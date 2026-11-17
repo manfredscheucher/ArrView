@@ -88,7 +88,11 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
                 TreeHeader("${group.title} (${sets.size})", group.name in open) { toggle(group.name) }
                 HorizontalDivider()
                 if (group.name in open) for (set in sets) {
-                    TreeLeaf(set.name, ex.selected == set) { ex.selected = set; indexError = false }
+                    TreeLeaf(set.name, ex.selected == set) {
+                        // the same leaf again keeps its (maybe invalid) number field
+                        if (ex.selected != set) indexError = false
+                        ex.selected = set
+                    }
                     if (ex.selected == set) key(set.name) {
                         ExampleDetails(state, set, ex.indexOf(set)) { i ->
                             if (i != null) ex.index[set.name] = i

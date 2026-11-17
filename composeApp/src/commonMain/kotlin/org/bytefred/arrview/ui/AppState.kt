@@ -100,11 +100,14 @@ class AppState(
 
     /** The outer face of the drawing, if it shows the current arrangement and model. */
     val outerFace: Int?
-        get() = drawing?.takeIf { it.arrangement == arrangement && it.model == model }?.outerFace
+        get() = currentDrawing?.outerFace
 
     /** Settings of the iterated Tutte embedding (edited in a widget). */
     var layoutSettings by mutableStateOf(LayoutSettings())
         private set
+
+    /** The drawing if it shows the current arrangement and model (null while the next one is computed). */
+    val currentDrawing: Drawing? get() = drawing?.takeIf { it.arrangement == arrangement && it.model == model }
 
     /** The latest finished drawing; it may still show the previous arrangement while the next one is computed. */
     var drawing by mutableStateOf<Drawing?>(null)
@@ -414,8 +417,12 @@ class AppState(
     /** The arrangement differs from the last load or save. */
     val arrangementUnsaved: Boolean get() = arrangement != saved
 
-    /** A Sequences or Encoding widget holds an edit that is not applied. */
-    val unappliedDraft: Boolean get() = drafts.isNotEmpty()
+    /**
+     * A Sequences or Encoding widget holds an edit that differs from the current arrangement's
+     * text (compared live, as in PoCoView: after an undo a draft may equal it again).
+     */
+    val unappliedDraft: Boolean
+        get() = drafts.any { (format, text) -> !format.availableFor(arrangement) || text != text(format) }
 
     /** The arrangement is unsaved or a widget has an unapplied edit. */
     val unsavedChanges: Boolean get() = arrangementUnsaved || unappliedDraft

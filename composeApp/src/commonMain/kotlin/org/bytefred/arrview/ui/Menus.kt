@@ -172,8 +172,8 @@ fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Un
                 MenuItem(state, "Open file...") { state.leave { opener() } }
                 MenuItem(state, "Save file...") { openDialog(DialogKind.SAVE) }
                 HorizontalDivider()
-                MenuItem(state, "Export SVG", enabled = state.drawing != null) {
-                    state.drawing?.let { saver("${state.fileName}.svg", drawingSvg(it).encodeToByteArray()) }
+                MenuItem(state, "Export SVG", enabled = state.currentDrawing != null) {
+                    state.currentDrawing?.let { saver("${state.fileName}.svg", drawingSvg(it).encodeToByteArray()) }
                 }
             }
             MenuButton(state, "Edit") {

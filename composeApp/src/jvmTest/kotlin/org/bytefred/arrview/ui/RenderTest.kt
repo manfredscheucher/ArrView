@@ -72,6 +72,8 @@ class RenderTest {
         s.load("two", Arrangement.two())
         render(s, file = "two.png")
         render(s, w = 300, h = 200)
+        s.openWidgets.addAll(Widget.entries - s.openWidgets.toSet())
+        render(s, w = 1800, h = 900, file = "two-widgets.png")
     }
 
     @Test

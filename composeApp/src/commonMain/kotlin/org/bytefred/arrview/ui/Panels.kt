@@ -37,12 +37,7 @@ fun ToolBar(state: AppState) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         ToolbarLabel("Drawing")
-        for (m in DrawModel.entries) FilterChip(
-            selected = state.model == m,
-            onClick = { state.changeModel(m) },
-            enabled = m == DrawModel.MODEL2 || state.arrangement.hasModel1,
-            label = { Text(m.label) },
-        )
+        ModelChips(state)
         VerticalDivider(Modifier.height(32.dp).align(Alignment.CenterVertically).padding(horizontal = 4.dp))
         ToolbarLabel("Widgets")
         for (w in Widget.entries) FilterChip(
@@ -51,6 +46,17 @@ fun ToolBar(state: AppState) {
         )
         ToolbarStatus(state)
     }
+}
+
+/** Model 1 / Model 2 (toolbar, Layout widget); model 1 only where it exists. */
+@Composable
+fun ModelChips(state: AppState) {
+    for (m in DrawModel.entries) FilterChip(
+        selected = state.model == m,
+        onClick = { state.changeModel(m) },
+        enabled = m == DrawModel.MODEL2 || state.arrangement.hasModel1,
+        label = { Text(m.label) },
+    )
 }
 
 /**

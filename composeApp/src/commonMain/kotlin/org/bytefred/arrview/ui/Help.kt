@@ -82,7 +82,7 @@ private val GENERAL_TEXT = listOf(
         "around the rest. Drag to pan, zoom with the wheel or by pinching.",
     "Model 1 and Model 2 (toolbar, View menu, Layout widget) are two ways to draw. Model 1 draws the " +
         "crossings only, a digon is a point where its two circles touch (blue dot). It needs an " +
-        "intersecting arrangement, where every two circles cross. Model 2 draws digons as regions and " +
+        "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
         "works for every arrangement. The drawing is an iterated Tutte embedding as in the paper by " +
         "Felsner and Scheucher (see About).",
     "In the Arrangement menu, Examples... has the bundled arrangements, Import... reads pasted text and " +

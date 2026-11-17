@@ -12,6 +12,8 @@ import org.bytefred.arrview.core.Model2
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.readArrangement
 import org.bytefred.arrview.core.relabelled
+import org.bytefred.arrview.core.sequencesText
+import org.bytefred.arrview.core.triangleFlip
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -64,6 +66,19 @@ class EditingStateTest {
         assertTrue(s.unappliedDraft)
         s.editDraft(TextFormat.MODEL2, s.text(TextFormat.MODEL2))
         assertFalse(s.unappliedDraft)
+    }
+
+    @Test
+    fun aDraftEqualToTheArrangementAgainIsNoChange() {
+        val s = state()
+        val flipped = s.arrangement.triangleFlip(s.arrangement.faces.indices.first { s.arrangement.faces[it].size == 3 && it != s.outerFace })
+        s.editDraft(TextFormat.SEQUENCES, flipped.toString())
+        s.applyDraft(TextFormat.SEQUENCES)
+        s.editDraft(TextFormat.SEQUENCES, sequencesText(start))
+        assertTrue(s.unappliedDraft)
+        // undo makes the draft the current text: nothing to save
+        s.undo()
+        assertFalse(s.unsavedChanges)
     }
 
     @Test

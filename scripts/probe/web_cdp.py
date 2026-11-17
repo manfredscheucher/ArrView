@@ -3,7 +3,7 @@ output and exceptions, dispatch mouse/key events and take screenshots.
 
 Usage: python3 web_cdp.py <port> <out-dir> <steps.json>
 Steps: [{"wait": s}, {"shot": "name"}, {"click": [x, y], "button": "left|right", "mods": 0},
-        {"key": "Escape"}, {"eval": "js"}, {"reload": true}]
+        {"wheel": [x, y, dy]}, {"key": "Escape"}, {"eval": "js"}, {"reload": true}]
 Chrome must run with --remote-debugging-port=<port>.
 """
 import base64, json, os, socket, struct, sys, time, urllib.request
@@ -112,6 +112,10 @@ def main():
             c.call("Input.dispatchMouseEvent", type="mouseMoved", x=x, y=y, modifiers=mods)
             c.call("Input.dispatchMouseEvent", type="mousePressed", x=x, y=y, button=btn, clickCount=1, modifiers=mods)
             c.call("Input.dispatchMouseEvent", type="mouseReleased", x=x, y=y, button=btn, clickCount=1, modifiers=mods)
+            c.pump(0.4)
+        elif "wheel" in st:
+            x, y, dy = st["wheel"]
+            c.call("Input.dispatchMouseEvent", type="mouseWheel", x=x, y=y, deltaX=0, deltaY=dy)
             c.pump(0.4)
         elif "key" in st:
             k = st["key"]

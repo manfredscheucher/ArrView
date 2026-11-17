@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -42,11 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.crosses
-import org.bytefred.arrview.core.hasModel1
 import org.bytefred.arrview.core.intersectionGraph
 import org.bytefred.arrview.core.isCylindrical
 import org.bytefred.arrview.core.isDigonFree
@@ -104,6 +101,7 @@ private fun PropertiesWidget(state: AppState) {
         for ((k, count) in arr.pVector.withIndex()) if (k >= 2) Text("p$k = $count", style = MonoStyle)
     }
     Heading("Classes")
+    // every arrangement here is connected (Linhart-Ortner Def. 2.4 (iv) rejects the others)
     ValueRow("connected", "yes")
     ValueRow("intersecting", yesNo(arr.isIntersecting))
     ValueRow("digon-free", yesNo(arr.isDigonFree))
@@ -220,14 +218,7 @@ private val GRAPH_SIZE = 240.dp
 @Composable
 private fun LayoutWidget(state: AppState) {
     val settings = state.layoutSettings
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        for (m in DrawModel.entries) FilterChip(
-            selected = state.model == m,
-            onClick = { state.changeModel(m) },
-            enabled = m == DrawModel.MODEL2 || state.arrangement.hasModel1,
-            label = { Text(m.label) },
-        )
-    }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ModelChips(state) }
     ParsedField(
         state, "Max. iterations", settings.maxIterations.toString(), { it.toIntOrNull()?.takeIf { n -> n >= 1 } },
         "at least 1", Modifier.width(160.dp).testTag("max-iterations"),
