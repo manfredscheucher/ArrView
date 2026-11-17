@@ -181,7 +181,7 @@ object KotlinLiteral {
 // ── build-time license notices (GeneratedLicenses.kt) ───────────────────────
 // Ported from ktoy. About -> "License texts" shows the notices a binary distribution
 // must carry. The texts are read from the license files themselves (nothing
-// hand-copied): ArrView's LICENSE.
+// hand-copied): ArrView's LICENSE and the bundled font's.
 @CacheableTask
 abstract class GenerateLicenses : DefaultTask() {
     /** Notice titles, in display order; parallel to [sources]. */
@@ -223,6 +223,7 @@ abstract class GenerateLicenses : DefaultTask() {
 
 val licenseNotices = listOf(
     "ArrView (MIT)" to rootProject.file("LICENSE"),
+    "Font: DejaVu Sans Mono (Bitstream Vera license)" to rootProject.file("doc/licenses/LICENSE_DEJAVU.txt"),
 )
 val generateLicenses = tasks.register<GenerateLicenses>("generateLicenses") {
     titles.set(licenseNotices.map { it.first })
@@ -285,4 +286,9 @@ val generateExamples = tasks.register<GenerateExamples>("generateExamples") {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn(generateLicenses, generateExamples)
+}
+
+// the JVM tests use a fresh in-memory preference store (Prefs.jvm.kt), never the real desktop one
+tasks.withType<Test>().configureEach {
+    systemProperty("arrview.prefs", "memory")
 }

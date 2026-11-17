@@ -1,26 +1,145 @@
 package org.bytefred.arrview.ui
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import org.bytefred.arrview.core.Arrangement
 
-/** Placeholder UI (phase 1): the app header and one example arrangement as text. */
+/** Landscape (side panel) needs at least this width in AUTO layout mode. */
+private val WIDE_MIN = 760.dp
+
+/** Below MIN_CANVAS + MIN_COLUMN per widget, the side by side widget columns scroll horizontally. */
+private val MIN_COLUMN = 260.dp
+private val MIN_CANVAS = 320.dp
+
+/** The canvas's share next to widget columns of share 1 each, until a divider is dragged. */
+private const val WIDE_CANVAS_WEIGHT = 2f
+
+/** The whole app: menu bar, toolbar, the canvas and the widget columns next to it or below it. */
 @Composable
-fun App() {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("ArrView", style = MaterialTheme.typography.headlineMedium)
-                Text("Arrangements of pseudocircles", style = MaterialTheme.typography.titleSmall)
-                Text(Arrangement.krupp().toString(), modifier = Modifier.padding(top = 16.dp))
+fun App(initialState: AppState? = null, initialView: ViewTransform? = null) {
+    ArrViewTheme { ProvideMonoStyle {
+        val state = remember { initialState ?: AppState() }
+        // the display settings are stored while the app is shown
+        LaunchedEffect(state) { state.keepDisplayPrefs() }
+        val view = remember { initialView ?: ViewTransform() }
+        val focus = remember { FocusRequester() }
+        // scroll positions survive closing and reopening a widget
+        val scrolls = remember { Widget.entries.associateWith { ScrollState(0) } }
+        val columnsScroll = rememberScrollState()
+
+        // shortcuts on the root: key events of the focused canvas, chip or button bubble up here;
+        // they are ignored while a text field has focus or a menu is open (Escape closes the menu)
+        Surface(Modifier.fillMaxSize().onKeyEvent { closeMenuOnEscape(it, state) || state.shortcutsActive && handleKey(it, state, view) }) {
+            Dialogs(state)
+            Column(Modifier.fillMaxSize()) {
+                MenuBar(state, view)
+                ToolBar(state)
+                HorizontalDivider()
+                BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
+                    val wide = when (state.layoutMode) {
+                        LayoutMode.LANDSCAPE -> true
+                        LayoutMode.PORTRAIT -> false
+                        LayoutMode.AUTO -> maxWidth >= WIDE_MIN
+                    }
+                    val canvas = @Composable { m: Modifier ->
+                        Box(m.focusRequester(focus).focusable()) {
+                            // the canvas is composed inside BoxWithConstraints (subcomposition),
+                            // so request the initial focus from here, once it is attached
+                            // (again after a widget was opened or closed: keeps the shortcuts working);
+                            // not while a menu is open: the menu bar holds the focus for Escape
+                            LaunchedEffect(state.openWidgets.toList()) {
+                                if (state.textFieldsFocused == 0 && state.openMenu == null) focus.requestFocus()
+                            }
+                            ArrangementCanvas(state, view, onInteract = { focus.requestFocus() })
+                        }
+                    }
+                    val column = @Composable { w: Widget, m: Modifier ->
+                        Column(m) {
+                            WidgetHeader(state, w)
+                            ScrollColumn(Modifier.weight(1f), scrolls.getValue(w)) {
+                                WidgetContent(state, w)
+                            }
+                        }
+                    }
+                    val open = state.openWidgets.toList()
+                    // the canvas (key null) and the widgets in opening order, with draggable dividers
+                    fun panels(canvasWeight: Float): List<SplitPanel<Widget?>> =
+                        listOf(SplitPanel<Widget?>(null, canvasWeight, canvas)) + open.map { w -> SplitPanel<Widget?>(w) { m -> column(w, m) } }
+                    if (wide && maxWidth < MIN_CANVAS + MIN_COLUMN * open.size) {
+                        // too narrow to split: the canvas keeps MIN_CANVAS, the MIN_COLUMN wide
+                        // columns right of it scroll horizontally
+                        Row(Modifier.fillMaxSize()) {
+                            canvas(Modifier.width(MIN_CANVAS).fillMaxHeight())
+                            ScrollbarBox(null, Modifier.weight(1f).fillMaxHeight(), columnsScroll) {
+                                Row(Modifier.fillMaxHeight().horizontalScroll(columnsScroll)) {
+                                    for (w in open) key(w) {
+                                        VerticalDivider()
+                                        column(w, Modifier.width(MIN_COLUMN).fillMaxHeight())
+                                    }
+                                }
+                            }
+                        }
+                    } else if (wide) {
+                        // the widgets as columns right of the canvas
+                        SplitPane(panels(WIDE_CANVAS_WEIGHT), state.wideWeights, { state.wideWeights = it }, horizontal = true, Modifier.fillMaxSize())
+                    } else {
+                        // portrait: the widgets stacked below the canvas, each with its own scrolling
+                        SplitPane(panels(1f), state.stackedWeights, { state.stackedWeights = it }, horizontal = false, Modifier.fillMaxSize())
+                    }
+                }
             }
         }
+    } }
+}
+
+/** Escape closes the open menu (the menu bar takes the focus while one is open). */
+private fun closeMenuOnEscape(e: KeyEvent, state: AppState): Boolean {
+    if (e.type != KeyEventType.KeyDown || e.key != Key.Escape || state.openMenu == null) return false
+    state.openMenu = null
+    return true
+}
+
+private fun handleKey(e: KeyEvent, state: AppState, view: ViewTransform): Boolean {
+    if (e.type != KeyEventType.KeyDown) return false
+    val cmd = e.isCtrlPressed || e.isMetaPressed
+    when {
+        cmd && e.key == Key.Z && e.isShiftPressed -> state.redo()
+        cmd && e.key == Key.Z -> state.undo()
+        cmd && e.key == Key.Y -> state.redo()
+        cmd -> return false
+        e.key == Key.Plus || e.key == Key.Equals || e.key == Key.NumPadAdd -> view.zoomCenter(ZOOM_STEP)
+        e.key == Key.Minus || e.key == Key.NumPadSubtract -> view.zoomCenter(1 / ZOOM_STEP)
+        e.key == Key.MoveHome || e.key == Key.Zero -> state.requestFit()
+        else -> return false
     }
+    return true
 }

@@ -1,0 +1,424 @@
+package org.bytefred.arrview.ui
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
+import org.bytefred.arrview.core.Arrangement
+import org.bytefred.arrview.core.ArrangementLayout
+import org.bytefred.arrview.core.DrawModel
+import org.bytefred.arrview.core.Drawing
+import org.bytefred.arrview.core.Examples
+import org.bytefred.arrview.core.InvalidArrangementException
+import org.bytefred.arrview.core.IteratedTutte
+import org.bytefred.arrview.core.LayoutSettings
+import org.bytefred.arrview.core.canBeOuter
+import org.bytefred.arrview.core.defaultOuterFace
+import org.bytefred.arrview.core.digonCollapse
+import org.bytefred.arrview.core.faceKey
+import org.bytefred.arrview.core.faceWithKey
+import org.bytefred.arrview.core.hasModel1
+import org.bytefred.arrview.core.readArrangement
+import org.bytefred.arrview.core.triangleFlip
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
+
+/** The panels next to the canvas; each one is a column that can be shown or hidden. */
+enum class Widget(val label: String) {
+    PROPERTIES("Properties"),
+}
+
+enum class LayoutMode { AUTO, PORTRAIT, LANDSCAPE }
+
+/**
+ * A status message (shown in the toolbar). A [transient] one (pure info such as "Flipped a
+ * triangle") disappears after [AppState.INFO_DURATION_MS]; the others stay until the next message.
+ */
+class StatusMessage(val text: String, val transient: Boolean)
+
+/** One step of the undo history: the arrangement, its name and the chosen outer face. */
+private class HistoryEntry(val arrangement: Arrangement, val name: String, val loaded: Arrangement, val outerKey: String?)
+
+/** What a drawing is computed from; equal keys give equal drawings (the layout cache). */
+private data class LayoutKey(val arrangement: Arrangement, val model: DrawModel, val outerKey: String?, val settings: LayoutSettings)
+
+/**
+ * All GUI state and actions. Plain Compose state + a coroutine scope. The drawing is computed in
+ * a cancellable background job ([layoutContext]) whenever the arrangement, the model, the outer
+ * face or the layout settings change; until it is done the previous drawing stays.
+ */
+class AppState(
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    private val layoutContext: CoroutineContext = Dispatchers.Default,
+) {
+    var arrangement by mutableStateOf(Examples.start.arrangement())
+        private set
+
+    /** Name of the loaded arrangement (an example name or a file name). */
+    var name by mutableStateOf(Examples.start.name)
+        private set
+
+    /** The arrangement as loaded; anything else is shown as modified. */
+    private var loaded = arrangement
+
+    /** The name for the toolbar status. */
+    val title: String get() = if (arrangement == loaded) name else "$name (modified)"
+
+    /** The model chosen in the menu; model 1 falls back to model 2 where it does not exist. */
+    var preferredModel by mutableStateOf(DrawModel.MODEL1)
+        private set
+
+    /** The model drawn. */
+    val model: DrawModel get() = if (preferredModel == DrawModel.MODEL1 && arrangement.hasModel1) DrawModel.MODEL1 else DrawModel.MODEL2
+
+    /** The chosen outer face ([faceKey]), null for the default. */
+    private var outerKey by mutableStateOf<String?>(null)
+
+    /** The outer face of the drawing, if it shows the current arrangement and model. */
+    val outerFace: Int?
+        get() = drawing?.takeIf { it.arrangement == arrangement && it.model == model }?.outerFace
+
+    /** Settings of the iterated Tutte embedding (edited in a widget). */
+    var layoutSettings by mutableStateOf(LayoutSettings())
+        private set
+
+    /** The latest finished drawing; it may still show the previous arrangement while the next one is computed. */
+    var drawing by mutableStateOf<Drawing?>(null)
+        private set
+
+    /** The face under the mouse (indices of the drawing's arrangement). */
+    var hoverFace by mutableStateOf<Int?>(null)
+
+    /** Number of focused text fields: keyboard shortcuts are off while one has focus. */
+    var textFieldsFocused by mutableIntStateOf(0)
+
+    /** The open menu's title (one for all menus), or null; keyboard shortcuts are off while a menu is open. */
+    var openMenu by mutableStateOf<String?>(null)
+
+    /** The keyboard shortcuts apply: no text field has focus and no menu is open. */
+    val shortcutsActive: Boolean get() = textFieldsFocused == 0 && openMenu == null
+
+    /** When an outside click last closed a menu (see [closeMenuByOutsideClick]). */
+    private var menuClosedAt: TimeMark? = null
+
+    /** An outside click closed the open menu; that click must not also act on the canvas. */
+    fun closeMenuByOutsideClick() {
+        menuClosedAt = TimeSource.Monotonic.markNow()
+        openMenu = null
+    }
+
+    /**
+     * Whether a canvas press only closes the menu: one is open, or it was just closed by this
+     * same press (the menu's outside-click dismissal comes before the canvas sees the press).
+     * The mark is used up, so only the closing press is swallowed.
+     */
+    fun consumeMenuPress(): Boolean {
+        val justClosed = menuClosedAt?.let { it.elapsedNow() < MENU_CLICK_GUARD } == true
+        menuClosedAt = null
+        return openMenu != null || justClosed
+    }
+
+    var layoutMode by mutableStateOf(LayoutMode.AUTO)
+
+    /**
+     * Shares of the canvas (key null) and the widget columns, changed by dragging the dividers;
+     * kept apart for side by side ([wideWeights]) and stacked ([stackedWeights]).
+     */
+    var wideWeights by mutableStateOf<Map<Widget?, Float>>(emptyMap())
+    var stackedWeights by mutableStateOf<Map<Widget?, Float>>(emptyMap())
+
+    /** Open widget columns, in opening order. */
+    val openWidgets = mutableStateListOf(Widget.PROPERTIES)
+
+    fun toggleWidget(w: Widget) {
+        if (w in openWidgets) openWidgets.remove(w) else openWidgets.add(w)
+    }
+
+    /** The status message (see [showInfo] and [showNote]). */
+    var status by mutableStateOf<StatusMessage?>(null)
+        private set
+
+    /** A load error, shown in a modal error dialog until the user clears it with OK. */
+    var error by mutableStateOf<String?>(null)
+
+    /** Incremented to ask the canvas to fit the view to the drawing. */
+    var fitRequest by mutableIntStateOf(0)
+        private set
+
+    private val undoStack = ArrayDeque<HistoryEntry>()
+    private val redoStack = ArrayDeque<HistoryEntry>()
+    var canUndo by mutableStateOf(false)
+        private set
+    var canRedo by mutableStateOf(false)
+        private set
+
+    private val cache = LinkedHashMap<LayoutKey, Drawing>()
+    private var layoutJob: Job? = null
+
+    init {
+        loadDisplayPrefs()
+        relayout()
+    }
+
+    // ---- remembered display settings ---------------------------------------------------
+
+    /** The remembered display settings, encoded as pref key -> value. */
+    private fun displayPrefs(): Map<String, String> = mapOf(
+        LAYOUT_PREF to layoutMode.name,
+        OPEN_WIDGETS_PREF to openWidgets.joinToString(",") { it.name },
+        WIDE_WEIGHTS_PREF to encodeWeights(wideWeights),
+        STACKED_WEIGHTS_PREF to encodeWeights(stackedWeights),
+        MODEL_PREF to preferredModel.name,
+    )
+
+    /** What [displayPrefs] was at the last load or save: only changed settings are written. */
+    private var savedDisplay: Map<String, String> = emptyMap()
+
+    /** Stores the display settings that changed since the last save. */
+    fun saveDisplayPrefs() {
+        val now = displayPrefs()
+        for ((key, value) in now) if (savedDisplay[key] != value) savePref(key, value)
+        savedDisplay = now
+    }
+
+    /**
+     * Stores the display settings whenever they change, a moment after the last change (a divider
+     * drag is written once). Runs while the app is shown (App starts it).
+     */
+    suspend fun keepDisplayPrefs() {
+        snapshotFlow { displayPrefs() }.collectLatest {
+            delay(PREF_SAVE_DELAY_MS)
+            saveDisplayPrefs()
+        }
+    }
+
+    private fun loadDisplayPrefs() {
+        enumPref<LayoutMode>(LAYOUT_PREF)?.let { layoutMode = it }
+        loadPref(OPEN_WIDGETS_PREF)?.let { stored ->
+            val open = stored.split(',').mapNotNull { name -> Widget.entries.firstOrNull { it.name == name } }.distinct()
+            openWidgets.clear()
+            openWidgets.addAll(open)
+        }
+        loadPref(WIDE_WEIGHTS_PREF)?.let { wideWeights = decodeWeights(it) }
+        loadPref(STACKED_WEIGHTS_PREF)?.let { stackedWeights = decodeWeights(it) }
+        enumPref<DrawModel>(MODEL_PREF)?.let { preferredModel = it }
+        savedDisplay = displayPrefs()
+    }
+
+    // ---- status ------------------------------------------------------------------------
+
+    /** Pure info ("Flipped a triangle"): disappears after [INFO_DURATION_MS]. */
+    fun showInfo(text: String) {
+        val m = StatusMessage(text, transient = true)
+        status = m
+        scope.launch {
+            delay(INFO_DURATION_MS)
+            if (status === m) status = null
+        }
+    }
+
+    /** A result or warning: stays until the next message. */
+    fun showNote(text: String?) {
+        status = text?.let { StatusMessage(it, transient = false) }
+    }
+
+    // ---- view --------------------------------------------------------------------------
+
+    fun requestFit() {
+        fitRequest++
+    }
+
+    fun changeModel(m: DrawModel) {
+        preferredModel = m
+        relayout()
+    }
+
+    fun changeLayoutSettings(settings: LayoutSettings) {
+        layoutSettings = settings
+        relayout()
+    }
+
+    /** Draws face [f] (of the current arrangement) as the outer face. */
+    fun makeOuterFace(f: Int) {
+        if (!arrangement.canBeOuter(f, model)) return
+        outerKey = arrangement.faceKey(f)
+        relayout()
+    }
+
+    /**
+     * Starts computing the drawing of the current state (cancelling a running one), or takes it
+     * from the cache. The previous drawing stays until the new one is done.
+     */
+    private fun relayout() {
+        layoutJob?.cancel()
+        val key = LayoutKey(arrangement, model, outerKey, layoutSettings)
+        cache[key]?.let { drawing = it; return }
+        layoutJob = scope.launch {
+            val result = try {
+                withContext(layoutContext) { computeDrawing(key) }
+            } catch (e: IllegalArgumentException) {
+                showNote("Cannot draw: ${e.message}")
+                return@launch
+            }
+            cache[key] = result
+            while (cache.size > CACHE_SIZE) cache.remove(cache.keys.first())
+            drawing = result
+        }
+    }
+
+    private suspend fun computeDrawing(key: LayoutKey): Drawing {
+        val arr = key.arrangement
+        // the chosen outer face if it exists and fits the model, else the default one
+        val outer = key.outerKey?.let { arr.faceWithKey(it) }?.takeIf { arr.canBeOuter(it, key.model) }
+            ?: arr.defaultOuterFace(key.model)
+        val layout = ArrangementLayout(arr, key.model, outer)
+        val tutte = IteratedTutte(layout.problem, key.settings)
+        // one embedding per step; in between the UI runs (the web has one thread) or the job is cancelled
+        while (!tutte.step()) yield()
+        return layout.drawing(tutte.positions)
+    }
+
+    /** Waits until the drawing of the current state is done (tests). */
+    suspend fun awaitLayout() {
+        layoutJob?.join()
+    }
+
+    // ---- editing -----------------------------------------------------------------------
+
+    private fun snapshot() = HistoryEntry(arrangement, name, loaded, outerKey)
+
+    private fun restore(e: HistoryEntry) {
+        arrangement = e.arrangement
+        name = e.name
+        loaded = e.loaded
+        outerKey = e.outerKey
+        hoverFace = null
+        relayout()
+    }
+
+    /** Replaces the arrangement (undoable); the outer face is kept if it still exists. */
+    private fun change(next: Arrangement) {
+        // the face drawn outside now stays outside if the change keeps it
+        val keep = outerFace?.let { arrangement.faceKey(it) } ?: outerKey
+        undoStack.addLast(snapshot())
+        if (undoStack.size > MAX_UNDO) undoStack.removeFirst()
+        redoStack.clear()
+        updateUndoFlags()
+        arrangement = next
+        outerKey = keep
+        hoverFace = null
+        relayout()
+    }
+
+    private fun updateUndoFlags() {
+        canUndo = undoStack.isNotEmpty()
+        canRedo = redoStack.isNotEmpty()
+    }
+
+    fun undo() {
+        val prev = undoStack.removeLastOrNull() ?: return
+        redoStack.addLast(snapshot())
+        updateUndoFlags()
+        restore(prev)
+        status = null
+    }
+
+    fun redo() {
+        val next = redoStack.removeLastOrNull() ?: return
+        undoStack.addLast(snapshot())
+        updateUndoFlags()
+        restore(next)
+        status = null
+    }
+
+    /** Shows [arr] under [name] (undoable), with the default outer face and a fitted view. */
+    fun load(name: String, arr: Arrangement) {
+        undoStack.addLast(snapshot())
+        redoStack.clear()
+        updateUndoFlags()
+        restore(HistoryEntry(arr, name, arr, null))
+        status = null
+        requestFit()
+    }
+
+    /** Opens a file: intersection sequences or a sparse6 line; errors go to the error dialog. */
+    fun open(fileName: String, bytes: ByteArray) {
+        try {
+            load(fileName.substringBeforeLast('.'), readArrangement(bytes.decodeToString()))
+            showInfo("Opened $fileName")
+        } catch (e: InvalidArrangementException) {
+            error = "Cannot open $fileName: ${e.message}"
+        }
+    }
+
+    /** The current arrangement as a file: its intersection sequences. */
+    fun saveText(): String = "$arrangement\n"
+
+    /** The file name for saving. */
+    val fileName: String get() = name.replace(Regex("[^A-Za-z0-9._#-]+"), "_")
+
+    /**
+     * A click on face [f] of the [drawing]: a triangle flips, a digon collapses; other faces and
+     * the outer face do nothing. Ignored while the drawing still shows a previous arrangement.
+     */
+    fun clickFace(f: Int) {
+        if (f == (outerFace ?: return)) return
+        when (arrangement.faces.getOrNull(f)?.size) {
+            3 -> flipTriangle(f)
+            2 -> collapseDigon(f)
+        }
+    }
+
+    /** Triangle flip of face [f] (undoable). */
+    fun flipTriangle(f: Int) {
+        if (arrangement.faces.getOrNull(f)?.size != 3) return
+        try {
+            change(arrangement.triangleFlip(f))
+            showInfo("Flipped a triangle")
+        } catch (e: InvalidArrangementException) {
+            showNote("Cannot flip: ${e.message}")
+        }
+    }
+
+    /** Digon collapse of face [f] (undoable); refused if the arrangement would fall apart. */
+    fun collapseDigon(f: Int) {
+        if (arrangement.faces.getOrNull(f)?.size != 2) return
+        val next = try {
+            arrangement.digonCollapse(f)
+        } catch (e: InvalidArrangementException) {
+            showNote("Cannot collapse: ${e.message}")
+            return
+        }
+        if (next == null) {
+            showNote("the arrangement would fall apart")
+            return
+        }
+        change(next)
+        showInfo("Collapsed a digon")
+    }
+
+    companion object {
+        /** How long a [StatusMessage.transient] message stays. */
+        const val INFO_DURATION_MS = 3000L
+
+        /** Display settings are stored this long after their last change. */
+        private const val PREF_SAVE_DELAY_MS = 500L
+
+        private const val MAX_UNDO = 500
+
+        /** Drawings kept for undo / redo and switching back and forth. */
+        private const val CACHE_SIZE = 32
+    }
+}
