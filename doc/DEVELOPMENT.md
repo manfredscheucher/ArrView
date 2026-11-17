@@ -36,7 +36,8 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 | `PlaneGraph.kt`, `Graphs.kt` | embedded graphs: primal graph, vertex-edge-face graph | |
 | `Operations.kt` | intersection graph, class tests (Krupp, great, cylindrical, …), triangle flip, digon collapse, relabel/reverse/mirror | `flip_potential.rs::flip`, `test_*.sage` |
 | `Examples.kt` | catalogue of the bundled examples (data: `composeApp/examples/`) | |
-| `Formats.kt` | reading a file: sequences or a sparse6 line | |
+| `Formats.kt` | text forms (sequences, model 1 / 2 sparse6), file formats (JSON, text), reading with format detection | |
+| `Json.kt` | small strict JSON reader | PoCoView `core/Json.kt` |
 | `Tutte.kt` | iterated weighted Tutte embedding (`IteratedTutte`, one embedding per `step()`) | `program_py3/draw7.sage`, `model2_program/draw3.sage` |
 | `Layout.kt` | model 1 / model 2 graphs, outer face keys, curves, face boundaries, hit test (`Drawing`) | |
 | `Symmetry.kt` | automorphisms of the map, default outer face | draw7.sage's maximal symmetry |
@@ -45,9 +46,11 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 
 Ported from PoCoView (package renamed, PoCoView-specific parts dropped): `Theme.kt`,
 `Menus.kt`, `SplitPane.kt`, `Scroll.kt`, `Prefs.kt`, `FileIo.kt`, `Platform.kt` (with `jsMain` /
-`jvmMain` actuals). ArrView's own: `AppState.kt` (state, undo, background layout),
-`ArrangementCanvas.kt` (drawing, clicks, zoom / pan), `Panels.kt` (toolbar, widgets), `App.kt`.
-A new widget is an entry of `Widget` plus a branch in `WidgetContent`.
+`jvmMain` actuals). Also from PoCoView: `Dialogs.kt` (Import, Export, Save, "Save changes?", Welcome, About),
+`ExamplesDialog.kt` (tree, `ExamplesState`), `Help.kt`, `Svg.kt` (Export SVG). ArrView's own:
+`AppState.kt` (state, undo, drafts, saving, background layout), `ArrangementCanvas.kt` (drawing,
+clicks, zoom / pan), `Panels.kt` (toolbar), `Widgets.kt` (the widgets), `App.kt`. A new widget is
+an entry of `Widget` plus a branch in `WidgetContent`.
 
 ## Example data
 
@@ -98,8 +101,10 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 | `cylindrical/all5.mod2s6.notcylindrical.mod2s6` | `computations/model2_program/noncylindrical/` | `isCylindrical` |
 
 `RenderTest` renders the app offscreen and writes screenshots to `composeApp/build/screenshots/`
-(start example in both models and portrait, examples with digons, n = 24, n = 2): look at them
-after changing the drawing.
+(start example in both models and portrait, examples with digons, n = 24, n = 2, every widget, every
+dialog and Help page): look at them after changing the UI. UI tests with real clicks:
+`CanvasUiTest`, `WidgetsUiTest`, `DialogsUiTest`; `HelpClaimsTest` checks the Help texts against the
+code.
 
 ### Web check
 

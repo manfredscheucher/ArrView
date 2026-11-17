@@ -2,6 +2,63 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-17: Phase 3b, widgets, dialogs, help
+
+### Request (Manfred, via the phase plan)
+
+- Widgets (columns, toggled in the toolbar and the View menu, remembered): Properties (n, crossings,
+  faces, p-vector with p2 and p3 prominent, non-intersecting pairs, classes connected / intersecting /
+  digon-free / pseudo great circles / cylindrical, Krupp / NonKrupp triples); Sequences (editable,
+  one line per circle, Apply validates with Linhart-Ortner, reason in the error dialog, unapplied
+  draft counts as unsaved); Encoding (model 1 sparse6 if intersecting, else a note why not; model 2
+  sparse6; editable with Apply, Copy); Intersection graph (K_n on a circle, labels 1..n in the circle
+  colours, edge ij iff i and j cross, small fixed size); Layout (max iterations, eps, Model 1/2,
+  Reset to defaults).
+- Examples dialog (Arrangement menu, first item, and from Welcome): the core groups as a tree, each
+  set a leaf; the selected set shows description, size and for lists a member chooser (number
+  1..size, previous / next); Load; no "Loading..."; state kept between openings; drawn tree arrows.
+- Import / Export (sequences, model 1 / model 2 sparse6; import detects `{` / `:`), Open / Save file
+  (JSON with name + sequences, or text) with PoCoView's "Save changes?" flow for Load / Import /
+  Open / close / Cmd+Q; Export SVG.
+- Help: General, Widgets, Formats, Keyboard shortcuts, About ArrView (generated licenses, website,
+  papers). Plain short ASCII texts, a HelpClaimsTest. Welcome dialog like PoCoView.
+
+### Decisions and interpretations
+
+- Unsaved = the arrangement differs from the one at the last load or save, or a widget draft differs
+  from the current text (compared live, as PoCoView does). **All three editors** (sequences, model 1,
+  model 2) count as drafts, not only the sequences: an unapplied sparse6 edit would be lost the same
+  way. Drafts stay when the arrangement changes on the canvas (as in PoCoView); applying a stale
+  draft replaces the arrangement (undoable).
+- Applying a draft is one undo step; text that decodes to the current arrangement just drops the draft.
+- Sequences widget: the text format with one circle per line, keys right-aligned
+  (`{1: [...],` / ` 2: [...]}`); lines do not wrap, the field scrolls sideways. The sparse6 fields
+  wrap. Copy copies what the field shows (the draft, if any).
+- Model 1 sparse6 is offered for every intersecting arrangement (also n = 2), while the Model 1
+  drawing needs a face with 3 or more sides (so not n = 2), as decided in phase 3a.
+- Saved files: JSON `{"name": ..., "sequences": [[...], ...]}` (list i for circle i, entries as in
+  the text format) or the sequences text (`.txt`). Open file / Import read JSON (quoted key after
+  `{`), sequences (`{` or `[`) or a sparse6 line (model 1 tried first, then model 2). An imported
+  arrangement without a name is called "imported"; a JSON name wins over the file name.
+- Examples: everything collapsed at first; a leaf's details show "n = N, M arrangements" and, for
+  lists, `< [#] > of M`; an out-of-range number shows "1 to M" and disables Load. Loading a member
+  names it `<set> #<i>`.
+- Properties: "connected" is always yes (disconnected input is rejected). Krupp / NonKrupp count the
+  triples of pairwise crossing circles.
+- Intersection graph: 240 dp, vertex 1 on top, clockwise; "k of n(n-1)/2 pairs cross" above it.
+- Layout settings are remembered like the other display settings. Fields apply while typing when the
+  value is valid (max. iterations >= 1, eps > 0); there is no upper bound on max. iterations
+  (**open point for Manfred**: a cap would avoid a long background run after a typo).
+- Export dialog: format chips Sequences / Model 1 sparse6 / Model 2 sparse6 (model 1 disabled if not
+  intersecting) instead of PoCoView's dropdown. Export SVG uses the drawing of the current
+  arrangement and model (disabled while it is computed), 1000 x 1000, colours as on the canvas.
+- About: website link, the EJC page of Linhart-Ortner, the two Felsner-Scheucher papers as plain
+  citations (no DOI links, to avoid wrong links), build line, license texts. Feedback address and
+  mailto as in PoCoView.
+- The Welcome "Don't show again" label toggles the checkbox too (in PoCoView only the box does).
+- Copy uses `LocalClipboardManager` like PoCoView; its deprecation warning stays visible (the new
+  `LocalClipboard` needs platform-specific clip entries).
+
 ## 2026-11-17: Phase 3a, app shell and drawing
 
 ### Request (Manfred, via the phase plan)
@@ -82,7 +139,7 @@ Requests and decisions. Newest first.
   arrangement. The last 32 drawings are cached (undo / redo and model switches are instant).
 - Menus (phase 3a): Arrangement (Open file..., Save file...), Edit (Undo, Redo), View (Fit, Zoom
   in / out, Model 1 / Model 2, widgets, layout auto / portrait / landscape). Examples and Help
-  follow in phase 3b. Open file reads intersection sequences or a sparse6 line (model 1, else
+  followed in phase 3b. Open file reads intersection sequences or a sparse6 line (model 1, else
   model 2); Save file writes the sequences (`<name>.txt`). Keys: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z
   and Ctrl/Cmd+Y redo, + / - zoom, 0 / Home fit, Escape closes a menu.
 - Toolbar: "Drawing" chips Model 1 / Model 2, "Widgets" chips, the status
