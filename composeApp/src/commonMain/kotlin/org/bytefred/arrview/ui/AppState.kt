@@ -3,6 +3,7 @@ package org.bytefred.arrview.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -20,9 +21,13 @@ import org.bytefred.arrview.core.ArrangementLayout
 import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.Drawing
 import org.bytefred.arrview.core.Examples
+import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.InvalidArrangementException
 import org.bytefred.arrview.core.IteratedTutte
 import org.bytefred.arrview.core.LayoutSettings
+import org.bytefred.arrview.core.NamedArrangement
+import org.bytefred.arrview.core.TextFormat
+import org.bytefred.arrview.core.arrangementFile
 import org.bytefred.arrview.core.canBeOuter
 import org.bytefred.arrview.core.defaultOuterFace
 import org.bytefred.arrview.core.digonCollapse
@@ -38,6 +43,10 @@ import kotlin.time.TimeSource
 /** The panels next to the canvas; each one is a column that can be shown or hidden. */
 enum class Widget(val label: String) {
     PROPERTIES("Properties"),
+    SEQUENCES("Sequences"),
+    ENCODING("Encoding"),
+    INTERSECTION_GRAPH("Intersection graph"),
+    LAYOUT("Layout"),
 }
 
 enum class LayoutMode { AUTO, PORTRAIT, LANDSCAPE }
@@ -72,6 +81,9 @@ class AppState(
 
     /** The arrangement as loaded; anything else is shown as modified. */
     private var loaded = arrangement
+
+    /** The arrangement at the last load or save; anything else is an unsaved change. */
+    private var saved by mutableStateOf(arrangement)
 
     /** The name for the toolbar status. */
     val title: String get() = if (arrangement == loaded) name else "$name (modified)"
@@ -153,6 +165,18 @@ class AppState(
     /** A load error, shown in a modal error dialog until the user clears it with OK. */
     var error by mutableStateOf<String?>(null)
 
+    /** The Help page the Help dialog shows. */
+    var helpPage by mutableStateOf(HelpPage.GENERAL)
+
+    /** What the Examples dialog shows, kept while it is closed. */
+    val examples = ExamplesState()
+
+    /**
+     * Unapplied edits of the Sequences and Encoding widgets, per format; text equal to the
+     * current arrangement's is no draft.
+     */
+    val drafts = mutableStateMapOf<TextFormat, String>()
+
     /** Incremented to ask the canvas to fit the view to the drawing. */
     var fitRequest by mutableIntStateOf(0)
         private set
@@ -181,6 +205,8 @@ class AppState(
         WIDE_WEIGHTS_PREF to encodeWeights(wideWeights),
         STACKED_WEIGHTS_PREF to encodeWeights(stackedWeights),
         MODEL_PREF to preferredModel.name,
+        MAX_ITERATIONS_PREF to layoutSettings.maxIterations.toString(),
+        EPS_PREF to layoutSettings.eps.toString(),
     )
 
     /** What [displayPrefs] was at the last load or save: only changed settings are written. */
@@ -214,6 +240,8 @@ class AppState(
         loadPref(WIDE_WEIGHTS_PREF)?.let { wideWeights = decodeWeights(it) }
         loadPref(STACKED_WEIGHTS_PREF)?.let { stackedWeights = decodeWeights(it) }
         enumPref<DrawModel>(MODEL_PREF)?.let { preferredModel = it }
+        loadPref(MAX_ITERATIONS_PREF)?.toIntOrNull()?.takeIf { it >= 1 }?.let { layoutSettings = layoutSettings.copy(maxIterations = it) }
+        loadPref(EPS_PREF)?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }?.let { layoutSettings = layoutSettings.copy(eps = it) }
         savedDisplay = displayPrefs()
     }
 
@@ -349,25 +377,135 @@ class AppState(
         redoStack.clear()
         updateUndoFlags()
         restore(HistoryEntry(arr, name, arr, null))
+        saved = arr
+        drafts.clear()
         status = null
         requestFit()
     }
 
-    /** Opens a file: intersection sequences or a sparse6 line; errors go to the error dialog. */
+    /** Opens a file: JSON, intersection sequences or a sparse6 line; errors go to the error dialog. */
     fun open(fileName: String, bytes: ByteArray) {
         try {
-            load(fileName.substringBeforeLast('.'), readArrangement(bytes.decodeToString()))
+            val read = readArrangement(bytes.decodeToString())
+            load(read.name ?: fileName.substringBeforeLast('.'), read.arrangement)
             showInfo("Opened $fileName")
         } catch (e: InvalidArrangementException) {
             error = "Cannot open $fileName: ${e.message}"
         }
     }
 
-    /** The current arrangement as a file: its intersection sequences. */
-    fun saveText(): String = "$arrangement\n"
+    /** The arrangement in pasted [text] (Import, format detected), or null after setting [error]. */
+    fun parseImport(text: String): NamedArrangement? =
+        try {
+            readArrangement(text)
+        } catch (e: InvalidArrangementException) {
+            error = "Cannot import the text: ${e.message}"
+            null
+        }
 
-    /** The file name for saving. */
+    /** The file name for saving, without extension. */
     val fileName: String get() = name.replace(Regex("[^A-Za-z0-9._#-]+"), "_")
+
+    /** The suggested file name for saving as [format]. */
+    fun saveName(format: FileFormat): String = "$fileName.${format.extension}"
+
+    // ---- unsaved changes ---------------------------------------------------------------
+
+    /** The arrangement differs from the last load or save. */
+    val arrangementUnsaved: Boolean get() = arrangement != saved
+
+    /** A Sequences or Encoding widget holds an edit that is not applied. */
+    val unappliedDraft: Boolean get() = drafts.isNotEmpty()
+
+    /** The arrangement is unsaved or a widget has an unapplied edit. */
+    val unsavedChanges: Boolean get() = arrangementUnsaved || unappliedDraft
+
+    /**
+     * What Load / Import / Open file or closing the app wants to do once the user has answered
+     * "Save changes?" (PoCoView's); the dialog shows while it is set.
+     */
+    var pendingLeave by mutableStateOf<(() -> Unit)?>(null)
+        private set
+
+    /** Runs [action] (which replaces the arrangement or quits), asking "Save changes?" first if there are unsaved changes. */
+    fun leave(action: () -> Unit) {
+        if (unsavedChanges) pendingLeave = action else action()
+    }
+
+    /** "Discard": drops the changes and goes on with the pending action. */
+    fun discardAndLeave() {
+        val action = pendingLeave ?: return
+        pendingLeave = null
+        action()
+    }
+
+    fun cancelLeave() {
+        pendingLeave = null
+    }
+
+    /** The arrangement being written by the file save in progress ([beginSave] .. [fileSaved]). */
+    private var saving: Arrangement? = null
+
+    /** The file content to save as [format]; [fileSaved] reports how the save ended. */
+    fun beginSave(format: FileFormat): ByteArray {
+        saving = arrangement
+        return arrangementFile(name, arrangement, format).encodeToByteArray()
+    }
+
+    /**
+     * A file save finished as [fileName], or was cancelled or failed (null). The saved arrangement
+     * is the new clean state; a pending action goes on once nothing is unsaved (else "Save
+     * changes?" stays), a cancelled or failed save cancels it.
+     */
+    fun fileSaved(fileName: String?) {
+        val done = saving
+        saving = null
+        if (fileName == null) {
+            cancelLeave()
+            return
+        }
+        if (done != null) saved = done
+        showInfo("Saved $fileName")
+        if (!unsavedChanges) discardAndLeave()
+    }
+
+    // ---- text forms ----------------------------------------------------------------------
+
+    /** The texts of the current arrangement, computed once per arrangement (model 2 of n = 42 is long). */
+    private var texts: Pair<Arrangement, MutableMap<TextFormat, String>>? = null
+
+    /** The current arrangement in [format] (Export, the Sequences and Encoding widgets); see [TextFormat.availableFor]. */
+    fun text(format: TextFormat): String {
+        val cache = texts?.takeIf { it.first == arrangement }?.second ?: mutableMapOf<TextFormat, String>().also { texts = arrangement to it }
+        return cache.getOrPut(format) { format.write(arrangement) }
+    }
+
+    /** A widget edit of the [format] text; text equal to the current one is no draft. */
+    fun editDraft(format: TextFormat, text: String) {
+        if (format.availableFor(arrangement) && text == text(format)) drafts.remove(format) else drafts[format] = text
+    }
+
+    fun revertDraft(format: TextFormat) {
+        drafts.remove(format)
+    }
+
+    /**
+     * Applies the edited [format] text (undoable). Invalid text goes to the error dialog with the
+     * reason (sequences: the Linhart-Ortner condition that fails) and the draft stays.
+     */
+    fun applyDraft(format: TextFormat) {
+        val text = drafts[format] ?: return
+        val next = try {
+            format.read(text)
+        } catch (e: InvalidArrangementException) {
+            error = "Cannot apply the ${format.label.lowercase()}: ${e.message}"
+            return
+        }
+        drafts.remove(format)
+        if (next == arrangement) return
+        change(next)
+        showInfo("Applied the ${format.label.lowercase()}")
+    }
 
     /**
      * A click on face [f] of the [drawing]: a triangle flips, a digon collapses; other faces and

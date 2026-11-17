@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -143,9 +141,9 @@ fun MenuHeading(text: String) = Text(
     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
 )
 
-/** Arrangement / Edit / View on the left, the app name (and on the web a subtitle) on the right. */
+/** Arrangement / Edit / View / Help on the left, the app name (and on the web a subtitle) on the right. */
 @Composable
-fun MenuBar(state: AppState, view: ViewTransform) {
+fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Unit) {
     val opener = rememberFileOpener(onError = { state.error = it }) { name, bytes -> state.open(name, bytes) }
     val saver = rememberFileSaver(onError = { state.error = it }) { name -> if (name != null) state.showInfo("Saved $name") }
     // the popups are not focusable (see MenuButton), so the bar takes the focus while a menu
@@ -167,8 +165,16 @@ fun MenuBar(state: AppState, view: ViewTransform) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MenuButton(state, "Arrangement") {
-                MenuItem(state, "Open file...") { opener() }
-                MenuItem(state, "Save file...") { saver("${state.fileName}.txt", state.saveText().encodeToByteArray()) }
+                MenuItem(state, "Examples...") { openDialog(DialogKind.EXAMPLES) }
+                MenuItem(state, "Import...") { openDialog(DialogKind.IMPORT) }
+                MenuItem(state, "Export...") { openDialog(DialogKind.EXPORT) }
+                HorizontalDivider()
+                MenuItem(state, "Open file...") { state.leave { opener() } }
+                MenuItem(state, "Save file...") { openDialog(DialogKind.SAVE) }
+                HorizontalDivider()
+                MenuItem(state, "Export SVG", enabled = state.drawing != null) {
+                    state.drawing?.let { saver("${state.fileName}.svg", drawingSvg(it).encodeToByteArray()) }
+                }
             }
             MenuButton(state, "Edit") {
                 MenuItem(state, "Undo", enabled = state.canUndo) { state.undo() }
@@ -190,6 +196,10 @@ fun MenuBar(state: AppState, view: ViewTransform) {
                 MenuHeading("Layout")
                 for (m in LayoutMode.entries) CheckMenuItem(m.name.lowercase(), state.layoutMode == m) { state.layoutMode = m }
             }
+            MenuButton(state, "Help") {
+                for (page in HelpPage.entries) MenuItem(state, page.title) { state.helpPage = page; openDialog(DialogKind.HELP) }
+                MenuItem(state, "About ArrView") { openDialog(DialogKind.ABOUT) }
+            }
         }
         // one line + ellipsis, shrinking (weight), so the header cannot push the menus off-screen
         Text(
@@ -206,18 +216,3 @@ fun MenuBar(state: AppState, view: ViewTransform) {
 
 /** View menu, + and - keys: zoom factor per step. */
 const val ZOOM_STEP = 1.2
-
-/** The modal dialogs; for now the error dialog. */
-@Composable
-fun Dialogs(state: AppState) {
-    state.error?.let { ErrorDialog(it) { state.error = null } }
-}
-
-/** A load error the user must see (the toolbar status is for info): one OK button. */
-@Composable
-private fun ErrorDialog(message: String, onDismiss: () -> Unit) = AlertDialog(
-    onDismissRequest = onDismiss,
-    title = { Text("Error") },
-    text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
-    confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
-)

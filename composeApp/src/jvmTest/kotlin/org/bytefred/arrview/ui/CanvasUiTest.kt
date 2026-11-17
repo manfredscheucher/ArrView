@@ -58,7 +58,7 @@ class CanvasUiTest {
     @Test
     fun headerAndToolbarStatus() = runComposeUiTest {
         val s = state()
-        setContent { App(s) }
+        setContent { App(s, initialDialog = DialogKind.NONE) }
         // the desktop build shows the app name without the web subtitle
         onNodeWithText("ArrView").assertIsDisplayed()
         val status = onNodeWithTag("toolbar-status")
@@ -72,7 +72,7 @@ class CanvasUiTest {
     fun clickOnATriangleFlipsIt() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        setContent { App(s, view) }
+        setContent { App(s, view, DialogKind.NONE) }
         waitUntil(timeoutMillis = 10_000) { s.drawing?.arrangement == start && view.fittedRequest == s.fitRequest }
         val d = s.drawing!!
         val t = start.faces.indices.first { start.faces[it].size == 3 && it != d.outerFace }
@@ -92,7 +92,7 @@ class CanvasUiTest {
     fun rightClickMakesAFaceTheOuterFace() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        setContent { App(s, view) }
+        setContent { App(s, view, DialogKind.NONE) }
         waitUntil(timeoutMillis = 10_000) { s.drawing?.arrangement == start && view.fittedRequest == s.fitRequest }
         val d = s.drawing!!
         val f = start.faces.indices.first { start.faces[it].size == 4 && it != d.outerFace }

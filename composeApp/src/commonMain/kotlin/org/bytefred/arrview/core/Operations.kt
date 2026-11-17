@@ -38,6 +38,21 @@ fun Arrangement.isKrupp(a: Int, b: Int, c: Int): Boolean {
     return b2 in (c1 + 1) until c2
 }
 
+/**
+ * The triples of pairwise crossing circles, counted as (Krupp, NonKrupp). An intersecting
+ * arrangement of three pseudocircles is one of the two.
+ */
+val Arrangement.kruppTriples: Pair<Int, Int>
+    get() {
+        var krupp = 0
+        var nonKrupp = 0
+        for (a in 0 until n) for (b in a + 1 until n) for (c in b + 1 until n) {
+            if (!crosses(a, b) || !crosses(a, c) || !crosses(b, c)) continue
+            if (isKrupp(a, b, c)) krupp++ else nonKrupp++
+        }
+        return krupp to nonKrupp
+    }
+
 /** Pseudo great-circle arrangement: intersecting and every triple is a Krupp (`test_greatcircles.sage`). */
 val Arrangement.isGreat: Boolean
     get() {

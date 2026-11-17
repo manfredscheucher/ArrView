@@ -108,9 +108,9 @@ private val CIRCLE_COLORS = listOf(
 
 fun circleColor(c: Int): Color = CIRCLE_COLORS[c % CIRCLE_COLORS.size]
 
-private val TRIANGLE_FILL = Color(0xFFFFE3A3)
-private val DIGON_FILL = Color(0xFFC9D8F7)
-private val DIGON_MARK = Color(0xFF5577CC)
+internal val TRIANGLE_FILL = Color(0xFFFFE3A3)
+internal val DIGON_FILL = Color(0xFFC9D8F7)
+internal val DIGON_MARK = Color(0xFF5577CC)
 private val HOVER_FILL = Color(0x332F5D62)
 
 /** Pixels a press may move and still be a click. */

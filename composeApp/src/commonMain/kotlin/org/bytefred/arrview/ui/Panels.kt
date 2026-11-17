@@ -2,7 +2,6 @@ package org.bytefred.arrview.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
@@ -28,9 +27,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.hasModel1
-import org.bytefred.arrview.core.isDigonFree
-import org.bytefred.arrview.core.isGreat
-import org.bytefred.arrview.core.nonIntersectingPairCount
 
 /** The row below the menu bar: the drawing model, the widget toggles and the status at the right. */
 @OptIn(ExperimentalLayoutApi::class)
@@ -103,39 +99,4 @@ fun WidgetHeader(state: AppState, w: Widget) {
         Text(w.label, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
         TextButton(onClick = { state.toggleWidget(w) }) { Text("x") }
     }
-}
-
-/** The content of a widget (without scrolling; the caller scrolls). */
-@Composable
-fun WidgetContent(state: AppState, w: Widget) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)) {
-        when (w) {
-            Widget.PROPERTIES -> PropertiesWidget(state)
-        }
-    }
-}
-
-/** The basic numbers of the arrangement. */
-@Composable
-private fun PropertiesWidget(state: AppState) {
-    val arr = state.arrangement
-    val rows = listOf(
-        "n" to "${arr.n}",
-        "faces" to "${arr.faceCount}",
-        "triangles (p3)" to "${arr.triangleCount}",
-        "digons (p2)" to "${arr.digonCount}",
-        "non-intersecting pairs" to "${arr.nonIntersectingPairCount}",
-        "class" to when {
-            arr.isGreat -> "pseudo great circles"
-            arr.isIntersecting && arr.isDigonFree -> "intersecting, digon-free"
-            arr.isIntersecting -> "intersecting"
-            else -> "connected"
-        },
-    )
-    for ((label, value) in rows) Row(Modifier.padding(vertical = 2.dp)) {
-        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
-    Text("p-vector (p2, p3, ...)", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodyMedium)
-    Text(arr.pVector.drop(2).joinToString(", ", "(", ")"), style = MonoStyle)
 }

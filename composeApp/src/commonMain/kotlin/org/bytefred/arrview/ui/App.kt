@@ -17,8 +17,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -43,13 +46,27 @@ private val MIN_CANVAS = 320.dp
 /** The canvas's share next to widget columns of share 1 each, until a divider is dragged. */
 private const val WIDE_CANVAS_WEIGHT = 2f
 
-/** The whole app: menu bar, toolbar, the canvas and the widget columns next to it or below it. */
+/**
+ * The whole app: menu bar, toolbar, the canvas and the widget columns next to it or below it.
+ * [initialDialog]: the dialog shown at start (default: Welcome, unless it was turned off).
+ * [closeRequests] counts the desktop window's close requests (and Cmd+Q): each one asks "Save
+ * changes?" if there are unsaved changes, then calls [onClose].
+ */
 @Composable
-fun App(initialState: AppState? = null, initialView: ViewTransform? = null) {
+fun App(
+    initialState: AppState? = null,
+    initialView: ViewTransform? = null,
+    initialDialog: DialogKind? = null,
+    closeRequests: Int = 0,
+    onClose: () -> Unit = {},
+) {
     ArrViewTheme { ProvideMonoStyle {
         val state = remember { initialState ?: AppState() }
         // the display settings are stored while the app is shown
         LaunchedEffect(state) { state.keepDisplayPrefs() }
+        LaunchedEffect(closeRequests) {
+            if (closeRequests > 0) state.leave { state.saveDisplayPrefs(); onClose() }
+        }
         val view = remember { initialView ?: ViewTransform() }
         val focus = remember { FocusRequester() }
         // scroll positions survive closing and reopening a widget
@@ -59,9 +76,12 @@ fun App(initialState: AppState? = null, initialView: ViewTransform? = null) {
         // shortcuts on the root: key events of the focused canvas, chip or button bubble up here;
         // they are ignored while a text field has focus or a menu is open (Escape closes the menu)
         Surface(Modifier.fillMaxSize().onKeyEvent { closeMenuOnEscape(it, state) || state.shortcutsActive && handleKey(it, state, view) }) {
-            Dialogs(state)
+            var dialog by remember {
+                mutableStateOf(initialDialog ?: if (loadPref(WELCOME_PREF) == "off") DialogKind.NONE else DialogKind.WELCOME)
+            }
+            Dialogs(state, dialog, open = { dialog = it }) { dialog = DialogKind.NONE }
             Column(Modifier.fillMaxSize()) {
-                MenuBar(state, view)
+                MenuBar(state, view) { dialog = it }
                 ToolBar(state)
                 HorizontalDivider()
                 BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {

@@ -17,6 +17,11 @@ internal const val OPEN_WIDGETS_PREF = "openWidgets"
 internal const val WIDE_WEIGHTS_PREF = "wideWeights"
 internal const val STACKED_WEIGHTS_PREF = "stackedWeights"
 internal const val MODEL_PREF = "model"
+internal const val MAX_ITERATIONS_PREF = "maxIterations"
+internal const val EPS_PREF = "eps"
+
+/** "off" once "Don't show again" was ticked in the Welcome dialog. */
+const val WELCOME_PREF = "welcome"
 
 // stored values are checked: anything unreadable gives the default (null) or is clamped, so a
 // corrupt store can never break the GUI

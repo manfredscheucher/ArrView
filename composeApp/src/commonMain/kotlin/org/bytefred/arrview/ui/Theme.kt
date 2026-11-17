@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,9 +22,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -94,6 +99,26 @@ fun ProvideMonoStyle(content: @Composable () -> Unit) {
     val family = FontFamily(Font(Res.font.dejavu_sans_mono))
     val style = remember(family) { TextStyle(fontFamily = family, fontSize = 13.sp) }
     CompositionLocalProvider(LocalMonoStyle provides style, content = content)
+}
+
+/** A clickable link (PoCoView's). */
+@Composable
+fun LinkText(label: String, url: String, style: TextStyle = LocalTextStyle.current) {
+    val uri = LocalUriHandler.current
+    Text(
+        label,
+        style = style.copy(textDecoration = TextDecoration.Underline),
+        color = Color(0xFF1A4FB0),
+        modifier = Modifier.clickable { openUriSafely(uri, url) }.padding(vertical = 2.dp),
+    )
+}
+
+/**
+ * Opens a link without ever crashing the app: the JVM throws when the desktop can't browse.
+ * Then nothing happens.
+ */
+private fun openUriSafely(uri: UriHandler, url: String) {
+    try { uri.openUri(url) } catch (_: Exception) { }
 }
 
 /**
