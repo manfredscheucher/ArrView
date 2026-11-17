@@ -2,6 +2,95 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-17: Phase 3a, app shell and drawing
+
+### Request (Manfred, via the phase plan)
+
+- App shell ported from PoCoView: theme, menus (MenuButton, one open menu, one-shot press guard,
+  Escape), split pane with draggable dividers, scrollbars, BigDialog, preferences, file open/save,
+  `isWeb`; header in the menu bar (bold "ArrView", web-only subtitle "Arrangements of
+  pseudocircles"); toolbar row with the status at the right (name, n, short message; info green,
+  fades after 3 s); widget columns next to / below the canvas. Undo/Redo (Ctrl+Z / Ctrl+Y) for
+  arrangement changes.
+- Drawing: the iterated weighted Tutte embedding of draw7.sage / draw3.sage (paper: weights
+  `p(A(f1)) + p(A(f2)) + q(|uv|/j)`, `p(x) = x^4`, `q(x) = x^2/10`, outer face on a regular
+  polygon, iterate until the weight change is below eps or max iterations), plain Kotlin solver.
+  Model 1 (primal graph, digons as touchings, intersecting only) and model 2 (vertex-edge-face
+  graph, always). Default view model 1 if possible. Outer face: largest face (or draw7's maximal
+  symmetry if cheap); right-click a face, "Make outer face". Smooth curves, one colour and a label
+  per circle; triangles and digons filled; hover highlight. Layout off the UI thread, cancellable,
+  never crashing.
+- Click a triangle: flip; click a digon: collapse ("the arrangement would fall apart" if refused);
+  undoable; re-layout keeping the outer face if it still exists. Zoom/pan as in PoCoView.
+- Start with `Examples.start`. No "Loading..." anywhere; no text glyphs that need web fallback fonts.
+
+### Decisions and interpretations
+
+- **Weights: the sage code, not the paper's formula.** Taken literally (outer polygon on the unit
+  circle, weights exactly `A(f1)^4 + A(f2)^4 + (|uv|/j)^2/10`), the paper's formula collapses the
+  start example: after 10 iterations the smallest face has area 0 and the interior vertices end
+  up in the corners of the outer polygon. draw7.sage converges (smallest / largest face area
+  0.031 / 0.144 for the start example), so ArrView implements draw7.sage: plain Tutte embedding
+  first (weights `1e-6`), then `w <- w + 0.1 (|uv|^2 - w) + c * sum (j A(f))^4` over the faces of
+  `uv`, with `c = 1` in model 1 (draw7.sage) and `c = 0.001` in model 2 (draw3.sage). Stop when the
+  normalized weight vector changes by less than eps. **To be confirmed by Manfred.**
+- Settings (in `AppState.layoutSettings`, UI in phase 3b): max iterations 100 (as in sage), eps
+  `1e-8` (draw3.sage; draw7.sage has `1e-10`). With these weights the change rarely drops below
+  eps, so mostly all 100 iterations run: n = 6 takes 3 ms (model 1) / 21 ms (model 2) on the JVM,
+  n = 14 13 / 118 ms, the largest example (Füredi–Palásti n = 42, model 2) 1.9 s.
+- Safeguards not in sage: weights below `1e-12` times the largest are raised to it, non-finite ones
+  become the largest; a solve with a non-finite result is dropped and the iteration stops. The
+  linear system is solved by Jacobi-preconditioned conjugate gradients, warm-started from the
+  previous embedding.
+- **Outer face: largest face first, symmetry breaks ties.** A largest face (model 1: no digon), and
+  among the largest ones the one with the most symmetries (automorphisms of the arrangement, mirror
+  images included, mapping the face to itself; draw7.sage's criterion, computed on the
+  combinatorial map, cheap), then the first. Maximal symmetry alone picks a triangle for the start
+  example, which leaves large empty regions; the largest face (a quadrangle) looked better.
+- **Curves: interpolating cubic Bezier pieces, not the paper's B-spline.** The paper takes a
+  2-subdivision (points at distance `d(v)` <= 1/3 of the shortest edge at `v`) and a B-spline,
+  which does not pass through the crossings. ArrView draws every arc between two crossings as one
+  cubic Bezier piece through the crossings, so that the face fills and the hit tests follow the
+  curves exactly. The tangent at a crossing is parallel to the line through its two neighbours on
+  the circle and shortened by the turn there (factor `(1 + cos(turn)) / 2`, so sharp turns stay
+  sharp, which keeps the curves inside the outer polygon); handles are a third of the chord. With
+  short handles as in the paper (`d(v)`) the curves looked pinched and wavy. In model 2 the arc
+  vertices only steer the tangents (curves through them zigzag), except on the sides of a digon,
+  where the curve passes through them so the two sides stay apart (n = 2).
+- Model 1 digons: both crossings of a digon are drawn at the middle of its (single) edge, both
+  curves tangent to that edge, so they touch there; a small blue dot marks the touching point, a
+  click within 10 px collapses the digon. Model 1 needs an intersecting arrangement with a face of
+  at least 3 sides (not n = 2); otherwise model 2 is drawn and the Model 1 chip is disabled. The
+  model chosen in the menu / toolbar is remembered (also across sessions); after a digon collapse
+  the drawing falls back to model 2, and model 1 returns with undo.
+- Labels: per circle at the middle of one of its longer pieces (at least half the longest),
+  farthest from the centre, at least 0.15 times the drawing radius away from earlier labels.
+- Colours: 12 distinct circle colours (cycled for n > 12); triangles light orange, digons light
+  blue, other faces unfilled; the outer face is never filled.
+- Interaction: left click on a bounded triangle flips it, on a digon collapses it, other faces do
+  nothing; a click into the outer face does nothing (empty space is for panning). Right-click (or
+  Ctrl+click on the Mac) on any face, the outer one included, opens its menu: "Flip triangle",
+  "Collapse digon", "Make outer face" (not for the current outer face, not for digons in model 1).
+- Outer face after a change: the face drawn outside before the change stays outside if it still
+  exists (same sides: circle, crossing entry and direction of every side), otherwise the default.
+  Undo / redo restore the arrangement with its outer face. The outer face choice itself is not an
+  undo step (view only).
+- An edited arrangement keeps its name with " (modified)" until it equals the loaded one again.
+- The drawing is computed in a background job (one Tutte embedding per step, `yield()` in
+  between, so the single-threaded web UI stays responsive); a change cancels it. The previous
+  drawing stays until the new one is done; clicks on it are ignored while it shows another
+  arrangement. The last 32 drawings are cached (undo / redo and model switches are instant).
+- Menus (phase 3a): Arrangement (Open file..., Save file...), Edit (Undo, Redo), View (Fit, Zoom
+  in / out, Model 1 / Model 2, widgets, layout auto / portrait / landscape). Examples and Help
+  follow in phase 3b. Open file reads intersection sequences or a sparse6 line (model 1, else
+  model 2); Save file writes the sequences (`<name>.txt`). Keys: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z
+  and Ctrl/Cmd+Y redo, + / - zoom, 0 / Home fit, Escape closes a menu.
+- Toolbar: "Drawing" chips Model 1 / Model 2, "Widgets" chips, the status
+  `name   |   n = 6   |   message`. Only ASCII in UI texts ("...", "|", "x"); the menu checkmarks
+  are drawn paths.
+- First widget: Properties (n, faces, p3, p2, non-intersecting pairs, class, p-vector), a minimal
+  one so the widget columns work; phase 3b adds the other widgets.
+
 ## 2026-11-17: First version, arrangements of pseudocircles
 
 ### Request (Manfred, summarized)

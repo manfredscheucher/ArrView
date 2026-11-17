@@ -36,6 +36,18 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 | `PlaneGraph.kt`, `Graphs.kt` | embedded graphs: primal graph, vertex-edge-face graph | |
 | `Operations.kt` | intersection graph, class tests (Krupp, great, cylindrical, …), triangle flip, digon collapse, relabel/reverse/mirror | `flip_potential.rs::flip`, `test_*.sage` |
 | `Examples.kt` | catalogue of the bundled examples (data: `composeApp/examples/`) | |
+| `Formats.kt` | reading a file: sequences or a sparse6 line | |
+| `Tutte.kt` | iterated weighted Tutte embedding (`IteratedTutte`, one embedding per `step()`) | `program_py3/draw7.sage`, `model2_program/draw3.sage` |
+| `Layout.kt` | model 1 / model 2 graphs, outer face keys, curves, face boundaries, hit test (`Drawing`) | |
+| `Symmetry.kt` | automorphisms of the map, default outer face | draw7.sage's maximal symmetry |
+
+### UI
+
+Ported from PoCoView (package renamed, PoCoView-specific parts dropped): `Theme.kt`,
+`Menus.kt`, `SplitPane.kt`, `Scroll.kt`, `Prefs.kt`, `FileIo.kt`, `Platform.kt` (with `jsMain` /
+`jvmMain` actuals). ArrView's own: `AppState.kt` (state, undo, background layout),
+`ArrangementCanvas.kt` (drawing, clicks, zoom / pan), `Panels.kt` (toolbar, widgets), `App.kt`.
+A new widget is an entry of `Widget` plus a branch in `WidgetContent`.
 
 ## Example data
 
@@ -84,6 +96,23 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 | `fingerprints/all{3,4,5}.enc.fingerprints.txt` | `computations/program/` | sequences of the old sage code = model 1 lists |
 | `model2_old/all{3,4,5}.mod2s6` (OLD hub encoding) | `computations/model2_results/abstract/` | same arrangements as the NEW encoding |
 | `cylindrical/all5.mod2s6.notcylindrical.mod2s6` | `computations/model2_program/noncylindrical/` | `isCylindrical` |
+
+`RenderTest` renders the app offscreen and writes screenshots to `composeApp/build/screenshots/`
+(start example in both models and portrait, examples with digons, n = 24, n = 2): look at them
+after changing the drawing.
+
+### Web check
+
+`./scripts/buildWeb.sh`, then serve the site and drive headless Chrome with
+`scripts/probe/web_cdp.py` (clicks, keys, screenshots, console exceptions):
+
+```
+python3 -m http.server 8611 --bind 127.0.0.1 --directory composeApp/build/dist/js/productionExecutable
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --use-angle=swiftshader \
+  --enable-unsafe-swiftshader --user-data-dir=<scratch>/chrome-prof --window-size=1200,800 \
+  --remote-debugging-port=9333 http://127.0.0.1:8611/
+python3 scripts/probe/web_cdp.py 9333 <out-dir> steps.json
+```
 
 ## Deploy to GitHub Pages
 

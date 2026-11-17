@@ -301,8 +301,8 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
 
     /**
      * Per circle a label position on its curve and the outward direction there: the middle of a
-     * piece between two points, the one farthest from the centre of the drawing that keeps a
-     * distance from the labels placed before.
+     * longer piece between two crossings, the one farthest from the centre of the drawing that
+     * keeps a distance from the labels placed before.
      */
     private fun labels(circles: List<List<Cubic>>): List<Pair<Point, Point>> {
         val all = circles.flatten().map { it.p0 }
@@ -311,7 +311,9 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
         val separation = LABEL_SEPARATION * all.maxOf { (it - centre).length }
         val placed = ArrayList<Point>()
         return circles.map { pieces ->
-            val candidates = pieces.map { it.at(0.5) }
+            // the middles of the longer pieces, farthest out first
+            val longest = pieces.maxOfOrNull { (it.p3 - it.p0).length } ?: 0.0
+            val candidates = pieces.filter { (it.p3 - it.p0).length >= LONG_PIECE * longest }.map { it.at(0.5) }
                 .sortedByDescending { (it - centre).length }
             val at = candidates.firstOrNull { p -> placed.all { (it - p).length >= separation } } ?: candidates.first()
             placed += at
@@ -322,5 +324,8 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
     private companion object {
         /** Least distance between two labels, relative to the radius of the drawing. */
         const val LABEL_SEPARATION = 0.15
+
+        /** Labels go on pieces at least this long, relative to the longest piece of the circle. */
+        const val LONG_PIECE = 0.5
     }
 }
