@@ -43,6 +43,8 @@ kotlin {
             kotlin.srcDir(layout.buildDirectory.dir("generated/buildInfo"))
             // GeneratedLicenses.kt (license texts for About), see generateLicenses
             kotlin.srcDir(layout.buildDirectory.dir("generated/licenses"))
+            // GeneratedExamples.kt (the bundled example files), see generateExamples
+            kotlin.srcDir(layout.buildDirectory.dir("generated/examples"))
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -159,6 +161,23 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
     dependsOn(generateBuildInfo)
 }
 
+/** Kotlin string literals for generated sources. */
+object KotlinLiteral {
+    fun of(text: String) = buildString {
+        append('"')
+        for (c in text) when (c) {
+            '\\' -> append("\\\\")
+            '"' -> append("\\\"")
+            '$' -> append("\\$")
+            '\n' -> append("\\n")
+            '\r' -> Unit
+            '\t' -> append("\\t")
+            else -> append(c)
+        }
+        append('"')
+    }
+}
+
 // ── build-time license notices (GeneratedLicenses.kt) ───────────────────────
 // Ported from ktoy. About -> "License texts" shows the notices a binary distribution
 // must carry. The texts are read from the license files themselves (nothing
@@ -176,21 +195,8 @@ abstract class GenerateLicenses : DefaultTask() {
         val files = sources.files.toList()
         val names = titles.get()
         require(files.size == names.size) { "titles and sources differ in length" }
-        fun literal(text: String) = buildString {
-            append('"')
-            for (c in text) when (c) {
-                '\\' -> append("\\\\")
-                '"' -> append("\\\"")
-                '$' -> append("\\$")
-                '\n' -> append("\\n")
-                '\r' -> Unit
-                '\t' -> append("\\t")
-                else -> append(c)
-            }
-            append('"')
-        }
         val entries = names.zip(files).joinToString(",\n") { (title, file) ->
-            "        LicenseNotice(${literal(title)}, ${literal(file.readText(Charsets.UTF_8).trimEnd())})"
+            "        LicenseNotice(${KotlinLiteral.of(title)}, ${KotlinLiteral.of(file.readText(Charsets.UTF_8).trimEnd())})"
         }
         val dir = outputDir.get().asFile.apply { mkdirs() }
         dir.resolve("GeneratedLicenses.kt").writeText(
@@ -225,6 +231,58 @@ val generateLicenses = tasks.register<GenerateLicenses>("generateLicenses") {
     outputDir.set(layout.buildDirectory.dir("generated/licenses"))
 }
 
+// ── build-time example files (GeneratedExamples.kt) ─────────────────────────
+// The example arrangements live as text files in composeApp/examples/ (copied there by
+// scripts/import_examples.py, see doc/DEVELOPMENT.md). Every file is embedded as a string, so
+// the app has them at once (no resource reads, no fetches on the web). The catalogue (names,
+// groups, descriptions) is core/Examples.kt. Long files are split into chunks, since a JVM string
+// constant holds at most 65535 bytes.
+@CacheableTask
+abstract class GenerateExamples : DefaultTask() {
+    @get:InputDirectory @get:PathSensitive(PathSensitivity.RELATIVE) abstract val examplesDir: DirectoryProperty
+    @get:Input abstract val packageName: Property<String>
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun run() {
+        val dir = examplesDir.get().asFile
+        val files = dir.walkTopDown().filter { it.isFile && !it.name.startsWith(".") }
+            .sortedBy { it.relativeTo(dir).invariantSeparatorsPath }.toList()
+        val entries = files.joinToString(",\n") { file ->
+            val chunks = file.readText(Charsets.UTF_8).chunked(CHUNK).joinToString(", ") { KotlinLiteral.of(it) }
+            "        ${KotlinLiteral.of(file.relativeTo(dir).invariantSeparatorsPath)} to arrayOf($chunks)"
+        }
+        outputDir.get().asFile.apply { mkdirs() }.resolve("GeneratedExamples.kt").writeText(
+            """
+            |package ${packageName.get()}
+            |
+            |/**
+            | * AUTO-GENERATED — DO NOT EDIT.
+            | * Generated at build time by the generateExamples Gradle task from composeApp/examples/.
+            | */
+            |internal object GeneratedExamples {
+            |    /** The text of every example file (in chunks), by its path below composeApp/examples/. */
+            |    val FILES: Map<String, Array<String>> = mapOf(
+            |$entries,
+            |    )
+            |}
+            |""".trimMargin(),
+            Charsets.UTF_8,
+        )
+    }
+
+    private companion object {
+        /** Characters per string literal (the files are ASCII). */
+        const val CHUNK = 60000
+    }
+}
+
+val generateExamples = tasks.register<GenerateExamples>("generateExamples") {
+    examplesDir.set(layout.projectDirectory.dir("examples"))
+    packageName.set("org.bytefred.arrview.core")
+    outputDir.set(layout.buildDirectory.dir("generated/examples"))
+}
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    dependsOn(generateLicenses)
+    dependsOn(generateLicenses, generateExamples)
 }
