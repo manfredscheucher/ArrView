@@ -47,8 +47,7 @@ Requests and decisions. Newest first.
   triples of pairwise crossing circles.
 - Intersection graph: 240 dp, vertex 1 on top, clockwise; "k of n(n-1)/2 pairs cross" above it.
 - Layout settings are remembered like the other display settings. Fields apply while typing when the
-  value is valid (max. iterations >= 1, eps > 0); there is no upper bound on max. iterations
-  (**open point for Manfred**: a cap would avoid a long background run after a typo).
+  value is valid (max. iterations >= 1, eps > 0); no upper bound on max. iterations (Manfred).
 - Export dialog: format chips Sequences / Model 1 sparse6 / Model 2 sparse6 (model 1 disabled if not
   intersecting) instead of PoCoView's dropdown. Export SVG uses the drawing of the current
   arrangement and model (disabled while it is computed), 1000 x 1000, colours as on the canvas.
@@ -91,9 +90,10 @@ Requests and decisions. Newest first.
   first (weights `1e-6`), then `w <- w + 0.1 (|uv|^2 - w) + c * sum (j A(f))^4` over the faces of
   `uv`, with `c = 1` in model 1 (draw7.sage) and `c = 0.001` in model 2 (draw3.sage). Stop when the
   normalized weight vector changes by less than eps. **To be confirmed by Manfred.**
-- Settings (in `AppState.layoutSettings`, UI in phase 3b): max iterations 100 (as in sage), eps
+- Settings (in `AppState.layoutSettings`, UI in phase 3b): max iterations 5 (Manfred, 2026-11-17;
+  sage uses 100), eps
   `1e-8` (draw3.sage; draw7.sage has `1e-10`). With these weights the change rarely drops below
-  eps, so mostly all 100 iterations run: n = 6 takes 3 ms (model 1) / 21 ms (model 2) on the JVM,
+  eps, so mostly all iterations run; with 100 iterations n = 6 takes 3 ms (model 1) / 21 ms (model 2) on the JVM,
   n = 14 13 / 118 ms, the largest example (Füredi–Palásti n = 42, model 2) 1.9 s.
 - Safeguards not in sage: weights below `1e-12` times the largest are raised to it, non-finite ones
   become the largest; a solve with a non-finite result is dropped and the iteration stops. The

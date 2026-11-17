@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 /** Settings of the iterated Tutte embedding. */
 data class LayoutSettings(
     /** At most this many Tutte embeddings are computed. */
-    val maxIterations: Int = 100,
+    val maxIterations: Int = 5,
     /** The iteration stops when the normalized weight vector changes by less than this. */
     val eps: Double = 1e-8,
 )

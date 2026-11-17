@@ -121,7 +121,7 @@ class WidgetsUiTest {
         onNodeWithText("Reset to defaults").performClick()
         waitForIdle()
         assertEquals(LayoutSettings(), s.layoutSettings)
-        assertEquals("100", onNodeWithTag("max-iterations").text())
+        assertEquals("5", onNodeWithTag("max-iterations").text())
         assertEquals("1e-8", onNodeWithTag("eps").text())
     }
 }

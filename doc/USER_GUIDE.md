@@ -26,7 +26,7 @@ https://manfredscheucher.github.io/ArrView/
 - Sequences: the intersection sequences, one line per circle. Edit, then Apply or Revert.
 - Encoding: model 1 and model 2 sparse6, editable, with Copy.
 - Intersection graph: an edge for every pair of crossing circles.
-- Layout: model, max. iterations (100), eps (1e-8), Reset to defaults.
+- Layout: model, max. iterations (5), eps (1e-8), Reset to defaults.
 
 ## Formats
 
