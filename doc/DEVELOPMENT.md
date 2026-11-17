@@ -103,8 +103,31 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 `RenderTest` renders the app offscreen and writes screenshots to `composeApp/build/screenshots/`
 (start example in both models and portrait, examples with digons, n = 24, n = 2, every widget, every
 dialog and Help page): look at them after changing the UI. UI tests with real clicks:
-`CanvasUiTest`, `WidgetsUiTest`, `DialogsUiTest`; `HelpClaimsTest` checks the Help texts against the
-code.
+`CanvasUiTest`, `CanvasInteractionUiTest`, `WidgetsUiTest`, `WidgetButtonsUiTest`, `DialogsUiTest`,
+`MenusAndDialogsUiTest`, `ExamplesDialogUiTest`; `HelpClaimsTest` checks the Help texts and this
+user guide against the code.
+
+### What the tests cover
+
+| Area | Tests |
+|---|---|
+| Core combinatorics | `ArrangementTest`, `OperationsTest`, `LinhartOrtnerTest` (every rejection reason), `SymmetryTest`, `FormatsTest`, `FilesTest`, `DataFilesTest` |
+| Examples | `ExamplesTest` (sizes, valid, distinct, class), `ExampleCatalogTest` (every member through sequences, JSON, text, model 1 / 2 sparse6; group claims: Krupp triples, digon-free, min / max triangles, Füredi–Palásti, named ones) |
+| Drawing | `LayoutTest` (every example with n <= 5, both models), `ExampleDrawingTest` (n >= 6, long lists sampled, both models, SVG) |
+| Flips, collapses, undo | `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
+| Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |
+| Menus | `MenusAndDialogsUiTest` (every item clicked), `MenuBarTest` |
+| Dialogs | `ExamplesDialogUiTest` (a member of every set by clicks, member chooser), `DialogsUiTest`, `MenusAndDialogsUiTest` (Import, Export, Save file, Help, About, Welcome, error, "Save changes?" per trigger) |
+| Canvas | `CanvasUiTest`, `CanvasInteractionUiTest` (digon clicks in both models, refusal, face menus, hover, wheel, pinch, pan, dividers, clicks during a layout) |
+| Keyboard | `CanvasInteractionUiTest` (every shortcut, off in menus and fields) |
+| Widgets and toolbar | `WidgetsUiTest`, `WidgetButtonsUiTest` (Properties values, chips, close buttons, Layout fields) |
+| Settings | `EditingSessionTest` (remembered and corrupt display settings), `AppStateTest`, `SplitPaneTest` |
+| Files | `EditingSessionTest` (desktop read / write helpers, file names), `ExportTest` |
+| Help texts | `HelpClaimsTest` (defaults, shortcuts, menus, colours, formats; also `doc/USER_GUIDE.md`) |
+
+Not covered: the system file dialogs (Open file, Save JSON / text, Export SVG), which a test cannot
+drive, and the macOS Quit handler in `main.kt`. `jsTest` is not part of `scripts/test.sh`: the
+data-heavy common tests take longer than mocha's 2 s per test in the browser.
 
 ### Web check
 

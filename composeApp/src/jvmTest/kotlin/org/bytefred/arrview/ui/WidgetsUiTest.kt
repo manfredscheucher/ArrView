@@ -1,9 +1,6 @@
 package org.bytefred.arrview.ui
 
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
@@ -36,11 +33,6 @@ class WidgetsUiTest {
 
     @BeforeTest
     fun clearPrefs() = clearInMemoryPrefs()
-
-    private fun SemanticsNodeInteraction.text() =
-        fetchSemanticsNode().config.let { c ->
-            c.getOrNull(SemanticsProperties.EditableText)?.text ?: c.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }
-        }
 
     @Test
     fun editSequencesApplyValidAndInvalid() = runComposeUiTest {

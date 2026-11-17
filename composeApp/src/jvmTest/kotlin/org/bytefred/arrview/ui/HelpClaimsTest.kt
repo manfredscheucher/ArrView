@@ -2,7 +2,13 @@ package org.bytefred.arrview.ui
 
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.DrawModel
+import org.bytefred.arrview.core.Examples
+import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.LayoutSettings
+import org.bytefred.arrview.core.arrangementFile
+import org.bytefred.arrview.core.hasModel1
+import org.bytefred.arrview.core.parseJson
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -10,6 +16,9 @@ import kotlin.test.assertTrue
 /** What the Help pages state, checked against the code (as PoCoView's HelpClaimsTest). */
 class HelpClaimsTest {
     private val pages = HelpPage.entries.associateWith { helpText(it).joinToString(" ") }
+
+    /** doc/USER_GUIDE.md (the tests run in composeApp/). */
+    private val guide: String = File("../doc/USER_GUIDE.md").readText()
 
     private fun assertSays(page: HelpPage, claim: String) =
         assertTrue(claim in pages.getValue(page), "Help ${page.title} should say \"$claim\"")
@@ -45,4 +54,65 @@ class HelpClaimsTest {
         for (i in 0 until krupp.n) for (e in krupp.list(i)) if (e > 0) assertTrue(-(i + 1) in krupp.list(e - 1))
         assertSays(HelpPage.FORMATS, "So +j in list i and -i in list j are the same crossing.")
     }
+
+    @Test
+    fun arrangementMenuItems() {
+        // the menu itself: MenusAndDialogsUiTest.theMenusHaveTheirItems
+        for (item in ARRANGEMENT_MENU) assertSays(HelpPage.GENERAL, item)
+        assertTrue("Arrangement: ${ARRANGEMENT_MENU.joinToString(", ")}." in guide, "USER_GUIDE.md: Arrangement menu")
+        assertTrue("Help: ${HelpPage.entries.joinToString(", ") { it.title }}, About." in guide.replace("\n  ", " "), "USER_GUIDE.md: Help menu")
+    }
+
+    @Test
+    fun model1NeedsAnIntersectingArrangementOfThreeCircles() {
+        assertSays(HelpPage.GENERAL, "It needs an intersecting arrangement (every two circles cross) of at least 3 circles.")
+        for (set in Examples.sets.filter { it.n <= 5 }) for (i in 0 until set.size) {
+            val arr = set.arrangement(i)
+            assertEquals(arr.isIntersecting && arr.n >= 3, arr.hasModel1, set.memberName(i))
+        }
+    }
+
+    @Test
+    fun faceColours() {
+        assertSays(HelpPage.GENERAL, "Triangles are filled light orange, digons light blue.")
+        // orange: red > green > blue; blue: blue on top; both light
+        assertTrue(TRIANGLE_FILL.red > TRIANGLE_FILL.green && TRIANGLE_FILL.green > TRIANGLE_FILL.blue)
+        assertTrue(DIGON_FILL.blue > DIGON_FILL.red && DIGON_FILL.blue > DIGON_FILL.green)
+        for (c in listOf(TRIANGLE_FILL, DIGON_FILL)) assertTrue(minOf(c.red, c.green, c.blue) > 0.6f, "$c is light")
+    }
+
+    @Test
+    fun shortcutsAreTheHandledKeysAndTheUserGuideHasTheSame() {
+        // the keys themselves: CanvasInteractionUiTest (undoRedoShortcuts, zoomAndFitKeys, shortcutsAreOff...)
+        val lines = helpText(HelpPage.SHORTCUTS)
+        for (line in listOf("Esc: close the open menu", "Ctrl+Z: undo", "Ctrl+Shift+Z or Ctrl+Y: redo", "+ / -: zoom in / out", "Home or 0: fit")) {
+            assertTrue(line in lines, line)
+            assertTrue("- $line" in guide, "USER_GUIDE.md: $line")
+        }
+        assertSays(HelpPage.SHORTCUTS, "On a Mac, Cmd works like Ctrl")
+        assertTrue("On a Mac, Cmd works like Ctrl." in guide)
+        val guideKeys = guide.substringAfter("## Keyboard shortcuts").lines().filter { it.startsWith("- ") }.map { it.drop(2) }
+        assertEquals(lines.filter { ": " in it && !it.startsWith("Mouse") }, guideKeys)
+    }
+
+    @Test
+    fun userGuideLayoutDefaults() {
+        val d = LayoutSettings()
+        assertTrue("Layout: model, max. iterations (${d.maxIterations}), eps (${epsText(d.eps)}), Reset to defaults." in guide)
+    }
+
+    @Test
+    fun savedFileFormat() {
+        assertSays(HelpPage.FORMATS, "Save file writes JSON {\"name\": ..., \"sequences\": [[...], ...]} (list i for circle i)")
+        val json = arrangementFile("x", Arrangement.krupp(), FileFormat.JSON)
+        val root = parseJson(json) as Map<*, *>
+        assertEquals(setOf("name", "sequences"), root.keys)
+        assertEquals(Arrangement.krupp().lists.map { l -> l.map { it.toLong() } }, root["sequences"])
+        // the sequences example of the Formats page is a real arrangement (the NonKrupp)
+        val example = "{1: [2, -2, 3, -3], 2: [...], ...}"
+        assertSays(HelpPage.FORMATS, example)
+        val nonKrupp = Examples.byName("n3-intersecting-nonkrupp")!!.arrangement(0)
+        assertTrue(nonKrupp.toString().startsWith(example.substringBefore(" 2:")))
+    }
+
 }

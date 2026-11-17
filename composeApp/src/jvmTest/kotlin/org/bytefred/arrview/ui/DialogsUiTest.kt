@@ -3,10 +3,7 @@ package org.bytefred.arrview.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
@@ -37,13 +34,6 @@ class DialogsUiTest {
     @BeforeTest
     fun clearPrefs() = clearInMemoryPrefs()
 
-    private fun SemanticsNodeInteraction.editableText() =
-        fetchSemanticsNode().config.getOrNull(SemanticsProperties.EditableText)?.text
-
-    /** A bounded triangle of the current drawing, flipped: an unsaved change. */
-    private fun AppState.flipSomeTriangle() =
-        flipTriangle(arrangement.faces.indices.first { arrangement.faces[it].size == 3 && it != outerFace })
-
     @Test
     fun welcomeLeadsToTheExamplesAndCanBeTurnedOff() = runComposeUiTest {
         val s = state()
@@ -69,14 +59,14 @@ class DialogsUiTest {
         onNodeWithTag("example-index").performTextReplacement("5")
         onNodeWithText(">").performClick()
         waitForIdle()
-        assertEquals("6", onNodeWithTag("example-index").editableText())
+        assertEquals("6", onNodeWithTag("example-index").text())
         // out of range: a hint, Load waits
         onNodeWithTag("example-index").performTextReplacement("99")
         onNodeWithText("1 to 8").assertIsDisplayed()
         onNodeWithText("Load").assertIsNotEnabled()
         onNodeWithText("<").performClick()
         waitForIdle()
-        assertEquals("5", onNodeWithTag("example-index").editableText())
+        assertEquals("5", onNodeWithTag("example-index").text())
         onNodeWithText("Load").performClick()
         waitForIdle()
         val set = Examples.byName("n4-intersecting-all")!!
@@ -85,7 +75,7 @@ class DialogsUiTest {
         // the dialog is as it was left
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
-        assertEquals("5", onNodeWithTag("example-index").editableText())
+        assertEquals("5", onNodeWithTag("example-index").text())
     }
 
     @Test

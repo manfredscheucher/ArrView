@@ -2,6 +2,24 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-17: Broad tests
+
+### Request (Manfred)
+
+"write sensible broad tests, like in the other repos: examples, features, buttons, dialogs, everything
+that is implemented".
+
+### Decisions and interpretations
+
+- Every example member goes through all text forms; drawings: all of n <= 5 (LayoutTest), for
+  n >= 6 lists up to 25 fully, longer ones sampled (first, last, three in between).
+- Every menu item and every widget / dialog button is clicked once with an assertion on its effect,
+  except those that open the system file dialog (not drivable in a test; the state side of saving and
+  opening is tested).
+- Copy in the tests goes to a fake clipboard, never the real one.
+- `jsTest` stays out of `scripts/test.sh` (mocha's 2 s limit per test; see doc/DEVELOPMENT.md).
+- Overview per area: doc/DEVELOPMENT.md, "What the tests cover".
+
 ## 2026-11-17: Phase 3b, widgets, dialogs, help
 
 ### Request (Manfred, via the phase plan)

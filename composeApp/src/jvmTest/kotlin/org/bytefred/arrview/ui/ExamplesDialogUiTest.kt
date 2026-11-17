@@ -1,0 +1,135 @@
+package org.bytefred.arrview.ui
+
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.runComposeUiTest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.bytefred.arrview.core.ExampleGroup
+import org.bytefred.arrview.core.Examples
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+/** The Examples dialog driven by clicks: a member of every set, the member chooser, Cancel. */
+@OptIn(ExperimentalTestApi::class)
+class ExamplesDialogUiTest {
+    private fun state() = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+
+    @BeforeTest
+    fun clearPrefs() = clearInMemoryPrefs()
+
+    private fun ComposeUiTest.openExamples() {
+        onNodeWithTag("menu-Arrangement").performClick()
+        onNodeWithText("Examples...").performClick()
+        waitForIdle()
+    }
+
+    private fun ComposeUiTest.click(text: String) = onNodeWithText(text).performScrollTo().performClick()
+
+    @Test
+    fun aMemberOfEverySetLoadsByClicks() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        for (group in ExampleGroup.entries) {
+            val sets = Examples.inGroup(group)
+            for ((k, set) in sets.withIndex()) {
+                openExamples()
+                // the groups stay expanded between openings
+                if (k == 0) click("${group.title} (${sets.size})")
+                click(set.name)
+                onNodeWithText(set.name).assertIsSelected()
+                onNodeWithText(set.description).assertExists()
+                val index = if (set.size == 1) {
+                    onNodeWithText("n = ${set.n}").assertExists()
+                    onNodeWithTag("example-index").assertDoesNotExist()
+                    0
+                } else {
+                    onNodeWithText("n = ${set.n}, ${set.size} arrangements").assertExists()
+                    onNodeWithText("of ${set.size}").assertExists()
+                    val field = onNodeWithTag("example-index").performScrollTo()
+                    // out of range: a hint and no Load
+                    field.performTextReplacement("${set.size + 1}")
+                    onNodeWithText("1 to ${set.size}").assertExists()
+                    onNodeWithText("Load").assertIsNotEnabled()
+                    // the first member: no previous one
+                    field.performTextReplacement("1")
+                    onNodeWithText("<").assertIsNotEnabled()
+                    onNodeWithText("Load").assertIsEnabled()
+                    // the last member: no next one; < goes one back
+                    field.performTextReplacement("${set.size}")
+                    onNodeWithText(">").assertIsNotEnabled()
+                    onNodeWithText("<").performClick()
+                    waitForIdle()
+                    assertEquals("${set.size - 1}", field.text())
+                    set.size - 2
+                }
+                onNodeWithText("Load").performClick()
+                waitForIdle()
+                assertEquals(set.memberName(index), s.name)
+                assertEquals(set.arrangement(index), s.arrangement)
+                assertFalse(s.unsavedChanges, set.name)
+                onNodeWithTag("big-dialog").assertDoesNotExist()
+            }
+        }
+        // every load is one undo step
+        assertTrue(s.canUndo)
+    }
+
+    @Test
+    fun theMemberFieldTakesOnlyNumbersAndEachSetKeepsItsOwn() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        val set = Examples.byName("n5-intersecting-all")!!
+        val group = "${ExampleGroup.INTERSECTING.title} (${Examples.inGroup(ExampleGroup.INTERSECTING).size})"
+        openExamples()
+        click(group)
+        click(set.name)
+        val field = onNodeWithTag("example-index")
+        for (bad in listOf("0", "-3", "abc", "")) {
+            field.performTextReplacement(bad)
+            onNodeWithText("1 to ${set.size}").assertExists()
+            onNodeWithText("Load").assertIsNotEnabled()
+        }
+        field.performTextReplacement("19")
+        // another leaf and back: the number of each set is kept
+        click("n4-intersecting-all")
+        assertEquals("1", onNodeWithTag("example-index").text())
+        click(set.name)
+        assertEquals("19", onNodeWithTag("example-index").text())
+        // a click on an open group collapses it
+        click(group)
+        onNodeWithText(set.name).assertDoesNotExist()
+        click(group)
+        onNodeWithText(set.name).assertIsSelected()
+    }
+
+    @Test
+    fun cancelKeepsTheArrangement() = runComposeUiTest {
+        val s = state()
+        val start = s.arrangement
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        openExamples()
+        click("${ExampleGroup.NAMED.title} (${Examples.inGroup(ExampleGroup.NAMED).size})")
+        click("n3-great-krupp")
+        onNodeWithText("Cancel").performClick()
+        waitForIdle()
+        onNodeWithTag("big-dialog").assertDoesNotExist()
+        assertEquals(start, s.arrangement)
+        assertFalse(s.canUndo)
+        // the selection is kept for the next opening
+        openExamples()
+        onNodeWithText("n3-great-krupp").assertIsSelected()
+    }
+}
