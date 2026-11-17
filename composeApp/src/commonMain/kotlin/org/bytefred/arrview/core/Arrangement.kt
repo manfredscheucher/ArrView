@@ -156,6 +156,9 @@ class Arrangement private constructor(
     /** The canonical form: equal for two arrangements iff they are isomorphic (incl. mirror). */
     val canonical: Arrangement by lazy { Canonical.of(this) }
 
+    /** The symmetries as dart permutations (see [Symmetry]). */
+    val automorphisms: List<IntArray> by lazy { Symmetry.automorphisms(this) }
+
     /** True if [other] is the same arrangement up to relabelling, reorientation and mirroring. */
     fun isIsomorphicTo(other: Arrangement): Boolean = canonical == other.canonical
 
