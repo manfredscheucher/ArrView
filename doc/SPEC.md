@@ -58,12 +58,46 @@ with the data of the pseudocircles website / the results folders.
 - Formats read and written: intersection sequences (`{1: [2, -2, 3, -3], ...}`), model 1 sparse6
   (dual graph, intersecting only), model 2 sparse6 (primal-dual graph; the website's encoding with
   one pendant leaf per face; the old hub encoding is read as well).
-- Validity of edited sequences: Linhart–Ortner Def. 2.4/2.5 and Thm. 4.5 (Euler characteristic 2
-  and the "within" condition) plus Thm. 5.4 (consistency). Note: the "all 4-tuples must be
-  correct" condition Manfred mentioned was not found in the Linhart material; the conditions
-  above are what the papers state. To be confirmed by Manfred.
+- Validity of edited sequences (Linhart–Ortner, EJC 11 (2004) #R30): Def. 2.4 (i)–(iii) (allowed
+  and unique entries, `+k` in list `i` iff `-i` in list `k`), Def. 2.5 (v) (two circles cross
+  twice or not at all), Def. 2.4 (iv) (connected), Def. 5.1 / Thm. 5.4 (consistent) and Thm. 4.3
+  for genus 0 (Euler characteristic `V - E + F = 2`, which alone decides representability on the
+  sphere). Every rejection names the condition and the circles/entries involved. Thm. 4.5 (ii)
+  ("some crossing is not within any circle") is not used: it characterizes drawings in the plane
+  with all circles oriented counterclockwise, while here orientations are arbitrary (the first
+  version used it and wrongly rejected mirror images and flips).
+- Ortner's 4-tuple criterion (Manfred: checking all 4-tuples suffices, given a cyclic order per
+  pseudocircle, to know that a description is an arrangement of pseudocircles): the source is not
+  available locally, so it is NOT implemented. It awaits the source from Manfred.
 - Drawing: model 1 view = iterated weighted Tutte embedding of the primal graph (digons as
   touchings); model 2 view = the same on the vertex-edge-face graph (digons as real 2-gons). The
   outer face can be chosen (default: as in draw7, maximal symmetry or the largest face).
-- Bundled examples: complete lists for small n, selected sets for larger n (bundle size limits
-  of a web page); the exact choice is recorded in `doc/DEVELOPMENT.md`.
+- Bundled examples (phase 2): compiled into the app, no runtime loading. The data files are in
+  `composeApp/examples/` (copied by `scripts/import_examples.py`, sources in
+  `doc/DEVELOPMENT.md`); the Gradle task `generateExamples` embeds them as strings; the catalogue
+  (names, groups, descriptions) is `core/Examples.kt`. Lists are stored compactly as the original
+  sparse6 lines and decoded on demand, members addressed by index ("#17 of 278"), so large lists
+  need no tree rows. Raw data: 505 KB (limit ~2 MB).
+- Example names: `n<N>-<class>-<description>`, class `great`, `digonfree` (intersecting and
+  digon-free), `intersecting` or `connected`; a list member is `<name> #<index + 1>`.
+- Example groups and contents (all complete lists unless "some"):
+  - Pseudo great circles: n = 3..8 (1, 1, 1, 4, 11, 135).
+  - Intersecting, digon-free: n = 3..6 (1, 2, 14, 2131). n = 6 is 140 KB, so it is included.
+  - Intersecting: n = 2..5 (1, 2, 8, 278).
+  - Connected (model 2): n = 3..5 (3, 21, 984), 208 KB.
+  - Triangle minimizing (website `?show=triangles`, digon-free): n = 3..9 all, n = 10..14 some (the
+    317 for n = 10 included, 81 KB after conversion to sparse6).
+  - Triangle maximizing: the website files (n = 5: 12 triangles digon-free and 13 with a digon,
+    n = 6: 20, n = 7: 28 and 29, n = 8: 37 and n = 9: 48, the last two "some").
+  - Füredi–Palásti construction: n = 6, 12, ..., 42 (one each).
+  - Named: Krupp, NonKrupp, 3-Chain (typed in as sequences), the non-circularizable ones of the
+    website (n = 5 numbers 1–4, n = 6 numbers 1–3 digon-free), `n6_nonr_all_triangles_krupp_number2`,
+    `n6_nonr_edelsbrunnerramos` and the Pappus one (n = 9). `n6_edelsbrunner_nonr` is left out: it is
+    isomorphic to `n6_nonr_edelsbrunnerramos`.
+- Start example (TO BE CONFIRMED by Manfred, who said "something like the N6 triangle"):
+  `n6-digonfree-nonr-8-triangles` = `n6_nonr_number1_8triangles`, the non-circularizable digon-free
+  arrangement of 6 pseudocircles with 8 triangles. The tests show it is the only digon-free
+  arrangement of 6 pseudocircles with 8 triangles (the same as the website's triangle minimizer
+  `all6_df_8_triangles`), so "N6 triangle" (N₆^Δ) most likely means it. Alternatives: the four
+  triangle maximizers `n6-digonfree-20-triangles` (one of them a great-circle arrangement) and
+  `n6-intersecting-nonr-all-triangles-krupp`.
