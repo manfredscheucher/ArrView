@@ -73,6 +73,7 @@ class OperationsTest {
         for (a in 0 until 3) {
             val (b, c) = (0 until 3).filter { it != a }
             assertTrue(krupp.isKrupp(a, b, c))
+            assertTrue(!krupp.triangleFlip(0).isKrupp(a, b, c))
         }
     }
 

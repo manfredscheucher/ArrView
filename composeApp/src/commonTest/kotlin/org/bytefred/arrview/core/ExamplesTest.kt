@@ -90,6 +90,10 @@ class ExamplesTest {
         assertEquals(canonicalSet("n6-great-all"), digonFree6.filter { it.isGreat }.map { it.canonical }.toSet())
         assertEquals(canonicalSet("n6-digonfree-8-triangles"), digonFree6.filter { it.triangleCount == 8 }.map { it.canonical }.toSet())
         assertEquals(canonicalSet("n6-digonfree-20-triangles"), digonFree6.filter { it.triangleCount == 20 }.map { it.canonical }.toSet())
+        assertEquals(1, (0 until 4).count { set("n6-digonfree-20-triangles").arrangement(it).isGreat })
+        val intersecting5 = set("n5-intersecting-all").let { s -> (0 until s.size).map(s::arrangement) }
+        assertEquals(canonicalSet("n5-intersecting-13-triangles"), intersecting5.filter { it.triangleCount == 13 }.map { it.canonical }.toSet())
+        assertEquals(canonicalSet("n5-digonfree-12-triangles"), intersecting5.filter { it.isDigonFree && it.triangleCount == 12 }.map { it.canonical }.toSet())
     }
 
     @Test

@@ -188,6 +188,8 @@ object Model2 {
                 val e2 = adj[f].firstOrNull { a -> a != e && isArc[a] && h in ends.getValue(a) }
                     ?: error("face boundary is not a cycle")
                 val d2 = e2 to h
+                // a dart reached twice: the walk would never return to its start
+                check(d2 !in next || d2 == start) { "face boundary is not a cycle" }
                 next[d] = d2
                 d = d2
             } while (d != start)

@@ -83,6 +83,7 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 | `stats/all{3,4,5}.enc.stat.txt` | `computations/results/stats/` | p-vectors of the model 1 lists |
 | `fingerprints/all{3,4,5}.enc.fingerprints.txt` | `computations/program/` | sequences of the old sage code = model 1 lists |
 | `model2_old/all{3,4,5}.mod2s6` (OLD hub encoding) | `computations/model2_results/abstract/` | same arrangements as the NEW encoding |
+| `cylindrical/all5.mod2s6.notcylindrical.mod2s6` | `computations/model2_program/noncylindrical/` | `isCylindrical` |
 
 ## Deploy to GitHub Pages
 

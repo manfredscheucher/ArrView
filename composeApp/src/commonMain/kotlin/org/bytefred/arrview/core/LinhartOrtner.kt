@@ -126,7 +126,7 @@ object LinhartOrtner {
         return null
     }
 
-    /** Check 5 alone (internal for tests: after check 4 it never failed on the schemes tried). */
+    /** Check 5 alone. */
     internal fun checkEuler(arr: Arrangement): String? {
         val v = arr.crossingCount
         val e = arr.size

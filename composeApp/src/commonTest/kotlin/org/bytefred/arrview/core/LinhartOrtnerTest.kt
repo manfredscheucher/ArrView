@@ -70,6 +70,16 @@ class LinhartOrtnerTest {
         assertTrue("Thm. 4.3" in reason && "genus 2" in reason, reason)
     }
 
+    @Test
+    fun consistentTorusScheme() {
+        // pure, connected and consistent, but it lives on the torus (found by the fresh reviewer)
+        assertReason(
+            "{1: [2, -4, 4, 3, -3, -2], 2: [-3, -4, 4, 1, -1, 3], 3: [4, 1, -1, -2, 2, -4], 4: [-2, 2, 3, -3, 1, -1]}",
+            "Thm. 4.3",
+            "genus 1",
+        )
+    }
+
     /**
      * All 24^3 schemes of three pairwise crossing circles: exactly the Krupp and the NonKrupp (up
      * to isomorphism) are accepted, every other scheme is inconsistent (and so has Euler

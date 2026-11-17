@@ -98,6 +98,13 @@ class FormatsTest {
         val error = assertFailsWith<InvalidArrangementException> { Model2.decode(k4) }
         assertTrue("model 2" in error.message!!, error.message)
         assertTrue("sparse6" in assertFailsWith<InvalidArrangementException> { Model2.decode("hello") }.message!!)
+        // a face vertex with three arcs at one crossing (crossing 0, arcs 1..3, faces 4, 5 with leaves
+        // 6, 7, crossing 8): rejected, not an endless walk
+        val bad = SimpleGraphData(
+            9,
+            listOf(0 to 1, 0 to 2, 0 to 3, 1 to 8, 2 to 8, 3 to 8, 1 to 4, 2 to 4, 3 to 4, 1 to 5, 2 to 5, 3 to 5, 4 to 6, 5 to 7),
+        )
+        assertFailsWith<InvalidArrangementException> { Model2.decode(Sparse6.encode(bad)) }
     }
 
     @Test

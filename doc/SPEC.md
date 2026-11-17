@@ -66,6 +66,9 @@ with the data of the pseudocircles website / the results folders.
   ("some crossing is not within any circle") is not used: it characterizes drawings in the plane
   with all circles oriented counterclockwise, while here orientations are arbitrary (the first
   version used it and wrongly rejected mirror images and flips).
+- sparse6 strings written by ArrView (model 1 and model 2) use an arbitrary vertex numbering, so they
+  are equal to the research/website strings (sage `canonical_label().sparse6_string()`) only up to
+  isomorphism. Open point for the UI phase: canonical labelling of exported strings, if wanted.
 - Ortner's 4-tuple criterion (Manfred: checking all 4-tuples suffices, given a cyclic order per
   pseudocircle, to know that a description is an arrangement of pseudocircles): the source is not
   available locally, so it is NOT implemented. It awaits the source from Manfred.
@@ -93,7 +96,7 @@ with the data of the pseudocircles website / the results folders.
   - Named: Krupp, NonKrupp, 3-Chain (typed in as sequences), the non-circularizable ones of the
     website (n = 5 numbers 1–4, n = 6 numbers 1–3 digon-free), `n6_nonr_all_triangles_krupp_number2`,
     `n6_nonr_edelsbrunnerramos` and the Pappus one (n = 9). `n6_edelsbrunner_nonr` is left out: it is
-    isomorphic to `n6_nonr_edelsbrunnerramos`.
+    isomorphic to `n6_nonr_edelsbrunnerramos` (checked once with a probe; the file is not bundled).
 - Start example (TO BE CONFIRMED by Manfred, who said "something like the N6 triangle"):
   `n6-digonfree-nonr-8-triangles` = `n6_nonr_number1_8triangles`, the non-circularizable digon-free
   arrangement of 6 pseudocircles with 8 triangles. The tests show it is the only digon-free

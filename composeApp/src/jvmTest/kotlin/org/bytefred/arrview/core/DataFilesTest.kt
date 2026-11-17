@@ -7,7 +7,7 @@ import kotlin.test.assertNotNull
 /**
  * The bundled examples against further research files (test resources in `data/`, see
  * doc/DEVELOPMENT.md): p-vector statistics, the sequences of the old sage code, and the model 2
- * lists in the OLD encoding.
+ * lists in the OLD encoding, the cylindrical test of the old code.
  */
 class DataFilesTest {
     private fun resource(path: String): String =
@@ -47,5 +47,13 @@ class DataFilesTest {
             assertEquals(count, old.toSet().size)
             assertEquals(members("n$n-connected-all").map { it.canonical }.toSet(), old.toSet(), "n=$n")
         }
+    }
+
+    @Test
+    fun cylindricalTestMatchesTheOldCode() {
+        val notCylindrical = resource("cylindrical/all5.mod2s6.notcylindrical.mod2s6").lines().filter { it.isNotBlank() }
+            .map { Model2.decode(it).canonical }.toSet()
+        val connected = members("n5-connected-all")
+        assertEquals(notCylindrical, connected.filter { !it.isCylindrical }.map { it.canonical }.toSet())
     }
 }
