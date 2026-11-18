@@ -21,6 +21,43 @@ which edges to merge.
 - Outer face "!": in the corner (top left, top right, bottom left, bottom right) where there is room;
   arrangements are rounded, so the corners have more room than the middle.
 
+### Implementation (2026-11-18)
+
+- A click into the outer face (no drag) flips, collapses or creates like in any other cell; a drag
+  still pans. The right-click face menu is unchanged.
+- Menus: canvas cell -> pairs ("1 3"; with only one pair its options directly) -> options; graph
+  pair -> cells (with only one cell its options directly) -> options; hypergraph hit triples ->
+  cells (one triple: its cells directly). A level with a single option is skipped: such an entry is
+  that option. Options are the cell description with a star after the two pushed sides
+  (`cellDescription(f, marked)`), no brackets. Hovering an entry highlights its cell(s) in yellow
+  and the two sides of a create in orange. Escape or a click outside closes the menu.
+- Tests: `ActionsUiTest` (outer triangle flip and outer create by clicks, the "!" in a corner, pair ->
+  options and cell -> options submenus, star labels, hover highlight with sides, Escape).
+
+### Claude's choices (to confirm)
+
+- Corner rule: the four canvas corners moved 28 px inwards; of those that lie in the outer face,
+  the one farthest from the curves (distance to points sampled along all curves). No corner in the
+  outer face (zoomed far in): no "!".
+- Submenu = a second column inside the same popup, to the right of the entries, opened by pointing
+  at (or clicking) a group entry, with a drawn ">" on group entries. The column has its room from
+  the start (an empty area until a group is pointed at), so the menu does not move or grow under
+  the pointer when a submenu opens. Pointing at a single-option entry of the first column closes
+  the submenu.
+- Group entries: canvas pair "1 3"; a pair with one option keeps the label "1 3" (a click does it,
+  pointing at it highlights its sides). Graph: a cell with several options shows its plain
+  description (no stars); a cell with one option shows that option's starred description.
+  Hypergraph: triple "1 3 5"; pointing at it highlights all its triangle cells.
+- The canvas heading names the pair when there is only one ("Create a digon of 1 3").
+- Highlight of the two sides: orange `#FFB300`, 10 px wide under the curves. The highlight stays
+  until the pointer is on another entry or the menu closes.
+- Not tested by clicks: a canvas cell with one pair and several options (options directly). No such
+  cell occurs among the connected arrangements with n <= 5, nor after up to four digon creates on
+  them. The graph case (one cell, several options) is tested.
+- Note on the example in the request: "1 2 2 1 ..." has two consecutive sides on circle 2, which a
+  cell cannot have (two sides of one circle meet only at a crossing of two circles); the star
+  notation is used as given.
+
 ## 2026-11-18: Digon create, actions in the graph views, triangle hypergraph
 
 ### Request (Manfred)
@@ -77,13 +114,14 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
 
 - "Possible" means the flip succeeds: a digon whose collapse is refused (the arrangement would fall
   apart) gets no "!", no stripe and is not counted for ambiguity.
-- Outer face: as before, a click into the outer face does nothing on the canvas and it never shows a
-  "!". The graph views include the outer face (creates through it, a triangle as outer face); in
+- Outer face: (superseded by the entry "Outer face clickable" above: the outer face is clickable on
+  the canvas like every other cell, with its "!" in a corner.) The graph views include the outer face (creates through it, a triangle as outer face); in
   menus it is marked " (outer face)", and its highlight is a thick yellow line along its boundary.
 - Ambiguous = more than one option: in the canvas a cell with two creates of the same pair (one of
   the circles has several sides on it) opens the menu too; in the graph such a pair is "several
   cells to create through" (double stripe, menu).
-- Menu texts: canvas heading "Create a digon", entries `1 3: [1] 2 [3] 2` (pair, then the cell with
+- Menu texts (the brackets and the canvas entries are superseded by the stars and submenus of the
+  entry above): canvas heading "Create a digon", entries `1 3: [1] 2 [3] 2` (pair, then the cell with
   the two sides of the create in brackets). Graph: heading "Create a digon of 1 3" or "Collapse a
   digon of 1 3", entries the cells (creates with the two sides in brackets). Hypergraph: heading
   "Flip a triangle", entries `1 2 3: 1 3 2` (triple, then the cell). Equal entries get " (1)",
@@ -115,8 +153,7 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
 ### Open questions
 
 - Should the right-click face menu also list the digon creates of the face?
-- Should creates through the outer face be possible on the canvas (today only via the intersection
-  graph)?
+- Should creates through the outer face be possible on the canvas? (Answered: yes, see above.)
 
 ## 2026-11-17: Broad tests
 

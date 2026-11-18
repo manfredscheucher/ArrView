@@ -78,14 +78,14 @@ private val GENERAL_TEXT = listOf(
         "twice or not at all, and together they are connected. Triangles are filled light orange, digons light blue.",
     "Click a triangle to flip it. Click a digon to collapse it, so that its two circles no longer cross; " +
         "this is refused if the arrangement would fall apart. Click a face where two circles that do not " +
-        "cross both have a side to create a digon: one is pushed across the other, they cross twice (not in " +
-        "the outer face; for that use the intersection graph). If a " +
-        "face offers several digon creates, a menu lists them as the two circles and the face, with the two " +
-        "sides in brackets. A \"!\" appears in the face under the mouse when a click does something there. " +
-        "Undo and Redo are in the Edit menu.",
+        "cross both have a side to create a digon: one is pushed across the other, they cross twice. If there " +
+        "are several ways, a menu lists the pairs of circles, and a pair with several ways opens a submenu: " +
+        "the face with a star after the two sides that are pushed together. The outer face works the same. " +
+        "A \"!\" appears in the face under the mouse when a click does something there (for the outer face " +
+        "in a corner of the canvas). Undo and Redo are in the Edit menu.",
     "In menus a face is written as the circles of its sides in order around it, for example 1 2 1 3. " +
         "Pointing at a menu entry highlights its face in yellow (the outer face: its boundary, and the entry " +
-        "says (outer face)).",
+        "says (outer face)), the two sides of a digon create in orange.",
     "Right-click a face (Ctrl+click on a Mac) for its menu; Make outer face there draws that face " +
         "around the rest. Drag to pan, zoom with the wheel or by pinching.",
     "Model 1 and Model 2 (toolbar, View menu, Layout widget) are two ways to draw. Model 1 draws the " +
@@ -118,11 +118,11 @@ private val WIDGETS_TEXT = listOf(
     "Intersection graph: the circles as vertices 1 to n in their colours, an edge where two circles cross. " +
         "A dashed edge: the two circles do not cross but can create a digon. A yellow stripe marks every pair " +
         "that can create or collapse a digon, twice as strong if there are several ways; click it to do it " +
-        "(a menu lists the faces if there are several).",
+        "(a menu lists the faces if there are several, a face with several ways opens a submenu).",
     "Triangle hypergraph: the same vertices, and a transparent triangle for every triple of circles that " +
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
-        "a menu lists them with their faces.",
+        "a menu lists them with their faces (several triples: a submenu per triple).",
     "Layout: Max. iterations (default ${LayoutSettings().maxIterations}) and eps (default " +
         "${epsText(LayoutSettings().eps)}). The drawing stops after max. iterations, or earlier when the " +
         "weights change by less than eps. Reset restores the defaults.",

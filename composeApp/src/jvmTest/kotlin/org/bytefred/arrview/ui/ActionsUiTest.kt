@@ -24,11 +24,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.CellActions
+import org.bytefred.arrview.core.DigonCreate
 import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.defaultOuterFace
 import org.bytefred.arrview.core.digonCollapse
 import org.bytefred.arrview.core.digonCreate
+import org.bytefred.arrview.core.digonCreates
 import org.bytefred.arrview.core.triangleFlip
 import kotlin.math.abs
 import kotlin.test.BeforeTest
@@ -72,15 +74,49 @@ class ActionsUiTest {
         waitUntil(timeoutMillis = 10_000) { s.currentDrawing != null && view.fittedRequest == s.fitRequest }
 
     /** An arrangement of the pool with a bounded face (model 2 default outer face) with [creates] creates. */
-    private fun withCreateFace(creates: (Int) -> Boolean): Pair<Arrangement, Int> {
-        for (arr in pool) {
-            val outer = arr.defaultOuterFace(DrawModel.MODEL2)
+    private fun withCreateFace(creates: (Int) -> Boolean): Pair<Arrangement, Int> =
+        findFace(outer = false) { actions, f -> creates(actions.createsIn(f).size) }
+
+    /** The pool, then arrangements with one or two digons created (cells where a circle has several sides). */
+    private val candidates: Sequence<Arrangement>
+        get() {
+            fun created(a: Arrangement) = a.digonCreates().asSequence().map(a::digonCreate)
+            return pool.asSequence() + pool.asSequence().flatMap(::created) + pool.asSequence().flatMap(::created).flatMap(::created)
+        }
+
+    /**
+     * An arrangement and a face where [ok] holds: the outer face of the model 2 drawing if [outer] is
+     * true, a bounded one if false, any face if null.
+     */
+    private fun findFace(outer: Boolean?, ok: (CellActions, Int) -> Boolean): Pair<Arrangement, Int> {
+        for (arr in candidates) {
+            val o = arr.defaultOuterFace(DrawModel.MODEL2)
             val actions = CellActions(arr)
-            val f = arr.faces.indices.firstOrNull { it != outer && creates(actions.createsIn(it).size) } ?: continue
+            val f = arr.faces.indices.firstOrNull { (outer == null || (it == o) == outer) && ok(actions, it) } ?: continue
             return arr to f
         }
         error("no such arrangement")
     }
+
+    /** The creates of face [f] by pair. */
+    private fun CellActions.pairsIn(f: Int) = createsIn(f).groupBy { it.i to it.j }
+
+    /** Points at a menu entry and checks what it highlights in the canvas. */
+    private fun ComposeUiTest.hoverEntry(s: AppState, label: String, expected: Highlight) {
+        menuItem(label).performMouseInput { moveTo(center) }
+        waitForIdle()
+        assertEquals(expected, s.menuHighlight, label)
+    }
+
+    /** An option of [ops] whose star label is unique, with that label. */
+    private fun AppState.uniqueOption(ops: List<DigonCreate>): Pair<DigonCreate, String> {
+        val labels = ops.map { createNode(it).label }
+        val k = labels.indices.first { i -> labels.count { it == labels[i] } == 1 }
+        return ops[k] to labels[k]
+    }
+
+    private fun ComposeUiTest.canvasSize(): Size =
+        onNodeWithTag("canvas").fetchSemanticsNode().size.let { Size(it.width.toFloat(), it.height.toFloat()) }
 
     /** Ctrl+Z on the canvas gives [arr] back. */
     private fun ComposeUiTest.undoGivesBack(s: AppState, arr: Arrangement) {
@@ -111,31 +147,164 @@ class ActionsUiTest {
         undoGivesBack(s, arr)
     }
 
+    private fun close(a: Color, b: Color) = abs(a.red - b.red) < 0.05f && abs(a.green - b.green) < 0.05f && abs(a.blue - b.blue) < 0.05f
+
+    // ---- intersection graph ------------------------------------------------------------
+
+    /** A point on the edge of pair (i, j) that is farther than the hit distance from every other striped pair. */
+    private fun ComposeUiTest.pairPoint(arr: Arrangement, actions: CellActions, size: Size, i: Int, j: Int): Offset? {
+        val circle = with(density) { vertexCircle(arr.n, size) }
+        val hit = with(density) { 8.dp.toPx() } + 3f
+        val others = (0 until arr.n).flatMap { a -> (a + 1 until arr.n).map { b -> a to b } }
+            .filter { (a, b) -> (a to b) != (i to j) && actions.pairActionCount(a, b) > 0 }
+        for (k in 3..17) {
+            val p = circle.at(i) + (circle.at(j) - circle.at(i)) * (k / 20f)
+            if (others.all { (a, b) -> segmentDistance(p, circle.at(a), circle.at(b)) > hit }) return p
+        }
+        return null
+    }
+
+    private fun ComposeUiTest.graphSize(tag: String): Size =
+        onNodeWithTag(tag).fetchSemanticsNode().size.let { Size(it.width.toFloat(), it.height.toFloat()) }
+
+    /** An arrangement and pair with [count] actions and a clean point on its edge. */
+    private fun ComposeUiTest.findPair(size: Size, count: (Int) -> Boolean, creates: Boolean): Triple<Arrangement, Pair<Int, Int>, Offset> =
+        findPair(size) { actions, i, j ->
+            val c = actions.pairActionCount(i, j)
+            count(c) && c > 0 && actions.createsOf(i, j).isNotEmpty() == creates
+        }
+
+    /** An arrangement and pair where [ok] holds, with a clean point on its edge. */
+    private fun ComposeUiTest.findPair(size: Size, ok: (CellActions, Int, Int) -> Boolean): Triple<Arrangement, Pair<Int, Int>, Offset> {
+        for (arr in candidates) {
+            val actions = CellActions(arr)
+            for (i in 0 until arr.n) for (j in i + 1 until arr.n) {
+                if (!ok(actions, i, j)) continue
+                pairPoint(arr, actions, size, i, j)?.let { return Triple(arr, i to j, it) }
+            }
+        }
+        error("no such pair")
+    }
+
     @Test
-    fun canvasClickOnAFaceWithSeveralCreatesOpensAMenu() = runComposeUiTest {
-        val (arr, f) = withCreateFace { it >= 2 }
+    fun canvasMenuOfPairsWithSubmenusOfStarredOptions() = runComposeUiTest {
+        // a cell with several pairs, one of them with several options (a circle with several sides on it)
+        val (arr, f) = findFace(outer = false) { a, f -> a.pairsIn(f).size >= 2 && a.pairsIn(f).values.any { it.size >= 2 } }
         val s = state()
         val view = ViewTransform()
         show(s, view, arr)
-        val options = s.actions.createsIn(f)
+        val pairs = s.actions.pairsIn(f).toSortedMap(compareBy({ it.first }, { it.second }))
         onNodeWithTag("canvas").performMouseInput { click(view.at(s.currentDrawing!!, f)) }
         waitForIdle()
         assertEquals(arr, s.arrangement)
         onNodeWithText("Create a digon").assertExists()
-        val labels = menuLabels(s.createEntries(f))
-        assertEquals(options.size, labels.size)
-        for (l in labels) menuItem(l).assertExists()
-        val label = labels.last()
-        assertTrue(Regex("""\d \d: .*\[\d+].*\[\d+].*""").matches(label), label)
-        // pointing at an entry highlights its cell in the canvas
-        menuItem(label).performMouseInput { moveTo(center) }
-        waitForIdle()
-        assertEquals(f, s.menuHighlight)
+        for ((i, j) in pairs.keys) menuItem("${i + 1} ${j + 1}").assertExists()
+        onNodeWithTag("action-submenu").assertDoesNotExist()
+        // pointing at a pair with several options opens its submenu: the cell with two stars
+        val (pair, ops) = pairs.entries.first { it.value.size >= 2 }
+        hoverEntry(s, "${pair.first + 1} ${pair.second + 1}", Highlight(setOf(f)))
+        onNodeWithTag("action-submenu").assertExists()
+        for (l in menuLabels(ops.map { s.createNode(it).label })) {
+            menuItem(l).assertExists()
+            assertEquals(2, l.count { it == '*' }, l)
+            assertTrue('[' !in l, l)
+        }
+        // pointing at an option highlights the cell and its two sides; a click creates the digon
+        val (op, label) = s.uniqueOption(ops)
+        hoverEntry(s, label, Highlight(setOf(f), setOf(op.dartI, op.dartJ)))
         menuItem(label).performClick()
         waitForIdle()
         assertNull(s.menuHighlight)
-        assertEquals(arr.digonCreate(options.sortedWith(compareBy({ it.i }, { it.j })).last()), s.arrangement)
+        assertEquals(arr.digonCreate(op), s.arrangement)
         undoGivesBack(s, arr)
+        // a pair with one option is that option: a click on the pair creates it
+        pairs.entries.firstOrNull { it.value.size == 1 }?.let { (p, single) ->
+            onNodeWithTag("canvas").performMouseInput { click(view.at(s.currentDrawing!!, f)) }
+            waitForIdle()
+            menuItem("${p.first + 1} ${p.second + 1}").performClick()
+            waitForIdle()
+            assertEquals(arr.digonCreate(single.single()), s.arrangement)
+            undoGivesBack(s, arr)
+        }
+    }
+
+    @Test
+    fun escapeClosesTheMenu() = runComposeUiTest {
+        val (arr, f) = withCreateFace { it >= 2 }
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, arr)
+        onNodeWithTag("canvas").performMouseInput { click(view.at(s.currentDrawing!!, f)) }
+        waitForIdle()
+        onNodeWithTag("action-menu").assertExists()
+        onNodeWithTag("action-menu").performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+        onNodeWithTag("action-menu").assertDoesNotExist()
+        assertEquals(arr, s.arrangement)
+    }
+
+    @Test
+    fun outerTriangleFlipsWithTheMarkInACorner() = runComposeUiTest {
+        // the Krupp: every face is a triangle, the outer one too
+        val krupp = Arrangement.krupp()
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, krupp, DrawModel.MODEL1)
+        val d = s.currentDrawing!!
+        val outer = s.outerFace!!
+        val size = canvasSize()
+        val corner = assertNotNull(outerMarkCorner(d, view, size.width, size.height))
+        // one of the four corners, CORNER_INSET from the edges
+        assertTrue(corner.x == CORNER_INSET || corner.x == size.width - CORNER_INSET)
+        assertTrue(corner.y == CORNER_INSET || corner.y == size.height - CORNER_INSET)
+        onNodeWithTag("canvas").performMouseInput { moveTo(Offset(5f, 5f)); moveTo(Offset(6f, 6f)) }
+        waitForIdle()
+        assertEquals(outer, s.hoverFace)
+        val map = onNodeWithTag("canvas").captureToImage().toPixelMap()
+        assertTrue(close(map[(corner.x + 6f).toInt(), corner.y.toInt()], MARK_FILL))
+        onNodeWithTag("canvas").performMouseInput { click(Offset(6f, 6f)) }
+        waitForIdle()
+        assertEquals(krupp.triangleFlip(outer), s.arrangement)
+        undoGivesBack(s, krupp)
+    }
+
+    @Test
+    fun outerFaceCreatesOnClick() = runComposeUiTest {
+        // a face with one create, drawn as the outer face
+        val (arr, outer) = findFace(outer = false) { a, f -> a.createsIn(f).size == 1 }
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, arr)
+        runOnIdle { s.makeOuterFace(outer) }
+        waitUntil(timeoutMillis = 10_000) { s.outerFace == outer }
+        val op1 = s.actions.createsIn(outer).single()
+        onNodeWithTag("canvas").performMouseInput { moveTo(Offset(5f, 5f)); moveTo(Offset(6f, 6f)) }
+        waitForIdle()
+        assertTrue(markPixels() > 0)
+        onNodeWithTag("canvas").performMouseInput { click(Offset(6f, 6f)) }
+        waitForIdle()
+        assertEquals(arr.digonCreate(op1), s.arrangement)
+        undoGivesBack(s, arr)
+        // several: the menu, entries marked "(outer face)"
+        val (arr2, outer2) = findFace(outer = true) { a, f -> a.createsIn(f).size >= 2 }
+        runOnIdle { s.load("test2", arr2) }
+        awaitFitted(s, view)
+        assertEquals(outer2, s.outerFace)
+        onNodeWithTag("canvas").performMouseInput { click(Offset(6f, 6f)) }
+        waitForIdle()
+        onNodeWithTag("action-menu").assertExists()
+        // open the submenu of a pair with several options, if the menu has pairs
+        val pairs = s.actions.pairsIn(outer2)
+        val ops = pairs.values.firstOrNull { it.size >= 2 } ?: pairs.values.first()
+        if (pairs.size >= 2 && ops.size >= 2) hoverEntry(s, circlesLabel(listOf(ops[0].i, ops[0].j)), Highlight(setOf(outer2)))
+        val (op, label) = if (ops.size >= 2) s.uniqueOption(ops) else ops.single() to circlesLabel(listOf(ops[0].i, ops[0].j))
+        if (ops.size >= 2) {
+            assertTrue(label.endsWith("(outer face)"), label)
+            hoverEntry(s, label, Highlight(setOf(outer2), setOf(op.dartI, op.dartJ)))
+        }
+        menuItem(label).performClick()
+        waitForIdle()
+        assertEquals(arr2.digonCreate(op), s.arrangement)
     }
 
     @Test
@@ -158,6 +327,12 @@ class ActionsUiTest {
         assertTrue(markAt(s.bounded(3)))
         val big = start.faces.indices.first { start.faces[it].size >= 4 && it != s.outerFace }
         assertTrue(!markAt(big))
+        // the outer face (no triangle, nothing to do): no "!" anywhere
+        assertTrue(!s.actions.hasAction(s.outerFace!!))
+        onNodeWithTag("canvas").performMouseInput { moveTo(Offset(4f, 4f)); moveTo(Offset(5f, 5f)) }
+        waitForIdle()
+        assertEquals(s.outerFace, s.hoverFace)
+        assertEquals(0, markPixels())
         // a face with a digon create
         val (arr, f) = withCreateFace { it == 1 }
         runOnIdle { s.load("test", arr); s.changeModel(DrawModel.MODEL2) }
@@ -167,15 +342,6 @@ class ActionsUiTest {
         waitForIdle()
         val p = view.toScreen(d2.interiorPoint(f)!!) + Offset(6f, 0f)
         assertTrue(close(onNodeWithTag("canvas").captureToImage().toPixelMap()[p.x.toInt(), p.y.toInt()], MARK_FILL))
-        // the outer face: no "!" anywhere, and a click there does nothing although it has creates
-        assertTrue(s.actions.createsIn(s.outerFace!!).isNotEmpty())
-        onNodeWithTag("canvas").performMouseInput { moveTo(Offset(4f, 4f)); moveTo(Offset(5f, 5f)) }
-        waitForIdle()
-        assertEquals(s.outerFace, s.hoverFace)
-        assertEquals(0, markPixels())
-        onNodeWithTag("canvas").performMouseInput { click(Offset(5f, 5f)) }
-        waitForIdle()
-        assertEquals(arr, s.arrangement)
         // two circles: a digon whose collapse is refused gets no "!"
         runOnIdle { s.load("two", Arrangement.two()) }
         awaitFitted(s, view)
@@ -187,37 +353,113 @@ class ActionsUiTest {
         assertEquals(0, markPixels())
     }
 
-    private fun close(a: Color, b: Color) = abs(a.red - b.red) < 0.05f && abs(a.green - b.green) < 0.05f && abs(a.blue - b.blue) < 0.05f
-
-    // ---- intersection graph ------------------------------------------------------------
-
-    /** A point on the edge of pair (i, j) that is farther than the hit distance from every other striped pair. */
-    private fun ComposeUiTest.pairPoint(arr: Arrangement, actions: CellActions, size: Size, i: Int, j: Int): Offset? {
-        val circle = with(density) { vertexCircle(arr.n, size) }
-        val hit = with(density) { 8.dp.toPx() } + 3f
-        val others = (0 until arr.n).flatMap { a -> (a + 1 until arr.n).map { b -> a to b } }
-            .filter { (a, b) -> (a to b) != (i to j) && actions.pairActionCount(a, b) > 0 }
-        for (k in 3..17) {
-            val p = circle.at(i) + (circle.at(j) - circle.at(i)) * (k / 20f)
-            if (others.all { (a, b) -> segmentDistance(p, circle.at(a), circle.at(b)) > hit }) return p
+    @Test
+    fun graphMenuOfCellsWithSubmenus() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        val size = graphSize("intersection-graph")
+        // a pair with several cells, one of them with several options
+        val (arr, pair, at) = findPair(size) { a, i, j ->
+            val byFace = a.createsOf(i, j).groupBy { it.face }
+            byFace.size >= 2 && byFace.values.any { it.size >= 2 }
         }
-        return null
+        runOnIdle { s.load("test", arr) }
+        awaitFitted(s, view)
+        val (i, j) = pair
+        onNodeWithTag("intersection-graph").performMouseInput { click(at) }
+        waitForIdle()
+        assertEquals(arr, s.arrangement)
+        onNodeWithText("Create a digon of ${i + 1} ${j + 1}").assertExists()
+        val byFace = s.actions.createsOf(i, j).groupBy { it.face }
+        val (f, ops) = byFace.entries.first { it.value.size >= 2 }
+        // the cell entry: its description without stars; pointing at it opens its options
+        val cellLabels = menuLabels(byFace.map { (g, o) -> o.singleOrNull()?.let { s.createNode(it).label } ?: s.cellLabel(g) })
+        val cellLabel = cellLabels[byFace.keys.indexOf(f)]
+        assertTrue('*' !in cellLabel, cellLabel)
+        hoverEntry(s, cellLabel, Highlight(setOf(f)))
+        onNodeWithTag("action-submenu").assertExists()
+        val (op, label) = s.uniqueOption(ops)
+        hoverEntry(s, label, Highlight(setOf(f), setOf(op.dartI, op.dartJ)))
+        menuItem(label).performClick()
+        waitForIdle()
+        assertEquals(arr.digonCreate(op), s.arrangement)
+        undoGivesBack(s, arr)
     }
 
-    private fun ComposeUiTest.graphSize(tag: String): Size =
-        onNodeWithTag(tag).fetchSemanticsNode().size.let { Size(it.width.toFloat(), it.height.toFloat()) }
+    @Test
+    fun graphMenuOfOneCellShowsItsOptions() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        val size = graphSize("intersection-graph")
+        val (arr, pair, at) = findPair(size) { a, i, j -> a.createsOf(i, j).size >= 2 && a.createsOf(i, j).map { it.face }.toSet().size == 1 }
+        runOnIdle { s.load("test", arr) }
+        awaitFitted(s, view)
+        val (i, j) = pair
+        onNodeWithTag("intersection-graph").performMouseInput { click(at) }
+        waitForIdle()
+        onNodeWithTag("action-submenu").assertDoesNotExist()
+        val (op, label) = s.uniqueOption(s.actions.createsOf(i, j))
+        assertEquals(2, label.count { it == '*' })
+        menuItem(label).performClick()
+        waitForIdle()
+        assertEquals(arr.digonCreate(op), s.arrangement)
+        undoGivesBack(s, arr)
+    }
 
-    /** An arrangement and pair with [count] actions and a clean point on its edge. */
-    private fun ComposeUiTest.findPair(size: Size, count: (Int) -> Boolean, creates: Boolean): Triple<Arrangement, Pair<Int, Int>, Offset> {
-        for (arr in pool) {
-            val actions = CellActions(arr)
-            for (i in 0 until arr.n) for (j in i + 1 until arr.n) {
-                val c = actions.pairActionCount(i, j)
-                if (!count(c) || c == 0 || (actions.createsOf(i, j).isNotEmpty() != creates)) continue
-                pairPoint(arr, actions, size, i, j)?.let { return Triple(arr, i to j, it) }
-            }
-        }
-        error("no such pair")
+    @Test
+    fun hypergraphMenuOfTriplesWithSubmenusOfCells() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        val start = Examples.start.arrangement()
+        show(s, view, start, widget = Widget.TRIANGLE_HYPERGRAPH)
+        val size = graphSize("triangle-hypergraph")
+        val at = assertNotNull(hyperPoint(start, size) { hits, _ -> hits.size >= 2 })
+        assertEquals("${start.triangleCount} triangles on ${s.actions.triples.size} triples", onNodeWithTag("triangle-hypergraph-count").text())
+        onNodeWithTag("triangle-hypergraph").performMouseInput { click(at) }
+        waitForIdle()
+        assertEquals(start, s.arrangement)
+        onNodeWithText("Flip a triangle").assertExists()
+        val circle = with(density) { vertexCircle(start.n, size) }
+        val hits = s.actions.triples.filterKeys { inTriangle(at, circle.at(it[0]), circle.at(it[1]), circle.at(it[2])) }
+        for (t in hits.keys) menuItem(circlesLabel(t)).assertExists()
+        // the start example: every triple has two triangles, so each triple opens a submenu
+        val (t, faces) = hits.entries.first()
+        assertEquals(2, faces.size)
+        hoverEntry(s, circlesLabel(t), Highlight(faces.toSet()))
+        onNodeWithTag("action-submenu").assertExists()
+        val labels = menuLabels(faces.map { s.cellLabel(it) })
+        hoverEntry(s, labels[0], Highlight(setOf(faces[0])))
+        menuItem(labels[0]).performClick()
+        waitForIdle()
+        assertEquals(start.triangleFlip(faces[0]), s.arrangement)
+        undoGivesBack(s, start)
+    }
+
+    @Test
+    fun hypergraphClickOnATripleWithSeveralTrianglesListsItsCells() = runComposeUiTest {
+        // the Krupp: one triple with 8 triangles, all described "1 2 3" or "1 3 2": numbered entries
+        val krupp = Arrangement.krupp()
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, krupp, widget = Widget.TRIANGLE_HYPERGRAPH)
+        val size = graphSize("triangle-hypergraph")
+        val circle = with(density) { vertexCircle(3, size) }
+        onNodeWithTag("triangle-hypergraph").performMouseInput { click((circle.at(0) + circle.at(1) + circle.at(2)) / 3f) }
+        waitForIdle()
+        assertEquals(krupp, s.arrangement)
+        onNodeWithText("Flip a triangle").assertExists()
+        onNodeWithTag("action-submenu").assertDoesNotExist()
+        val faces = s.actions.triples.getValue(listOf(0, 1, 2))
+        val labels = menuLabels(faces.map { s.cellLabel(it) })
+        assertEquals(8, labels.size)
+        assertTrue(labels.all { Regex("""1 (2 3|3 2) (\(\d\)|\(outer face\))""").matches(it) }, "$labels")
+        for (l in labels) menuItem(l).assertExists()
+        menuItem(labels[2]).performClick()
+        waitForIdle()
+        assertEquals(krupp.triangleFlip(faces[2]), s.arrangement)
+        undoGivesBack(s, krupp)
     }
 
     @Test
@@ -238,32 +480,6 @@ class ActionsUiTest {
             assertEquals(expected, s.arrangement, "pair ${i + 1} ${j + 1}, creates = $creates")
             undoGivesBack(s, arr)
         }
-    }
-
-    @Test
-    fun graphClickOnAnAmbiguousPairOpensAMenu() = runComposeUiTest {
-        val s = state()
-        val view = ViewTransform()
-        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
-        val size = graphSize("intersection-graph")
-        val (arr, pair, at) = findPair(size, { it >= 2 }, creates = true)
-        runOnIdle { s.load("test", arr) }
-        awaitFitted(s, view)
-        val (i, j) = pair
-        onNodeWithTag("intersection-graph").performMouseInput { click(at) }
-        waitForIdle()
-        assertEquals(arr, s.arrangement)
-        onNodeWithText("Create a digon of ${i + 1} ${j + 1}").assertExists()
-        assertEquals("Create a digon of ${i + 1} ${j + 1}", s.pairHeading(i, j))
-        val op = s.actions.createsOf(i, j).first()
-        val label = menuLabels(s.pairEntries(i, j)).first()
-        menuItem(label).performMouseInput { moveTo(center) }
-        waitForIdle()
-        assertEquals(op.face, s.menuHighlight)
-        menuItem(label).performClick()
-        waitForIdle()
-        assertEquals(arr.digonCreate(op), s.arrangement)
-        undoGivesBack(s, arr)
     }
 
     @Test
@@ -345,58 +561,6 @@ class ActionsUiTest {
         waitForIdle()
         assertEquals(arr.triangleFlip(CellActions(arr).triples.getValue(t).single()), s.arrangement)
         undoGivesBack(s, arr)
-    }
-
-    @Test
-    fun hypergraphClickOnSeveralTrianglesOpensAMenu() = runComposeUiTest {
-        val s = state()
-        val view = ViewTransform()
-        val start = Examples.start.arrangement()
-        show(s, view, start, widget = Widget.TRIANGLE_HYPERGRAPH)
-        val size = graphSize("triangle-hypergraph")
-        val at = assertNotNull(hyperPoint(start, size) { hits, _ -> hits.size >= 2 })
-        assertEquals("${start.triangleCount} triangles on ${s.actions.triples.size} triples", onNodeWithTag("triangle-hypergraph-count").text())
-        onNodeWithTag("triangle-hypergraph").performMouseInput { click(at) }
-        waitForIdle()
-        assertEquals(start, s.arrangement)
-        onNodeWithText("Flip a triangle").assertExists()
-        val circle = with(density) { vertexCircle(start.n, size) }
-        val hits = s.actions.triples.filterKeys { inTriangle(at, circle.at(it[0]), circle.at(it[1]), circle.at(it[2])) }
-        val entries = hits.flatMap { (t, faces) -> s.triangleEntries(t, faces) }
-        val first = entries.first()
-        val label = menuLabels(entries).first()
-        menuItem(label).performMouseInput { moveTo(center) }
-        waitForIdle()
-        assertEquals(first.face, s.menuHighlight)
-        menuItem(label).performClick()
-        waitForIdle()
-        assertEquals(start.triangleFlip(first.face), s.arrangement)
-        undoGivesBack(s, start)
-    }
-
-    @Test
-    fun hypergraphClickOnATripleWithSeveralTrianglesOpensAMenu() = runComposeUiTest {
-        // the Krupp: one triple with 8 triangles, all described "1 2 3" or "1 3 2": numbered entries
-        val krupp = Arrangement.krupp()
-        val s = state()
-        val view = ViewTransform()
-        show(s, view, krupp, widget = Widget.TRIANGLE_HYPERGRAPH)
-        val size = graphSize("triangle-hypergraph")
-        val circle = with(density) { vertexCircle(3, size) }
-        onNodeWithTag("triangle-hypergraph").performMouseInput { click((circle.at(0) + circle.at(1) + circle.at(2)) / 3f) }
-        waitForIdle()
-        assertEquals(krupp, s.arrangement)
-        onNodeWithText("Flip a triangle").assertExists()
-        val entries = s.triangleEntries(listOf(0, 1, 2), s.actions.triples.getValue(listOf(0, 1, 2)))
-        val labels = menuLabels(entries)
-        assertEquals(8, labels.size)
-        assertTrue(labels.all { Regex("""1 2 3: 1 (2 3|3 2) (\(\d\)|\(outer face\))""").matches(it) }, "$labels")
-        for (l in labels) menuItem(l).assertExists()
-        assertTrue(labels.any { it.endsWith("(1)") })
-        menuItem(labels[2]).performClick()
-        waitForIdle()
-        assertEquals(krupp.triangleFlip(entries[2].face), s.arrangement)
-        undoGivesBack(s, krupp)
     }
 
     @Test

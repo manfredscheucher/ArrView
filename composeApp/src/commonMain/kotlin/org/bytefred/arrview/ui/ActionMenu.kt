@@ -1,97 +1,236 @@
 package org.bytefred.arrview.ui
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.DigonCreate
 import org.bytefred.arrview.core.cellDescription
 import kotlin.math.roundToInt
 
-/** An entry of an [ActionMenu]: its text, the face it acts on (highlighted while hovered) and the action. */
-class MenuAction(val label: String, val face: Int, val run: () -> Unit)
+/** What a menu entry highlights in the canvas while the pointer is on it: faces and sides (darts). */
+data class Highlight(val faces: Set<Int>, val darts: Set<Int> = emptySet())
 
 /**
- * A menu of flips at [at] (pixels in the parent): a heading, then one entry per action. Entries
- * with equal labels get " (1)", " (2)", ... Hovering an entry highlights its face in the canvas
- * ([AppState.menuHighlight]).
+ * An entry of an [ActionMenu]: a leaf runs [run]; a group has [children], which open in a second
+ * column next to the menu (a submenu) when the pointer is on it or it is clicked.
+ */
+class MenuNode(val label: String, val highlight: Highlight, val children: List<MenuNode> = emptyList(), val run: (() -> Unit)? = null)
+
+/** An entry for [options] under [label]: a group, or the single option itself (a level with one option is skipped). */
+fun group(label: String, highlight: Highlight, options: List<MenuNode>): MenuNode =
+    options.singleOrNull()?.let { MenuNode(label, it.highlight, run = it.run) } ?: MenuNode(label, highlight, options)
+
+/**
+ * A menu of flips at [at] (pixels in the parent): a heading, then the entries; a group's entries
+ * show in a second column to its right. Equal labels in a column get " (1)", " (2)", ...
+ * Hovering an entry highlights its cell (and sides) in the canvas ([AppState.menuHighlight]).
+ * Escape or a click outside closes the menu.
  */
 @Composable
-fun ActionMenu(state: AppState, at: Offset, heading: String, actions: List<MenuAction>, close: () -> Unit) {
-    val labels = menuLabels(actions)
+fun ActionMenu(state: AppState, at: Offset, heading: String, nodes: List<MenuNode>, close: () -> Unit) {
+    var open by remember(nodes) { mutableStateOf<MenuNode?>(null) }
     fun done() {
         state.menuHighlight = null
         close()
     }
-    // a zero-size anchor at the pointer: the menu opens right there
-    Box(Modifier.offset { IntOffset(at.x.roundToInt(), at.y.roundToInt()) }) {
-        DropdownMenu(expanded = true, onDismissRequest = ::done) {
-            MenuHeading(heading)
-            for ((a, label) in actions.zip(labels)) {
-                DropdownMenuItem(
-                    text = { Text(label) },
-                    onClick = {
+
+    @Composable
+    fun Entries(entries: List<MenuNode>, top: Boolean) {
+        for ((node, label) in entries.zip(menuLabels(entries.map { it.label }))) {
+            DropdownMenuItem(
+                text = { Text(label) },
+                onClick = {
+                    val run = node.run
+                    if (run != null) {
                         done()
-                        a.run()
-                    },
-                    modifier = Modifier.pointerInput(a.face) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                val ev = awaitPointerEvent()
-                                when (ev.type) {
-                                    PointerEventType.Enter, PointerEventType.Move -> state.menuHighlight = a.face
-                                    PointerEventType.Exit -> if (state.menuHighlight == a.face) state.menuHighlight = null
+                        run()
+                    } else {
+                        open = node
+                    }
+                },
+                trailingIcon = if (node.run == null) ({ Chevron() }) else null,
+                modifier = Modifier.pointerInput(node) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val ev = awaitPointerEvent()
+                            when (ev.type) {
+                                // the highlight stays until the pointer is on another entry
+                                PointerEventType.Enter, PointerEventType.Move -> {
+                                    state.menuHighlight = node.highlight
+                                    if (top) open = node.takeIf { it.run == null }
                                 }
                             }
                         }
-                    },
-                )
+                    }
+                },
+            )
+        }
+    }
+
+    // a zero-size anchor at the pointer: the menu opens right there
+    Box(Modifier.offset { IntOffset(at.x.roundToInt(), at.y.roundToInt()) }) {
+        DropdownMenu(expanded = true, onDismissRequest = ::done) {
+            // the menu takes the focus, so that Escape closes it
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focus.requestFocus() }
+            Row(
+                Modifier.width(IntrinsicSize.Max).focusRequester(focus).focusable().onKeyEvent {
+                    if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
+                        done()
+                        true
+                    } else false
+                },
+            ) {
+                Column(Modifier.width(IntrinsicSize.Max).testTag("action-menu")) {
+                    MenuHeading(heading)
+                    Entries(nodes, top = true)
+                }
+                val groups = nodes.filter { it.run == null }
+                if (groups.isNotEmpty()) {
+                    VerticalDivider()
+                    // room for the largest submenu from the start, so the menu does not move or
+                    // grow under the pointer when a submenu opens
+                    Box {
+                        for (g in groups) if (g !== open) SubmenuPlaceholder(g)
+                        open?.let { g ->
+                            Column(Modifier.width(IntrinsicSize.Max).testTag("action-submenu")) {
+                                MenuHeading(g.label)
+                                Entries(g.children, top = false)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-/** The entry texts of [actions]: equal labels get " (1)", " (2)", ... */
-fun menuLabels(actions: List<MenuAction>): List<String> {
-    val counts = actions.groupingBy { it.label }.eachCount()
-    val seen = HashMap<String, Int>()
-    return actions.map { a ->
-        val k = (seen[a.label] ?: 0) + 1
-        seen[a.label] = k
-        if (counts.getValue(a.label) > 1) "${a.label} ($k)" else a.label
+/** An invisible copy of [g]'s submenu, a bit wider than the real one: it only takes its room. */
+@Composable
+private fun SubmenuPlaceholder(g: MenuNode) {
+    Column(Modifier.alpha(0f).padding(end = 8.dp)) {
+        MenuHeading(g.label)
+        for (c in g.children) {
+            Box(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp), contentAlignment = Alignment.CenterStart) {
+                Text(c.label + " (99)", style = MaterialTheme.typography.labelLarge)
+            }
+        }
     }
 }
 
-/** A cell for a menu entry: its description, " (outer face)" for the outer face. */
+/** A drawn ">" (no font glyph): the entry opens a submenu. */
+@Composable
+private fun Chevron() {
+    val color = LocalContentColor.current
+    Canvas(Modifier.size(12.dp)) {
+        val w = size.width
+        val h = size.height
+        val stroke = 1.6f * density
+        drawLine(color, Offset(w * 0.35f, h * 0.2f), Offset(w * 0.7f, h * 0.5f), strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, Offset(w * 0.7f, h * 0.5f), Offset(w * 0.35f, h * 0.8f), strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+/** The entry texts for [labels]: equal ones get " (1)", " (2)", ... */
+fun menuLabels(labels: List<String>): List<String> {
+    val counts = labels.groupingBy { it }.eachCount()
+    val seen = HashMap<String, Int>()
+    return labels.map { l ->
+        val k = (seen[l] ?: 0) + 1
+        seen[l] = k
+        if (counts.getValue(l) > 1) "$l ($k)" else l
+    }
+}
+
+/** A cell for a menu entry: its description (sides in [marked] with a star), " (outer face)" for the outer face. */
 fun AppState.cellLabel(f: Int, marked: Set<Int> = emptySet()): String =
     arrangement.cellDescription(f, marked) + if (f == outerFace) " (outer face)" else ""
 
-/** The cell of a digon create with the two sides in brackets. */
-fun AppState.createCellLabel(op: DigonCreate): String = cellLabel(op.face, setOf(op.dartI, op.dartJ))
+/** A digon create as a menu entry: the cell with a star after the two sides that are pushed together. */
+fun AppState.createNode(op: DigonCreate): MenuNode =
+    MenuNode(cellLabel(op.face, setOf(op.dartI, op.dartJ)), Highlight(setOf(op.face), setOf(op.dartI, op.dartJ))) { createDigon(op) }
 
 /** The circles of a pair or triple, 1-based, separated by spaces. */
 fun circlesLabel(circles: List<Int>): String = circles.joinToString(" ") { "${it + 1}" }
 
-/** The canvas menu of face [f] with several digon creates, by pair: "i j: cell with the two sides in brackets". */
-fun AppState.createEntries(f: Int): List<MenuAction> =
-    actions.createsIn(f).sortedWith(compareBy({ it.i }, { it.j })).map { op -> MenuAction("${circlesLabel(listOf(op.i, op.j))}: ${createCellLabel(op)}", f) { createDigon(op) } }
+/** The digon creates of face [f] by pair, pairs in order. */
+private fun AppState.createPairs(f: Int): Map<Pair<Int, Int>, List<DigonCreate>> =
+    actions.createsIn(f).sortedWith(compareBy({ it.i }, { it.j })).groupBy { it.i to it.j }
+
+/** The canvas menu heading of face [f]: "Create a digon", with the pair if there is only one. */
+fun AppState.createHeading(f: Int): String =
+    "Create a digon" + (createPairs(f).keys.singleOrNull()?.let { (i, j) -> " of " + circlesLabel(listOf(i, j)) } ?: "")
+
+/**
+ * The canvas menu of face [f] with several digon creates: one entry per pair ("1 3"), whose
+ * options open as a submenu (a pair with one option is that option); with only one pair, its
+ * options directly.
+ */
+fun AppState.createEntries(f: Int): List<MenuNode> {
+    val pairs = createPairs(f)
+    pairs.values.singleOrNull()?.let { ops -> return ops.map(::createNode) }
+    return pairs.map { (pair, ops) -> group(circlesLabel(pair.toList()), Highlight(setOf(f)), ops.map(::createNode)) }
+}
 
 /** The heading of the intersection graph menu of pair [i] < [j]. */
 fun AppState.pairHeading(i: Int, j: Int): String =
     (if (actions.createsOf(i, j).isNotEmpty()) "Create a digon of " else "Collapse a digon of ") + circlesLabel(listOf(i, j))
 
-/** The intersection graph menu of pair [i] < [j]: the cells to create through, or the digons to collapse. */
-fun AppState.pairEntries(i: Int, j: Int): List<MenuAction> =
-    actions.createsOf(i, j).map { op -> MenuAction(createCellLabel(op), op.face) { createDigon(op) } } +
-        actions.collapsesOf(i, j).map { f -> MenuAction(cellLabel(f), f) { collapseDigon(f) } }
+/**
+ * The intersection graph menu of pair [i] < [j]: one entry per cell to create through, whose
+ * options open as a submenu (a cell with one option is that option, with its stars); with only
+ * one cell, its options directly. For a pair that crosses: the digons to collapse.
+ */
+fun AppState.pairEntries(i: Int, j: Int): List<MenuNode> {
+    val byFace = actions.createsOf(i, j).groupBy { it.face }
+    val creates = byFace.values.singleOrNull()?.map(::createNode)
+        ?: byFace.map { (f, ops) -> ops.singleOrNull()?.let(::createNode) ?: group(cellLabel(f), Highlight(setOf(f)), ops.map(::createNode)) }
+    return creates + actions.collapsesOf(i, j).map { f -> MenuNode(cellLabel(f), Highlight(setOf(f))) { collapseDigon(f) } }
+}
 
-/** The triangle flip menu entries of [triple] (one per triangle cell). */
-fun AppState.triangleEntries(triple: List<Int>, faces: List<Int>): List<MenuAction> =
-    faces.map { f -> MenuAction("${circlesLabel(triple)}: ${cellLabel(f)}", f) { flipTriangle(f) } }
+/**
+ * The triangle hypergraph menu for the hit [triples] (with their triangle cells): one triple, its
+ * cells; several, one entry per triple whose cells open as a submenu.
+ */
+fun AppState.triangleEntries(triples: Map<List<Int>, List<Int>>): List<MenuNode> {
+    fun cells(faces: List<Int>) = faces.map { f -> MenuNode(cellLabel(f), Highlight(setOf(f))) { flipTriangle(f) } }
+    triples.values.singleOrNull()?.let { return cells(it) }
+    return triples.map { (t, faces) -> group(circlesLabel(t), Highlight(faces.toSet()), cells(faces)) }
+}

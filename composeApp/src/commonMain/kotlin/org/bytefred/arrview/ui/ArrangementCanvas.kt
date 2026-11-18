@@ -38,9 +38,11 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
+import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.Cubic
 import org.bytefred.arrview.core.Drawing
 import org.bytefred.arrview.core.Point
+import org.bytefred.arrview.core.arcOfDart
 import org.bytefred.arrview.core.canBeOuter
 import kotlin.math.abs
 import kotlin.math.min
@@ -121,6 +123,9 @@ private const val TOUCH_RADIUS = 10.0
 
 private const val CURVE_WIDTH = 2.5f
 
+/** Width of a highlighted side under its curve. */
+private const val SIDE_WIDTH = 10f
+
 /**
  * The drawing of the arrangement: faces (triangles and digons filled), the curves and their labels.
  * Click a triangle to flip it, a digon to collapse it; right-click a face for its menu (also
@@ -145,8 +150,9 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
 
     // the face whose context menu is open and where it opens
     var faceMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
-    // the face with several digon creates whose menu is open and where it opens
-    var createMenu by remember(state.arrangement) { mutableStateOf<Pair<Int, Offset>?>(null) }
+    // the face with several digon creates whose menu is open, where it opens and for which
+    // arrangement (not a remember key: the pointer handler below keeps the state object it saw first)
+    var createMenu by remember { mutableStateOf<Triple<Arrangement, Int, Offset>?>(null) }
 
     /** The face at a screen position, if the drawing shows the current arrangement. */
     fun hit(pos: Offset): Int? {
@@ -231,7 +237,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                     if (pressed.isEmpty()) {
                                         val start = down
                                         if (start != null && !moved) hit(start)?.let { f ->
-                                            if (f != st.outerFace && st.actions.createsIn(f).size >= 2) createMenu = f to start
+                                            if (st.actions.createsIn(f).size >= 2) createMenu = Triple(st.arrangement, f, start)
                                             else st.clickFace(f)
                                         }
                                         down = null
@@ -253,9 +259,11 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 val current = drawing.arrangement == state.arrangement
                 val hover = state.hoverFace.takeIf { current }
                 drawArrangement(drawing, view, hover, state.menuHighlight.takeIf { current })
-                // "!" in the hovered cell when a click does something there (not the outer face)
-                if (hover != null && hover != drawing.outerFace && state.actions.hasAction(hover)) {
-                    drawing.interiorPoint(hover)?.let { p ->
+                // "!" in the hovered cell when a click does something there; for the outer face in a corner
+                if (hover != null && state.actions.hasAction(hover)) {
+                    if (hover == drawing.outerFace) {
+                        outerMarkCorner(drawing, view, size.width, size.height)?.let { drawActionMark(it) }
+                    } else drawing.interiorPoint(hover)?.let { p ->
                         val shift = if (hover in drawing.touchings) Offset(0f, -MARK_LIFT) else Offset.Zero
                         drawActionMark(view.toScreen(p) + shift)
                     }
@@ -276,9 +284,9 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 FaceMenu(state, f) { faceMenu = null }
             }
         }
-        createMenu?.let { (f, at) ->
+        createMenu?.takeIf { it.first == state.arrangement }?.let { (_, f, at) ->
             val entries = remember(state.arrangement, f) { state.createEntries(f) }
-            if (entries.isNotEmpty()) ActionMenu(state, at, "Create a digon", entries) { createMenu = null }
+            if (entries.isNotEmpty()) ActionMenu(state, at, state.createHeading(f), entries) { createMenu = null }
         }
     }
 }
@@ -335,10 +343,31 @@ private fun DrawScope.drawActionMark(at: Offset) {
     drawCircle(Color.White, 1.5f, at + Offset(0f, 5f))
 }
 
+/** Pixels from the canvas corners to the outer face's "!". */
+internal const val CORNER_INSET = 28f
+
+/**
+ * Where the outer face's "!" goes: of the four canvas corners (moved [CORNER_INSET] inwards) that
+ * lie in the outer face, the one farthest from the curves; null if none does.
+ */
+internal fun outerMarkCorner(d: Drawing, view: ViewTransform, width: Float, height: Float): Offset? {
+    val corners = listOf(
+        Offset(CORNER_INSET, CORNER_INSET), Offset(width - CORNER_INSET, CORNER_INSET),
+        Offset(CORNER_INSET, height - CORNER_INSET), Offset(width - CORNER_INSET, height - CORNER_INSET),
+    )
+    val points = d.curvePoints
+    return corners
+        .filter { d.faceAt(view.toWorld(it), 0.0) == d.outerFace }
+        .maxByOrNull { c -> val w = view.toWorld(c); points.minOfOrNull { (it - w).length } ?: 0.0 }
+}
+
+/** The sides of a menu entry (a digon create) highlighted along the curves. */
+internal val HIGHLIGHT_SIDE = Color(0xFFFFB300)
+
 /** A face highlighted from a menu entry: yellow, stronger than the hover. */
 internal val HIGHLIGHT_FILL = Color(0x88FFD600)
 
-private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Int?) {
+private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Highlight?) {
     val faces = d.arrangement.faces
     for ((f, pieces) in d.faces.withIndex()) {
         if (pieces.isEmpty()) continue
@@ -353,10 +382,17 @@ private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: In
         drawPath(path(it, view, close = true), HOVER_FILL)
     }
     if (highlight != null) {
-        val pieces = d.faces.getOrNull(highlight).orEmpty()
-        when {
-            highlight == d.outerFace -> drawPath(path(d.outerBoundary, view, close = true), HIGHLIGHT_FILL, style = Stroke(12f, cap = StrokeCap.Round))
-            pieces.isNotEmpty() -> drawPath(path(pieces, view, close = true), HIGHLIGHT_FILL)
+        for (f in highlight.faces) {
+            val pieces = d.faces.getOrNull(f).orEmpty()
+            when {
+                f == d.outerFace -> drawPath(path(d.outerBoundary, view, close = true), HIGHLIGHT_FILL, style = Stroke(12f, cap = StrokeCap.Round))
+                pieces.isNotEmpty() -> drawPath(path(pieces, view, close = true), HIGHLIGHT_FILL)
+            }
+        }
+        // the two sides of a digon create: a wide band under the curves
+        for (a in highlight.darts) {
+            val arc = d.arcs.getOrNull(d.arrangement.arcOfDart(a)).orEmpty()
+            if (arc.isNotEmpty()) drawPath(path(arc, view, close = false), HIGHLIGHT_SIDE, style = Stroke(SIDE_WIDTH, cap = StrokeCap.Round))
         }
     }
     for ((c, pieces) in d.circles.withIndex()) {
@@ -365,7 +401,7 @@ private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: In
     // model 1: a digon is the point where its two circles touch
     for ((f, at) in d.touchings) {
         val s = view.toScreen(at)
-        if (f == highlight) drawCircle(HIGHLIGHT_FILL, 14f, s)
+        if (highlight != null && f in highlight.faces) drawCircle(HIGHLIGHT_FILL, 14f, s)
         drawCircle(DIGON_MARK, if (f == hover) 7f else 4.5f, s)
     }
 }

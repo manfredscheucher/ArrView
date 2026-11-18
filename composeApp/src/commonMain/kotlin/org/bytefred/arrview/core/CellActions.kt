@@ -3,7 +3,7 @@ package org.bytefred.arrview.core
 /**
  * Face [f] described by the circles of its sides (labels `1..n`) in cyclic boundary order,
  * separated by spaces, starting at the lexicographically smallest rotation, e.g. `1 2 1 3`. Sides
- * whose dart is in [marked] are put in brackets: `[1] 2 1 [3]`.
+ * whose dart is in [marked] get a star: `1* 2 1 3*`.
  */
 fun Arrangement.cellDescription(f: Int, marked: Set<Int> = emptySet()): String {
     val darts = faces[f]
@@ -18,7 +18,7 @@ fun Arrangement.cellDescription(f: Int, marked: Set<Int> = emptySet()): String {
     } ?: 0
     return labels.indices.joinToString(" ") { t ->
         val s = (start + t) % labels.size
-        if (darts[s] in marked) "[${labels[s]}]" else "${labels[s]}"
+        if (darts[s] in marked) "${labels[s]}*" else "${labels[s]}"
     }
 }
 

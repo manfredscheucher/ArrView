@@ -120,8 +120,8 @@ class AppState(
     /** The face under the mouse (indices of the drawing's arrangement). */
     var hoverFace by mutableStateOf<Int?>(null)
 
-    /** The face (of the current arrangement) highlighted in the canvas while the pointer is on a menu entry for it. */
-    var menuHighlight by mutableStateOf<Int?>(null)
+    /** The faces and sides (of the current arrangement) highlighted in the canvas while the pointer is on a menu entry for them. */
+    var menuHighlight by mutableStateOf<Highlight?>(null)
 
     private var actionsCache: CellActions? = null
 
@@ -530,13 +530,13 @@ class AppState(
     }
 
     /**
-     * A click on face [f] of the [drawing]: a triangle flips, a digon collapses, a face with
-     * exactly one digon create does it (with several, the canvas opens a menu instead); other
-     * faces and the outer face do nothing. Ignored while the drawing still shows a previous
+     * A click on face [f] of the [drawing] (the outer face too): a triangle flips, a digon
+     * collapses, a face with exactly one digon create does it (with several, the canvas opens a
+     * menu instead); other faces do nothing. Ignored while the drawing still shows a previous
      * arrangement.
      */
     fun clickFace(f: Int) {
-        if (f == (outerFace ?: return)) return
+        if (outerFace == null) return
         when (arrangement.faces.getOrNull(f)?.size) {
             null -> return
             3 -> flipTriangle(f)

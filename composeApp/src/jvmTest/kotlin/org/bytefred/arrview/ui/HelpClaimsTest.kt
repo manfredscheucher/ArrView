@@ -122,7 +122,11 @@ class HelpClaimsTest {
         assertSays(HelpPage.GENERAL, "Click a face where two circles that do not cross both have a side to create a digon")
         assertSays(HelpPage.GENERAL, "A \"!\" appears in the face under the mouse")
         assertSays(HelpPage.GENERAL, "Pointing at a menu entry highlights its face in yellow")
-        assertSays(HelpPage.GENERAL, "not in the outer face; for that use the intersection graph")
+        assertSays(HelpPage.GENERAL, "the face with a star after the two sides that are pushed together. The outer face works the same.")
+        assertSays(HelpPage.GENERAL, "(for the outer face in a corner of the canvas)")
+        assertSays(HelpPage.GENERAL, "the two sides of a digon create in orange")
+        // orange: red > green > blue
+        assertTrue(HIGHLIGHT_SIDE.red > HIGHLIGHT_SIDE.green && HIGHLIGHT_SIDE.green > HIGHLIGHT_SIDE.blue)
         assertSays(HelpPage.WIDGETS, "A dashed edge: the two circles do not cross but can create a digon.")
         assertSays(HelpPage.WIDGETS, "A yellow stripe marks every pair")
         assertSays(HelpPage.WIDGETS, "A triple with two or more triangle faces is twice as strong.")
@@ -131,8 +135,8 @@ class HelpClaimsTest {
         assertTrue(HYPEREDGE_FILL.alpha < 0.5f)
         // the example of the user guide is a real menu entry: the chain 1-2-3 (1 and 3 do not cross)
         val chain = Arrangement.parse("{1: [2, -2], 2: [1, -1, 3, -3], 3: [2, -2]}")
-        val entries = chain.digonCreates().map { op -> "${op.i + 1} ${op.j + 1}: " + chain.cellDescription(op.face, setOf(op.dartI, op.dartJ)) }
-        val example = "1 3: [1] 2 [3] 2"
+        val entries = chain.digonCreates().map { op -> chain.cellDescription(op.face, setOf(op.dartI, op.dartJ)) }
+        val example = "1* 2 3* 2"
         assertTrue(example in entries, "$entries")
         assertTrue("`$example`" in guide, "USER_GUIDE.md: create menu example")
         assertTrue("Triangle hypergraph: " in guide && "dashed for a non-crossing pair" in guide, "USER_GUIDE.md: graph views")

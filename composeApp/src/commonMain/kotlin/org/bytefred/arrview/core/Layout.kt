@@ -76,6 +76,8 @@ class Drawing(
     val labels: List<Pair<Point, Point>>,
     /** The boundary of the outer face (for highlighting it). */
     val outerBoundary: List<Cubic> = emptyList(),
+    /** The curve of every arc, from crossing k to the next one on its circle (empty inside a model 1 digon). */
+    val arcs: List<List<Cubic>> = emptyList(),
 ) {
     /** The face boundaries as polygons (for hit tests and fills of the hover highlight). */
     val polygons: List<List<Point>> by lazy { faces.map { flatten(it) } }
@@ -102,6 +104,9 @@ class Drawing(
         }
         return best ?: outerFace
     }
+
+    /** Points along all curves (for distances to the drawing). */
+    val curvePoints: List<Point> by lazy { circles.flatMap { flatten(it) } }
 
     private val interiorPoints = HashMap<Int, Point?>()
 
@@ -342,7 +347,10 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
             if (a % 2 == 0) arcPieces[a / 2]!! else arcPieces[arr.arcOfDart(a)]!!.reversed().map { it.reversed() }
         }
         val faces = arr.faces.mapIndexed { f, darts -> if (f == outerFace || f in touchings) emptyList() else boundary(darts) }
-        return Drawing(arr, model, outerFace, circles, faces, touchings, labels(circles), boundary(arr.faces[outerFace]))
+        return Drawing(
+            arr, model, outerFace, circles, faces, touchings, labels(circles), boundary(arr.faces[outerFace]),
+            arcPieces.map { it.orEmpty() },
+        )
     }
 
     /**

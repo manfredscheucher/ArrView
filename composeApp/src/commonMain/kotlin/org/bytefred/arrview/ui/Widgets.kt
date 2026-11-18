@@ -279,7 +279,8 @@ private fun IntersectionGraphWidget(state: AppState) {
         }
         menu?.let { (pair, at) ->
             val (i, j) = pair
-            ActionMenu(state, at, state.pairHeading(i, j), state.pairEntries(i, j)) { menu = null }
+            val entries = remember(arr, pair) { state.pairEntries(i, j) }
+            ActionMenu(state, at, state.pairHeading(i, j), entries) { menu = null }
         }
     }
 }
@@ -329,7 +330,8 @@ private fun TriangleHypergraphWidget(state: AppState) {
             drawVertices(circle, measurer)
         }
         menu?.let { (hits, at) ->
-            ActionMenu(state, at, "Flip a triangle", hits.flatMap { t -> state.triangleEntries(t, triples[t].orEmpty()) }) { menu = null }
+            val entries = remember(arr, hits) { state.triangleEntries(hits.associateWith { triples[it].orEmpty() }) }
+            ActionMenu(state, at, "Flip a triangle", entries) { menu = null }
         }
     }
 }

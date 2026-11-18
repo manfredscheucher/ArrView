@@ -142,7 +142,7 @@ class DigonCreateTest {
         val d = chain.cellDescription(outside)
         assertTrue(d == "1 2 3 2", d)
         val marked = chain.faces[outside].filter { chain.circleOfDart(it) != 1 }.toSet()
-        assertEquals("[1] 2 [3] 2", chain.cellDescription(outside, marked))
+        assertEquals("1* 2 3* 2", chain.cellDescription(outside, marked))
     }
 
     @Test
