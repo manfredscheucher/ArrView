@@ -44,6 +44,11 @@ list them."
 - Right-click entries are labelled "Create digon 1 3" (verb as the other items "Flip triangle",
   "Collapse digon"); they come after Flip / Collapse and before Make outer face. Unlike the left
   click, the pair level is kept even when the face has only one pair ("one entry per pair").
+- A cell that circle i touches several times sits in the graph menu at its first touch (the first
+  side of i, in list order, from which a create through it starts). The two cells on both sides of
+  the same arc of i have the same position there; then the side of j decides.
+- The right-click menu is now the same menu as the left click, so pointing at Flip triangle,
+  Collapse digon or Make outer face highlights the cell too.
 
 ## 2026-11-18: Outer face clickable, submenus for ambiguous creates
 

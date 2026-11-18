@@ -197,7 +197,9 @@ fun circlesLabel(circles: List<Int>): String = circles.joinToString(" ") { "${it
 
 /** The digon creates of face [f] by pair, pairs in order, the options of a pair along its circles ([createOrder]). */
 private fun AppState.createPairs(f: Int): Map<Pair<Int, Int>, List<DigonCreate>> =
-    actions.createsIn(f).sortedWith(compareBy<DigonCreate>({ it.i }, { it.j }).then(arrangement.createOrder)).groupBy { it.i to it.j }
+    actions.createsIn(f)
+        .sortedWith(compareBy<DigonCreate>({ it.i }, { it.j }).then(arrangement.createOrder))
+        .groupBy { it.i to it.j }
 
 /** The canvas menu heading of face [f]: "Create a digon", with the pair if there is only one. */
 fun AppState.createHeading(f: Int): String =

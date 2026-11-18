@@ -246,6 +246,7 @@ class ActionsUiTest {
             waitForIdle()
         }
         rightClick()
+        assertTrue(arr.faces[f].size >= 4)
         onNodeWithText("Face with ${arr.faces[f].size} sides").assertExists()
         menuItem("Make outer face").assertExists()
         for ((i, j) in pairs.keys) menuItem("Create digon ${i + 1} ${j + 1}").assertExists()
@@ -423,10 +424,11 @@ class ActionsUiTest {
         val view = ViewTransform()
         show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
         val size = graphSize("intersection-graph")
-        // a pair with several cells, one of them with several options
+        // a pair with several cells, one of them with several options, whose cells along circle i
+        // are not in face order (so the menu order really comes from the ordering)
         val (arr, pair, at) = findPair(size) { a, i, j ->
             val byFace = a.createsOf(i, j).groupBy { it.face }
-            byFace.size >= 2 && byFace.values.any { it.size >= 2 }
+            byFace.size >= 2 && byFace.values.any { it.size >= 2 } && byFace.keys.toList() != byFace.keys.sorted()
         }
         runOnIdle { s.load("test", arr) }
         awaitFitted(s, view)
@@ -443,7 +445,8 @@ class ActionsUiTest {
         assertTrue('*' !in cellLabel, cellLabel)
         // the cells top to bottom along circle i: by the first side of i (in its list order) where a create starts
         val pos = { op: DigonCreate -> arr.sidePosition(op.dartI) to arr.sidePosition(op.dartJ) }
-        val alongI = byFace.keys.sortedBy { g -> byFace.getValue(g).minOf { arr.sidePosition(it.dartI) } }
+        val raw = arr.digonCreates().filter { it.i == i && it.j == j }
+        val alongI = raw.sortedWith(compareBy({ arr.sidePosition(it.dartI) }, { arr.sidePosition(it.dartJ) })).map { it.face }.distinct()
         assertEquals(alongI, byFace.keys.toList())
         assertEquals(cellLabels, cellLabels.sortedBy { top(it) }, "cells in the menu along circle ${i + 1}")
         hoverEntry(s, cellLabel, Highlight(setOf(f)))

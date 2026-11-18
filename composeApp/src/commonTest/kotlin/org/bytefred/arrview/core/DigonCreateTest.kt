@@ -173,7 +173,7 @@ class DigonCreateTest {
 
     @Test
     fun createsOfAPairAreOrderedAlongTheCircles() {
-        var checked = 0
+        var reordered = 0
         for (arr in samples.take(600)) {
             val actions = CellActions(arr)
             for (i in 0 until arr.n) for (j in i + 1 until arr.n) {
@@ -187,10 +187,11 @@ class DigonCreateTest {
                     val k = op.dartI / 2
                     assertEquals(if (op.dartI % 2 == 0) k - arr.offset(i) else arr.previousOnCircle(k) - arr.offset(i), p)
                 }
-                if (ops.map { it.face }.toSet().size >= 2) checked++
+                // the unsorted enumeration (by face) differs from the order along the circles: the sort matters
+                if (arr.digonCreates().filter { it.i == i && it.j == j } != ops) reordered++
             }
         }
-        assertTrue(checked > 50, "only $checked pairs with several cells")
+        assertTrue(reordered > 50, "only $reordered pairs whose order changes")
     }
 
     @Test
