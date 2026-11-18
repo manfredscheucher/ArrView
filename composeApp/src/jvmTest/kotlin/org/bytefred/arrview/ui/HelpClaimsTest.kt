@@ -2,6 +2,7 @@ package org.bytefred.arrview.ui
 
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.DrawModel
+import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.LayoutSettings
@@ -126,6 +127,12 @@ class HelpClaimsTest {
         assertSays(HelpPage.WIDGETS, "A triple is always written ascending, as in the menu title Flip a triangle of 1 2 3;")
         assertEquals("Flip a triangle of 1 2 3", triangleHeading(listOf(listOf(2, 0, 1))))
         assertEquals("Flip a triangle", triangleHeading(listOf(listOf(0, 1, 2), listOf(0, 1, 3))))
+    }
+
+    @Test
+    fun examplesSetsAndSingletons() {
+        assertSays(HelpPage.GENERAL, "Examples... has the bundled arrangements: Sets (by group, as on the pseudocircles website) and Singletons.")
+        assertEquals("Singletons", ExampleGroup.SINGLETONS.title)
     }
 
     @Test

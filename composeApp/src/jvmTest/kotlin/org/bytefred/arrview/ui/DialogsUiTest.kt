@@ -42,7 +42,7 @@ class DialogsUiTest {
         onNodeWithText("Interesting arrangements, ideas or general feedback?").assertIsDisplayed()
         onNodeWithText("Don't show again").performClick()
         onNodeWithText("Examples").performClick()
-        onNodeWithText("Pseudo great circles (6)").assertIsDisplayed()
+        onNodeWithText("Sets").assertIsDisplayed()
         assertEquals("off", loadPref(WELCOME_PREF))
     }
 
@@ -53,6 +53,7 @@ class DialogsUiTest {
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
         onNodeWithText("Load").assertIsNotEnabled()
+        onNodeWithText("Sets").performClick()
         onNodeWithText("Intersecting (4)").performClick()
         onNodeWithText("n4-intersecting-all").performClick()
         onNodeWithText("n = 4, 8 arrangements").assertIsDisplayed()
@@ -85,7 +86,7 @@ class DialogsUiTest {
         runOnIdle { s.flipSomeTriangle() }
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
-        onNodeWithText("Named arrangements", substring = true).performClick()
+        onNodeWithText("Singletons", substring = true).performClick()
         onNodeWithText("n3-great-krupp").performClick()
         onNodeWithText("Load").performClick()
         onNodeWithText("Save changes?").assertIsDisplayed()

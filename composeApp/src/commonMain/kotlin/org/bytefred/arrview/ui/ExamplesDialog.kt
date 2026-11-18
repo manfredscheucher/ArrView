@@ -29,12 +29,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.ExampleSet
 import org.bytefred.arrview.core.Examples
+import org.bytefred.arrview.core.PSEUDOCIRCLES_WEBSITE
 
 /**
  * What the Examples dialog remembers between openings ([AppState.examples]): the expanded groups
@@ -79,34 +81,57 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
     ) {
         ScrollColumn(Modifier.fillMaxSize(), ex.scroll) {
             FeedbackBox("Know an arrangement that belongs here, or have general feedback?")
-            Spacer(Modifier.height(8.dp))
-            for (group in ExampleGroup.entries) {
-                val sets = Examples.inGroup(group)
-                TreeHeader("${group.title} (${sets.size})", group.name in open) { toggle(group.name) }
-                HorizontalDivider()
-                if (group.name in open) for (set in sets) {
-                    TreeLeaf(set.name, ex.selected == set) {
+            Spacer(Modifier.height(4.dp))
+            LinkText(
+                "Most of the data is from the pseudocircles website", PSEUDOCIRCLES_WEBSITE,
+                MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(4.dp))
+            @Composable
+            fun leaves(sets: List<ExampleSet>, depth: Int) {
+                for (set in sets) {
+                    TreeLeaf(set.name, depth, ex.selected == set) {
                         // the same leaf again keeps its (maybe invalid) number field
                         if (ex.selected != set) indexError = false
                         ex.selected = set
                     }
                     if (ex.selected == set) key(set.name) {
-                        ExampleDetails(state, set, ex.indexOf(set)) { i ->
+                        ExampleDetails(state, set, ex.indexOf(set), depth) { i ->
                             if (i != null) ex.index[set.name] = i
                             indexError = i == null
                         }
                     }
                 }
             }
+            // two levels: the sets by group, then the single named arrangements
+            TreeHeader(SETS, 0, SETS in open) { toggle(SETS) }
+            HorizontalDivider()
+            if (SETS in open) for (group in ExampleGroup.entries.filter { it != ExampleGroup.SINGLETONS }) {
+                val sets = Examples.inGroup(group)
+                TreeHeader("${group.title} (${sets.size})", 1, group.name in open) { toggle(group.name) }
+                if (group.name in open) leaves(sets, 2)
+            }
+            val singletons = Examples.inGroup(ExampleGroup.SINGLETONS)
+            TreeHeader("${ExampleGroup.SINGLETONS.title} (${singletons.size})", 0, ExampleGroup.SINGLETONS.name in open) {
+                toggle(ExampleGroup.SINGLETONS.name)
+            }
+            HorizontalDivider()
+            if (ExampleGroup.SINGLETONS.name in open) leaves(singletons, 1)
         }
     }
 }
 
-/** A clickable, expand/collapse group with a drawn arrow (no glyph: the web font lacks them). */
+/** The top node of the sets (the groups below it). */
+private const val SETS = "Sets"
+
+/** Indentation per tree level. */
+private val INDENT = 16.dp
+
+/** A clickable, expand/collapse node at [depth] with a drawn arrow (no glyph: the web font lacks them). */
 @Composable
-private fun TreeHeader(label: String, open: Boolean, onToggle: () -> Unit) {
+private fun TreeHeader(label: String, depth: Int, open: Boolean, onToggle: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clickable { onToggle() }.padding(vertical = 12.dp),
+        Modifier.fillMaxWidth().clickable { onToggle() }.padding(start = INDENT * depth).padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TreeArrow(open)
@@ -144,11 +169,11 @@ private fun TreeArrow(open: Boolean) {
 
 /** An example leaf: a radio button; a click selects it. */
 @Composable
-private fun TreeLeaf(name: String, selected: Boolean, onSelect: () -> Unit) {
+private fun TreeLeaf(name: String, depth: Int, selected: Boolean, onSelect: () -> Unit) {
     Row(
         Modifier.fillMaxWidth()
             .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
-            .padding(start = 16.dp)
+            .padding(start = INDENT * depth)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -158,15 +183,20 @@ private fun TreeLeaf(name: String, selected: Boolean, onSelect: () -> Unit) {
 }
 
 /**
- * The selected set: its description and size; for a list the member number (1..size, typed or
- * with < and >). [onIndex] gets the 0-based member, or null while the typed number is invalid.
+ * The info of the selected set, as PoCoView's: description, n and the number of arrangements (for a
+ * list the member number, typed or with − and +), the website page and the paper it comes from, or
+ * where else its data is from. [onIndex] gets the 0-based member, or null while the typed number is
+ * invalid.
  */
 @Composable
-private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, onIndex: (Int?) -> Unit) {
-    Column(Modifier.padding(start = 64.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: Int, onIndex: (Int?) -> Unit) {
+    Column(
+        Modifier.padding(start = INDENT * depth + 48.dp, bottom = 8.dp).testTag("example-info"),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Text(set.description, style = MaterialTheme.typography.bodySmall)
         Text(
-            if (set.size == 1) "n = ${set.n}" else "n = ${set.n}, ${set.size} arrangements",
+            "n = ${set.n}, " + if (set.size == 1) "1 arrangement" else "${set.size} arrangements",
             style = MaterialTheme.typography.bodySmall,
         )
         if (set.size > 1) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -177,5 +207,11 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, onIndex
             ) { i -> onIndex(i?.minus(1)) }
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
+        set.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        set.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        if (set.page == null) Text(
+            set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
+            style = MaterialTheme.typography.labelSmall,
+        )
     }
 }

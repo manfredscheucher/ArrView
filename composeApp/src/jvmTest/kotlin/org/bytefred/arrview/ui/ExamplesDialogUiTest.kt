@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
+import org.bytefred.arrview.core.Paper
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,17 +45,19 @@ class ExamplesDialogUiTest {
     fun aMemberOfEverySetLoadsByClicks() = runComposeUiTest(testTimeout = 5.minutes) {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        for (group in ExampleGroup.entries) {
+        for ((g, group) in ExampleGroup.entries.withIndex()) {
             val sets = Examples.inGroup(group)
             for ((k, set) in sets.withIndex()) {
                 openExamples()
-                // the groups stay expanded between openings
+                // the groups stay expanded between openings; the sets are below "Sets"
+                if (g == 0 && k == 0) click("Sets")
                 if (k == 0) click("${group.title} (${sets.size})")
                 click(set.name)
                 onNodeWithText(set.name).assertIsSelected()
                 onNodeWithText(set.description).assertExists()
                 val index = if (set.size == 1) {
-                    onNodeWithText("n = ${set.n}").assertExists()
+                    // a single arrangement: only the note, no number selection
+                    onNodeWithText("n = ${set.n}, 1 arrangement").assertExists()
                     onNodeWithTag("example-index").assertDoesNotExist()
                     0
                 } else {
@@ -96,6 +99,7 @@ class ExamplesDialogUiTest {
         val set = Examples.byName("n5-intersecting-all")!!
         val group = "${ExampleGroup.INTERSECTING.title} (${Examples.inGroup(ExampleGroup.INTERSECTING).size})"
         openExamples()
+        click("Sets")
         click(group)
         click(set.name)
         val field = onNodeWithTag("example-index")
@@ -118,12 +122,50 @@ class ExamplesDialogUiTest {
     }
 
     @Test
+    fun twoLevelsAndTheInfoArea() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        openExamples()
+        onNodeWithText("Most of the data is from the pseudocircles website").assertExists()
+        // two levels: the groups only below "Sets"; the singletons directly below "Singletons"
+        val intersecting = "${ExampleGroup.INTERSECTING.title} (${Examples.inGroup(ExampleGroup.INTERSECTING).size})"
+        onNodeWithText(intersecting).assertDoesNotExist()
+        click("Sets")
+        onNodeWithText(intersecting).assertExists()
+        onNodeWithText(ExampleGroup.SINGLETONS.title, substring = true).assertExists()
+        click("${ExampleGroup.SINGLETONS.title} (${Examples.inGroup(ExampleGroup.SINGLETONS).size})")
+        // a singleton: the note "1 arrangement", no number selection, the website page and the paper
+        click("n5-intersecting-nonr-1")
+        val info = Examples.byName("n5-intersecting-nonr-1")!!
+        onNodeWithText(info.description).assertExists()
+        onNodeWithText("n = 5, 1 arrangement").assertExists()
+        onNodeWithTag("example-index").assertDoesNotExist()
+        onNodeWithText("Website: No more circle representations").assertExists()
+        onNodeWithText("Paper: ${Paper.CIRCULARIZABILITY.title}").assertExists()
+        // typed in: no links, where it comes from
+        click("n3-great-krupp")
+        onNodeWithText("n = 3, 1 arrangement").assertExists()
+        onNodeWithText("Typed in as intersection sequences").assertExists()
+        onNodeWithText("Website:", substring = true).assertDoesNotExist()
+        // a list of the database: the chooser and the links
+        click(intersecting)
+        click("n4-intersecting-all")
+        onNodeWithText("n = 4, 8 arrangements").assertExists()
+        onNodeWithTag("example-index").assertExists()
+        onNodeWithText("Website: The database of pseudocircles").assertExists()
+        // the great pseudocircles: the paper, the data from the computations
+        click("${ExampleGroup.GREAT.title} (${Examples.inGroup(ExampleGroup.GREAT).size})")
+        click("n5-great-all")
+        onNodeWithText("Data: computations/results/great/all5.enc.greatcircles.enc").assertExists()
+    }
+
+    @Test
     fun cancelKeepsTheArrangement() = runComposeUiTest {
         val s = state()
         val start = s.arrangement
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click("${ExampleGroup.NAMED.title} (${Examples.inGroup(ExampleGroup.NAMED).size})")
+        click("${ExampleGroup.SINGLETONS.title} (${Examples.inGroup(ExampleGroup.SINGLETONS).size})")
         click("n3-great-krupp")
         onNodeWithText("Cancel").performClick()
         waitForIdle()

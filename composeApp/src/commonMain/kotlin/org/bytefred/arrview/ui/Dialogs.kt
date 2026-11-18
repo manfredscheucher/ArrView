@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.GeneratedBuildInfo
 import org.bytefred.arrview.GeneratedLicenses
 import org.bytefred.arrview.core.FileFormat
+import org.bytefred.arrview.core.PSEUDOCIRCLES_WEBSITE
 import org.bytefred.arrview.core.TextFormat
 
 /** Which dialog is open (the menu bar and the Welcome dialog open them); HELP shows [AppState.helpPage]. */
@@ -257,7 +258,7 @@ private fun AboutDialog(close: () -> Unit) = AlertDialog(
             FeedbackBox("ArrView is in early development. Feedback is very welcome:")
             Spacer(Modifier.height(8.dp))
             LinkText("ArrView on GitHub", "https://github.com/manfredscheucher/ArrView", MaterialTheme.typography.bodyMedium)
-            LinkText("Arrangements of pseudocircles (website, data and formats)", WEBSITE, MaterialTheme.typography.bodyMedium)
+            LinkText("Arrangements of pseudocircles (website, data and formats)", PSEUDOCIRCLES_WEBSITE, MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(8.dp))
             Text("Literature", style = MaterialTheme.typography.titleSmall)
             for (paper in PAPERS) Text(paper, Modifier.padding(vertical = 2.dp), style = MaterialTheme.typography.bodySmall)
@@ -282,7 +283,6 @@ private fun AboutDialog(close: () -> Unit) = AlertDialog(
 private const val ABOUT = "ArrView shows arrangements of pseudocircles, draws them with iterated Tutte embeddings and " +
     "lets you change them by triangle flips and digon collapses. The examples come from the pseudocircles website."
 
-private const val WEBSITE = "https://www3.math.tu-berlin.de/diskremath/pseudocircles/"
 
 private const val LINHART_ORTNER = "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v11i1r30"
 

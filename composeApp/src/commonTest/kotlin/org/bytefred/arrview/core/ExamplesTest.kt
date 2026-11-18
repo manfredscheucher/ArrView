@@ -50,7 +50,7 @@ class ExamplesTest {
     @Test
     fun listSizes() {
         for ((name, size) in expectedSizes) assertEquals(size, set(name).size, name)
-        for (s in Examples.inGroup(ExampleGroup.FUREDI_PALASTI) + Examples.inGroup(ExampleGroup.NAMED)) {
+        for (s in Examples.inGroup(ExampleGroup.FUREDI_PALASTI) + Examples.inGroup(ExampleGroup.SINGLETONS)) {
             assertEquals(1, s.size, s.name)
         }
     }
@@ -124,5 +124,16 @@ class ExamplesTest {
         assertEquals("n5-intersecting-all #17", s.memberName(16))
         assertEquals("#17 of 278", s.position(16))
         assertEquals("n3-great-krupp", set("n3-great-krupp").memberName(0))
+    }
+
+    @Test
+    fun websitePagesAndPapers() {
+        assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles", WebPage.NO_MORE_CIRCLES.url)
+        for (s in Examples.sets) {
+            // a page of the website: its data is from the website mirror
+            if (s.page != null) assertTrue(s.source!!.startsWith("website/") || s.group in listOf(ExampleGroup.INTERSECTING, ExampleGroup.DIGON_FREE), s.name)
+            if (s.group == ExampleGroup.SINGLETONS && s.page == null) assertEquals(null, s.paper, s.name)
+        }
+        assertTrue(Examples.inGroup(ExampleGroup.SINGLETONS).all { it.size == 1 })
     }
 }

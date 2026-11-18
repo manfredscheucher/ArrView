@@ -1,15 +1,43 @@
 package org.bytefred.arrview.core
 
-/** The groups of bundled examples, in display order. */
+/**
+ * The groups of bundled examples, in display order (as on the pseudocircles website: the database,
+ * then the triangle pages). All but [SINGLETONS] are shown under "Sets".
+ */
 enum class ExampleGroup(val title: String) {
-    GREAT("Pseudo great circles"),
-    DIGON_FREE("Intersecting, digon-free"),
-    INTERSECTING("Intersecting"),
     CONNECTED("Connected"),
-    MIN_TRIANGLES("Triangle minimizing"),
-    MAX_TRIANGLES("Triangle maximizing"),
+    INTERSECTING("Intersecting"),
+    DIGON_FREE("Digon-free intersecting"),
+    GREAT("Great pseudocircles"),
+    MIN_TRIANGLES("Minimum number of triangles"),
+    MAX_TRIANGLES("Maximum number of triangles"),
     FUREDI_PALASTI("Füredi–Palásti construction"),
-    NAMED("Named arrangements"),
+    SINGLETONS("Singletons"),
+}
+
+/** The pseudocircles website (most of the bundled data comes from it). */
+const val PSEUDOCIRCLES_WEBSITE = "https://www3.math.tu-berlin.de/diskremath/pseudocircles/"
+
+/** A page of the pseudocircles website, titled as on its main page. */
+enum class WebPage(val title: String, show: String) {
+    DATABASE("The database of pseudocircles", "pseudocircles"),
+    TRIANGLES("Triangular cells", "triangles"),
+    NO_MORE_CIRCLES("No more circle representations", "nomorecircles"),
+    ;
+
+    val url: String = "$PSEUDOCIRCLES_WEBSITE?show=$show"
+}
+
+/** The papers the sets come from (DOIs as on the website). */
+enum class Paper(val title: String, val url: String) {
+    TRIANGLES(
+        "Felsner, Scheucher: Arrangements of Pseudocircles: Triangles and Drawings",
+        "https://doi.org/10.1007/s00454-020-00173-4",
+    ),
+    CIRCULARIZABILITY(
+        "Felsner, Scheucher: Arrangements of Pseudocircles: On Circularizability",
+        "https://doi.org/10.1007/s00454-019-00077-y",
+    ),
 }
 
 /**
@@ -30,6 +58,10 @@ class ExampleSet internal constructor(
     val source: String?,
     /** The members: a file below `composeApp/examples/` or inline sequences in the text format. */
     internal val data: Data,
+    /** The page of the pseudocircles website with this set, if any. */
+    val page: WebPage? = null,
+    /** The paper the set comes from, if any. */
+    val paper: Paper? = null,
 ) {
     internal sealed interface Data {
         /** One sparse6 string per line; `.mod2s6` files are model 2, all others model 1. */
@@ -96,33 +128,54 @@ object Examples {
         description: String,
         source: String,
         path: String,
-    ) = ExampleSet(name, group, n, description, source, ExampleSet.Data.File(path))
+        page: WebPage? = null,
+        paper: Paper? = null,
+    ) = ExampleSet(name, group, n, description, source, ExampleSet.Data.File(path), page, paper)
 
-    private fun sequences(name: String, group: ExampleGroup, description: String, text: String) =
-        ExampleSet(name, group, Arrangement.parseLists(text).size, description, null, ExampleSet.Data.Sequences(text))
+    private fun sequences(name: String, description: String, text: String) =
+        ExampleSet(
+            name, ExampleGroup.SINGLETONS, Arrangement.parseLists(text).size, description, null,
+            ExampleSet.Data.Sequences(text),
+        )
 
     /** Triangle files: `<all|some><n>_<df|digon>_<k>_triangles`. */
     private fun triangles(group: ExampleGroup, folder: String, source: String, stem: String, ext: String): ExampleSet {
         val (scope, n, kind, k) = Regex("""(all|some)(\d+)_(df|digon)_(\d+)_triangles""").matchEntire(stem)!!.destructured
         val what = if (kind == "df") "digon-free intersecting" else "intersecting"
         val which = if (scope == "all") "All" else "Some"
+        // as on the website: the minima are minimal; the maxima of n = 8, 9 "might be optimal"
+        val count = when {
+            group == ExampleGroup.MIN_TRIANGLES -> "the minimum of $k triangles"
+            scope == "some" -> "$k triangles (maybe the maximum)"
+            else -> "$k triangles"
+        }
         return file(
             name = "n$n-${if (kind == "df") "digonfree" else "intersecting"}-$k-triangles",
             group = group,
             n = n.toInt(),
-            description = "$which $what arrangements of $n pseudocircles with $k triangles.",
+            description = "$which $what arrangements of $n pseudocircles with $count.",
             source = "$source/$stem.${if (ext == "mod1s6") "txt" else ext}",
             path = "$folder/$stem.$ext",
+            page = WebPage.TRIANGLES,
+            paper = Paper.TRIANGLES,
         )
     }
 
     val sets: List<ExampleSet> = buildList {
-        for (n in 3..8) {
+        for (n in 3..5) {
             add(
                 file(
-                    "n$n-great-all", ExampleGroup.GREAT, n,
-                    "All arrangements of $n pseudo great circles (every three circles form a Krupp).",
-                    "$GREAT/all$n.enc.greatcircles.enc", "great/all$n.enc.greatcircles.enc",
+                    "n$n-connected-all", ExampleGroup.CONNECTED, n, "All connected arrangements of $n pseudocircles.",
+                    "$CONNECTED/all$n.mod2s6", "connected/all$n.mod2s6", WebPage.DATABASE, Paper.CIRCULARIZABILITY,
+                ),
+            )
+        }
+        for (n in 2..5) {
+            add(
+                file(
+                    "n$n-intersecting-all", ExampleGroup.INTERSECTING, n,
+                    "All intersecting arrangements of $n pseudocircles.",
+                    "$ABSTRACT/all$n.enc", "intersecting/all$n.enc", WebPage.DATABASE, Paper.CIRCULARIZABILITY,
                 ),
             )
         }
@@ -132,24 +185,16 @@ object Examples {
                     "n$n-digonfree-all", ExampleGroup.DIGON_FREE, n,
                     "All digon-free intersecting arrangements of $n pseudocircles.",
                     "$ABSTRACT/all${n}_digonfree.enc", "digonfree/all${n}_digonfree.enc",
+                    WebPage.DATABASE, Paper.CIRCULARIZABILITY,
                 ),
             )
         }
-        for (n in 2..5) {
+        // the website has the numbers (the table of the paper), not the files
+        for (n in 3..8) {
             add(
                 file(
-                    "n$n-intersecting-all", ExampleGroup.INTERSECTING, n,
-                    "All intersecting arrangements of $n pseudocircles.",
-                    "$ABSTRACT/all$n.enc", "intersecting/all$n.enc",
-                ),
-            )
-        }
-        for (n in 3..5) {
-            add(
-                file(
-                    "n$n-connected-all", ExampleGroup.CONNECTED, n,
-                    "All connected arrangements of $n pseudocircles.",
-                    "$CONNECTED/all$n.mod2s6", "connected/all$n.mod2s6",
+                    "n$n-great-all", ExampleGroup.GREAT, n, "All arrangements of $n great pseudocircles.",
+                    "$GREAT/all$n.enc.greatcircles.enc", "great/all$n.enc.greatcircles.enc", paper = Paper.CIRCULARIZABILITY,
                 ),
             )
         }
@@ -172,76 +217,79 @@ object Examples {
             add(
                 file(
                     "n$n-great-fueredi-palasti", ExampleGroup.FUREDI_PALASTI, n,
-                    "Füredi–Palásti construction with $n circles (circularizable, p3/n² tends to 2/3).",
+                    "The Füredi–Palásti arrangement of $n circles (p3/n² tends to 2/3).",
                     "$FUREDI_PALASTI/fueredi_palasti_$n.enc", "fueredipalasti/fueredi_palasti_$n.enc",
+                    WebPage.TRIANGLES, Paper.TRIANGLES,
                 ),
             )
         }
-        add(sequences("n3-great-krupp", ExampleGroup.NAMED, "The Krupp: three great circles.", Arrangement.krupp().toString()))
+        add(sequences("n3-great-krupp", "Three great circles (the Krupp).", Arrangement.krupp().toString()))
         add(
             sequences(
-                "n3-intersecting-nonkrupp", ExampleGroup.NAMED,
-                "The NonKrupp: the other intersecting arrangement of three circles.",
+                "n3-intersecting-nonkrupp", "The other intersecting arrangement of three circles (the NonKrupp).",
                 "{1: [2, -2, 3, -3], 2: [-1, 1, 3, -3], 3: [-1, 1, 2, -2]}",
             ),
         )
         add(
             sequences(
-                "n3-connected-chain", ExampleGroup.NAMED,
-                "The 3-Chain: circle 2 crosses circles 1 and 3, which do not cross.",
+                "n3-connected-chain", "Circle 2 crosses circles 1 and 3, which do not cross (the 3-Chain).",
                 "{1: [2, -2], 2: [1, -1, 3, -3], 3: [2, -2]}",
             ),
         )
+        fun noMoreCircles(name: String, n: Int, description: String, file: String) = file(
+            name, ExampleGroup.SINGLETONS, n, description, "$NOMORECIRCLES/$file", "named/${file.substringAfterLast('/')}",
+            WebPage.NO_MORE_CIRCLES, Paper.CIRCULARIZABILITY,
+        )
         add(
-            file(
-                "n5-intersecting-nonr-1", ExampleGroup.NAMED, 5, "Non-circularizable, intersecting.",
-                "$NOMORECIRCLES/connected/n5_nonr_number1_intersecting.mod2s6",
-                "named/n5_nonr_number1_intersecting.mod2s6",
+            noMoreCircles(
+                "n5-intersecting-nonr-1", 5, "The only non-circularizable intersecting arrangement of at most 5 pseudocircles.",
+                "connected/n5_nonr_number1_intersecting.mod2s6",
             ),
         )
         for (k in 2..4) {
             add(
-                file(
-                    "n5-connected-nonr-$k", ExampleGroup.NAMED, 5, "Non-circularizable, connected.",
-                    "$NOMORECIRCLES/connected/n5_nonr_number$k.mod2s6", "named/n5_nonr_number$k.mod2s6",
+                noMoreCircles(
+                    "n5-connected-nonr-$k", 5, "A non-circularizable connected arrangement of 5 pseudocircles.",
+                    "connected/n5_nonr_number$k.mod2s6",
                 ),
             )
         }
         add(
-            file(
-                "n6-digonfree-nonr-8-triangles", ExampleGroup.NAMED, 6,
-                "Non-circularizable, digon-free, 8 triangles (the only digon-free one of 6 circles with 8).",
-                "$NOMORECIRCLES/intersecting/digonfree/n6_nonr_number1_8triangles.mod2s6",
-                "named/n6_nonr_number1_8triangles.mod2s6",
+            noMoreCircles(
+                "n6-digonfree-nonr-8-triangles", 6,
+                "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, " +
+                    "the only digon-free one with 8 triangles.",
+                "intersecting/digonfree/n6_nonr_number1_8triangles.mod2s6",
             ),
         )
         for (k in 2..3) {
             add(
-                file(
-                    "n6-digonfree-nonr-$k", ExampleGroup.NAMED, 6, "Non-circularizable, digon-free.",
-                    "$NOMORECIRCLES/intersecting/digonfree/n6_nonr_number$k.mod2s6", "named/n6_nonr_number$k.mod2s6",
+                noMoreCircles(
+                    "n6-digonfree-nonr-$k", 6, "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles.",
+                    "intersecting/digonfree/n6_nonr_number$k.mod2s6",
                 ),
             )
         }
         add(
             file(
-                "n6-intersecting-nonr-all-triangles-krupp", ExampleGroup.NAMED, 6,
-                "Non-circularizable, intersecting (\"all triangles Krupp\", number 2).",
+                "n6-intersecting-nonr-all-triangles-krupp", ExampleGroup.SINGLETONS, 6,
+                "A non-circularizable intersecting arrangement of 6 pseudocircles (\"all triangles Krupp\", number 2).",
                 "computations/results/n6_nonr_all_triangles_krupp_number2.enc",
                 "named/n6_nonr_all_triangles_krupp_number2.enc",
             ),
         )
         add(
             file(
-                "n6-intersecting-nonr-edelsbrunner-ramos", ExampleGroup.NAMED, 6,
-                "Non-circularizable, intersecting (Edelsbrunner–Ramos).",
+                "n6-intersecting-nonr-edelsbrunner-ramos", ExampleGroup.SINGLETONS, 6,
+                "A non-circularizable intersecting arrangement of 6 pseudocircles (Edelsbrunner and Ramos).",
                 "computations/results/n6_nonr_edelsbrunnerramos.enc", "named/n6_nonr_edelsbrunnerramos.enc",
             ),
         )
         add(
             file(
-                "n9-great-nonr-pappus", ExampleGroup.NAMED, 9,
-                "Non-circularizable, pseudo great circles (from the non-Pappus arrangement of 9 pseudolines).",
+                "n9-great-nonr-pappus", ExampleGroup.SINGLETONS, 9,
+                "A non-circularizable arrangement of 9 great pseudocircles, " +
+                    "from the non-Pappus arrangement of 9 pseudolines.",
                 "computations/results/n9_nonr_pappus.enc", "named/n9_nonr_pappus.enc",
             ),
         )

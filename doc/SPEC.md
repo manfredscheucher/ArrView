@@ -2,6 +2,74 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Examples dialog: info area, singletons, website structure
+
+### Request (Manfred)
+
+The Examples dialog shows an info area for the selected entry, as PoCoView's; the description texts
+are "not good". A set with one arrangement gets no number selection. Two levels: Sets and Singletons.
+"Look at how the examples are best structured and labelled; also link the website and the
+circularizability paper: https://www3.math.tu-berlin.de/diskremath/pseudocircles/".
+
+### Decisions
+
+- Info area as in PoCoView's Examples dialog: description, n, number of arrangements, source.
+  Descriptions rewritten short and clear (simple stays simple, no padding); a fresh reviewer checks
+  that they are uniform and not wordy.
+- One arrangement: no − [#] +, only the note "1 arrangement".
+- Two levels: "Sets" with the groups (a group may have a single member for some n, e.g. great
+  n = 3; it stays in Sets), then "Singletons" with the named single arrangements.
+- The website (local mirror first) is the reference for grouping and labels, as far as ArrView has
+  the data; where the bundled data or computations/results differ from the website, the data wins
+  and the differences are reported. Link the set's page on the website (LinkText) and the paper
+  "On Circularizability" where the set comes from it; only verified links. If the website cannot be
+  read: stop that part and report.
+
+### Implementation (2026-11-18)
+
+- Reference read: the website mirror `~/Documents/2024/TUB/pseudocircles/website/arrangements`
+  (same as `~/github/research/pca/pseudocircles/website`): main page, pseudocircles (database) page
+  with the table, triangles page, nomorecircles page. The DOIs of both papers are taken from the
+  main page (Triangles and Drawings: 10.1007/s00454-020-00173-4; On Circularizability:
+  10.1007/s00454-019-00077-y). Page links `?show=pseudocircles|triangles|nomorecircles` follow the
+  site's index.php.
+- Groups in the website's order: Connected, Intersecting, Digon-free intersecting, Great
+  pseudocircles (the database page and its table), then Minimum number of triangles, Maximum number
+  of triangles, Füredi–Palásti construction (the triangles page). Singletons: Krupp, NonKrupp,
+  3-Chain, the non-circularizable ones (nomorecircles page), all-triangles-Krupp, Edelsbrunner-Ramos,
+  Pappus.
+- Info area (below the selected leaf, as PoCoView's): description; "n = 5, 278 arrangements" or
+  "n = 5, 1 arrangement"; the member chooser for lists; "Website: <page title>" and "Paper: <title>"
+  links where they apply; without a website page "Data: <path>" or "Typed in as intersection
+  sequences". A link "Most of the data is from the pseudocircles website" at the top of the dialog.
+- Tests: `ExamplesDialogUiTest.twoLevelsAndTheInfoArea` and the existing ones (every set loaded by
+  clicks through the two levels), `ExamplesTest.websitePagesAndPapers`.
+
+### Claude's choices (to confirm)
+
+- Website page links: database (connected, intersecting, digon-free), triangles (min, max,
+  Füredi–Palásti), nomorecircles (the n = 5 and n = 6 non-circularizable singletons). Paper links:
+  On Circularizability for the database sets, the great pseudocircles (counts in the paper's table)
+  and the nomorecircles singletons; Triangles and Drawings for the triangle sets.
+- No links for the great pseudocircle files (not on the website, only their counts), the
+  all-triangles-Krupp, Edelsbrunner-Ramos and Pappus arrangements (not on the website; not verified
+  in the paper), and the typed-in Krupp, NonKrupp, 3-Chain.
+- Group titles: "Great pseudocircles" as on the website (the Properties widget still says "pseudo
+  great circles"). Leaf names unchanged (`n5-intersecting-all`, ...).
+- Maximum triangles: n = 8, 9 described as "maybe the maximum" (website: "might be optimal"); the
+  "all" files only say how many triangles (the website does not say which of the two n = 7 files,
+  28 and 29 triangles, is the maximum).
+
+### Differences between the website and the bundled data
+
+- Great pseudocircles: no files on the website, only counts n = 3..7 (1, 1, 1, 4, 11); ArrView has
+  the files from computations/results for n = 3..8 (n = 8: 135 arrangements).
+- Intersecting n = 2 (1 arrangement): bundled; the website table starts at n = 3 (its file list has
+  all2).
+- The website has more than ArrView bundles (by choice of size): connected n = 6, intersecting
+  n = 6, digon-free n = 7, the additional non-circularizable n = 6 arrangements (intersecting and
+  digon-free connected). Bundled counts agree with the website table where both exist.
+
 ## 2026-11-18: Compact number fields
 
 ### Request (Manfred)

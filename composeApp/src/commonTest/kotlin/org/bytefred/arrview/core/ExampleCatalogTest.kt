@@ -134,7 +134,7 @@ class ExampleCatalogTest {
     fun descriptionsNameTheirSize() {
         for (s in Examples.sets) {
             assertTrue(s.description.endsWith("."), s.name)
-            if (s.group != ExampleGroup.NAMED) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
+            if (s.group != ExampleGroup.SINGLETONS) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
             Regex("""-(\d+)-triangles$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} triangles" in s.description, s.description) }
         }
     }

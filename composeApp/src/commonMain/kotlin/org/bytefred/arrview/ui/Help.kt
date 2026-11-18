@@ -97,7 +97,9 @@ private val GENERAL_TEXT = listOf(
         "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
         "works for every arrangement. The drawing is an iterated Tutte embedding as in the paper by " +
         "Felsner and Scheucher (see About).",
-    "In the Arrangement menu, Examples... has the bundled arrangements, Import... reads pasted text and " +
+    "In the Arrangement menu, Examples... has the bundled arrangements: Sets (by group, as on the " +
+        "pseudocircles website) and Singletons. A selected one shows its description, n, how many " +
+        "arrangements it has and where it comes from (a page of the website, a paper). Import... reads pasted text and " +
         "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG " +
         "saves the picture.",
     "If the arrangement has changed since it was loaded or saved, ArrView asks whether to save it before " +
