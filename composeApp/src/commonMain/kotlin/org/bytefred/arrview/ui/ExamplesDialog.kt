@@ -209,7 +209,7 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
         }
         set.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
         set.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
-        if (set.page == null) Text(
+        Text(
             set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
             style = MaterialTheme.typography.labelSmall,
         )

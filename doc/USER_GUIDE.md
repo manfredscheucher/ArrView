@@ -23,6 +23,9 @@ https://manfredscheucher.github.io/ArrView/
 ## Menus
 
 - Arrangement: Examples..., Import..., Export..., Open file..., Save file..., Export SVG.
+- Examples: "Sets" (groups as on the pseudocircles website) and "Singletons". The selected entry
+  shows its description, n, the number of arrangements (a list: choose the member with "-" / "+" or
+  type its number), the website page and the paper it comes from.
 - Edit: Undo, Redo. View: zoom, model, widgets, layout. Help: General, Widgets, Formats,
   Keyboard shortcuts, About.
 - Replacing or closing a changed arrangement asks "Save changes?" (Save JSON, Save text, Discard,
@@ -42,6 +45,8 @@ https://manfredscheucher.github.io/ArrView/
 - Triangle hypergraph: a transparent triangle per triple of circles bounding a triangle face (twice as
   strong for two or more). Click a triangle to flip it. Below it: "possible triangle flips (k): ...";
   click an entry to flip. Pointing at an entry highlights it in the graph and its faces.
+  Triples are written ascending ("Flip a triangle of 1 2 3"); the menu entries are the faces in their
+  own order around (e.g. 1 3 2).
 - Settings: Display (colour scheme: Standard (default), rainbow, rainbow2, rainbow3-2, rainbow3-k;
   line width 0.5 to 8, default 4) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
   defaults for all. Layout holds only the parameters of the drawing (iterated Tutte embedding; model 1 as in

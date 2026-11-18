@@ -48,12 +48,25 @@ circularizability paper: https://www3.math.tu-berlin.de/diskremath/pseudocircles
 ### Claude's choices (to confirm)
 
 - Website page links: database (connected, intersecting, digon-free), triangles (min, max,
-  Füredi–Palásti), nomorecircles (the n = 5 and n = 6 non-circularizable singletons). Paper links:
-  On Circularizability for the database sets, the great pseudocircles (counts in the paper's table)
-  and the nomorecircles singletons; Triangles and Drawings for the triangle sets.
-- No links for the great pseudocircle files (not on the website, only their counts), the
-  all-triangles-Krupp, Edelsbrunner-Ramos and Pappus arrangements (not on the website; not verified
-  in the paper), and the typed-in Krupp, NonKrupp, 3-Chain.
+  Füredi–Palásti), nomorecircles (the n = 5 and n = 6 non-circularizable singletons and
+  Edelsbrunner-Ramos, which the page lists as n6_edelsbrunner_nonr, isomorphic). Paper links: On
+  Circularizability for the database sets, the great pseudocircles (counts in the paper's table) and
+  the nomorecircles ones; Triangles and Drawings for the triangle sets.
+- No links for the great pseudocircle files (on the server as great.zip, but no page links them;
+  the database page has only their counts), the all-triangles-Krupp and Pappus arrangements (not on
+  the website; not verified in the paper), and the typed-in Krupp, NonKrupp, 3-Chain.
+- Every set shows "Data: <path>" (also those with a website page: intersecting and digon-free come
+  from computations/results, not the website's files).
+- The non-circularizable n = 5 and n = 6 arrangements are Singletons as the request says, although
+  the website presents them as two sets ("the four ... n = 5", "the three ... n = 6").
+- Triangle group titles shortened from the website headings ("Digonfree arrangement
+  minimizing/maximizing the number of triangles", "Fueredi Palasti Construction"); the maximum group
+  is not called digon-free since it contains all5_digon_13.
+- In a menu of several triples, a triple with one triangle is one entry labelled with the
+  (ascending) triple; its click flips that triangle.
+- The −/+ buttons have 8 dp horizontal padding (ktoy's compact buttons) instead of Material's 24 dp.
+- Descriptions: "The Krupp: 3 great circles.", "The NonKrupp: ...", "The 3-Chain: ..." (name first);
+  "all triangles Krupp, number 2" (from the file name) and "p3/n^2 tends to 2/3" dropped.
 - Group titles: "Great pseudocircles" as on the website (the Properties widget still says "pseudo
   great circles"). Leaf names unchanged (`n5-intersecting-all`, ...).
 - Maximum triangles: n = 8, 9 described as "maybe the maximum" (website: "might be optimal"); the
@@ -62,13 +75,21 @@ circularizability paper: https://www3.math.tu-berlin.de/diskremath/pseudocircles
 
 ### Differences between the website and the bundled data
 
-- Great pseudocircles: no files on the website, only counts n = 3..7 (1, 1, 1, 4, 11); ArrView has
-  the files from computations/results for n = 3..8 (n = 8: 135 arrangements).
+- Great pseudocircles: the database page shows only the counts n = 3..7 (1, 1, 1, 4, 11); the
+  files are on the server (great.zip, n = 3..10) but not linked. ArrView has n = 3..8 from
+  computations/results (n = 8: 135, as in great.zip).
 - Intersecting n = 2 (1 arrangement): bundled; the website table starts at n = 3 (its file list has
   all2).
 - The website has more than ArrView bundles (by choice of size): connected n = 6, intersecting
-  n = 6, digon-free n = 7, the additional non-circularizable n = 6 arrangements (intersecting and
-  digon-free connected). Bundled counts agree with the website table where both exist.
+  n = 6, digon-free n = 7, the additional non-circularizable n = 6 arrangements (of the intersecting
+  ones only Edelsbrunner-Ramos is bundled; none of the digon-free connected ones).
+
+### Open questions
+
+- What does "all triangles Krupp" (file n6_nonr_all_triangles_krupp_number2) mean? Its description
+  says only "non-circularizable intersecting, n = 6" now.
+- Maximum number of triangles, n = 7: two "all" files with 28 and 29 triangles, both digon-free; which
+  one is the maximum? The descriptions only give the numbers. Bundled counts agree with the website table where both exist.
 
 ## 2026-11-18: Compact number fields
 

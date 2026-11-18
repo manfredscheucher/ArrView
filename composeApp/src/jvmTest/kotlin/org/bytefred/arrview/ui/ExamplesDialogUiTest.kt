@@ -147,6 +147,10 @@ class ExamplesDialogUiTest {
         onNodeWithText("n = 3, 1 arrangement").assertExists()
         onNodeWithText("Typed in as intersection sequences").assertExists()
         onNodeWithText("Website:", substring = true).assertDoesNotExist()
+        // the Edelsbrunner-Ramos arrangement is on the website too (isomorphic file), with its source
+        click("n6-intersecting-nonr-edelsbrunner-ramos")
+        onNodeWithText("Website: No more circle representations").assertExists()
+        onNodeWithText("Data: computations/results/n6_nonr_edelsbrunnerramos.enc").assertExists()
         // a list of the database: the chooser and the links
         click(intersecting)
         click("n4-intersecting-all")

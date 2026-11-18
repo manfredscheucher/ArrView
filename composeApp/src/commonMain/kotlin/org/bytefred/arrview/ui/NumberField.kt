@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -60,7 +61,7 @@ fun <T : Any> CompactNumberField(
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             // "−" and "+" as text (no icon dependency), like ktoy
-            if (steppers != null) OutlinedButton(onClick = steppers.minus, enabled = steppers.minusEnabled) { Text("−") }
+            if (steppers != null) OutlinedButton(onClick = steppers.minus, enabled = steppers.minusEnabled, contentPadding = STEPPER_PADDING) { Text("−") }
             BasicTextField(
                 value = text,
                 onValueChange = { v ->
@@ -79,7 +80,7 @@ fun <T : Any> CompactNumberField(
                     ) { inner() }
                 },
             )
-            if (steppers != null) OutlinedButton(onClick = steppers.plus, enabled = steppers.plusEnabled) { Text("+") }
+            if (steppers != null) OutlinedButton(onClick = steppers.plus, enabled = steppers.plusEnabled, contentPadding = STEPPER_PADDING) { Text("+") }
         }
         if (invalid) Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
     }
@@ -89,6 +90,9 @@ fun <T : Any> CompactNumberField(
 internal const val MAX_FIELD_LENGTH = 12
 
 private val FIELD_PADDING = 6.dp
+
+/** The −/+ buttons with little padding (ktoy's compact buttons), not Material's 24 dp. */
+private val STEPPER_PADDING = PaddingValues(horizontal = 8.dp)
 
 /** ktoy's field border. */
 private val FIELD_BORDER = Color(0xFF888888)

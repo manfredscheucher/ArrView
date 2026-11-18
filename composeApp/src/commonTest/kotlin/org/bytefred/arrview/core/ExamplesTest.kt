@@ -131,7 +131,11 @@ class ExamplesTest {
         assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles", WebPage.NO_MORE_CIRCLES.url)
         for (s in Examples.sets) {
             // a page of the website: its data is from the website mirror
-            if (s.page != null) assertTrue(s.source!!.startsWith("website/") || s.group in listOf(ExampleGroup.INTERSECTING, ExampleGroup.DIGON_FREE), s.name)
+            if (s.page != null) {
+                val fromResults = s.group in listOf(ExampleGroup.INTERSECTING, ExampleGroup.DIGON_FREE) ||
+                    s.name == "n6-intersecting-nonr-edelsbrunner-ramos"
+                assertTrue(s.source!!.startsWith("website/") || fromResults, s.name)
+            }
             if (s.group == ExampleGroup.SINGLETONS && s.page == null) assertEquals(null, s.paper, s.name)
         }
         assertTrue(Examples.inGroup(ExampleGroup.SINGLETONS).all { it.size == 1 })

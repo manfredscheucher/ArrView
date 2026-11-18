@@ -217,22 +217,22 @@ object Examples {
             add(
                 file(
                     "n$n-great-fueredi-palasti", ExampleGroup.FUREDI_PALASTI, n,
-                    "The Füredi–Palásti arrangement of $n circles (p3/n² tends to 2/3).",
+                    "The Füredi–Palásti arrangement of $n circles.",
                     "$FUREDI_PALASTI/fueredi_palasti_$n.enc", "fueredipalasti/fueredi_palasti_$n.enc",
                     WebPage.TRIANGLES, Paper.TRIANGLES,
                 ),
             )
         }
-        add(sequences("n3-great-krupp", "Three great circles (the Krupp).", Arrangement.krupp().toString()))
+        add(sequences("n3-great-krupp", "The Krupp: 3 great circles.", Arrangement.krupp().toString()))
         add(
             sequences(
-                "n3-intersecting-nonkrupp", "The other intersecting arrangement of three circles (the NonKrupp).",
+                "n3-intersecting-nonkrupp", "The NonKrupp: the other intersecting arrangement of 3 circles.",
                 "{1: [2, -2, 3, -3], 2: [-1, 1, 3, -3], 3: [-1, 1, 2, -2]}",
             ),
         )
         add(
             sequences(
-                "n3-connected-chain", "Circle 2 crosses circles 1 and 3, which do not cross (the 3-Chain).",
+                "n3-connected-chain", "The 3-Chain: circle 2 crosses circles 1 and 3, which do not cross.",
                 "{1: [2, -2], 2: [1, -1, 3, -3], 3: [2, -2]}",
             ),
         )
@@ -257,8 +257,7 @@ object Examples {
         add(
             noMoreCircles(
                 "n6-digonfree-nonr-8-triangles", 6,
-                "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, " +
-                    "the only digon-free one with 8 triangles.",
+                "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, the only one with 8 triangles.",
                 "intersecting/digonfree/n6_nonr_number1_8triangles.mod2s6",
             ),
         )
@@ -273,7 +272,7 @@ object Examples {
         add(
             file(
                 "n6-intersecting-nonr-all-triangles-krupp", ExampleGroup.SINGLETONS, 6,
-                "A non-circularizable intersecting arrangement of 6 pseudocircles (\"all triangles Krupp\", number 2).",
+                "A non-circularizable intersecting arrangement of 6 pseudocircles.",
                 "computations/results/n6_nonr_all_triangles_krupp_number2.enc",
                 "named/n6_nonr_all_triangles_krupp_number2.enc",
             ),
@@ -283,6 +282,8 @@ object Examples {
                 "n6-intersecting-nonr-edelsbrunner-ramos", ExampleGroup.SINGLETONS, 6,
                 "A non-circularizable intersecting arrangement of 6 pseudocircles (Edelsbrunner and Ramos).",
                 "computations/results/n6_nonr_edelsbrunnerramos.enc", "named/n6_nonr_edelsbrunnerramos.enc",
+                // on the website as n6_edelsbrunner_nonr (isomorphic), "Additional intersecting arrangements"
+                WebPage.NO_MORE_CIRCLES, Paper.CIRCULARIZABILITY,
             ),
         )
         add(
