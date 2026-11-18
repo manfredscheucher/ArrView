@@ -627,6 +627,17 @@ class ActionsUiTest {
         waitForIdle()
         assertEquals(star.digonCreate(s.let { CellActions(star).createsOf(1, 2)[1] }), s.arrangement)
         undoGivesBack(s, star)
+        // after a change (and undo) the entries still open their menus, and Exit clears the highlight
+        onNodeWithTag("possible-creates-2-3").performMouseInput { moveTo(center) }
+        waitForIdle()
+        assertEquals(listOf(1, 2), s.graphHighlight)
+        onNodeWithTag("possible-creates-2-3").performMouseInput { moveTo(Offset(-50f, -50f)) }
+        waitForIdle()
+        assertNull(s.graphHighlight)
+        assertNull(s.menuHighlight)
+        onNodeWithTag("possible-creates-2-3").performMouseInput { click(center) }
+        waitForIdle()
+        onNodeWithText("Create a digon of 2 3").assertExists()
     }
 
     @Test

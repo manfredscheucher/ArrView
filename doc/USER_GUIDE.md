@@ -40,7 +40,8 @@ https://manfredscheucher.github.io/ArrView/
   Below it: "possible digon creates (k): 1 3 (x2), 2 4" and "possible digon collapses (k): ...";
   "(xm)" marks m ways. Click an entry to do it, like a click on the pair (several ways: the menu).
 - Triangle hypergraph: a transparent triangle per triple of circles bounding a triangle face (twice as
-  strong for two or more). Click a triangle to flip it. Below it: "possible triangle flips (k): ..."; click an entry to flip.
+  strong for two or more). Click a triangle to flip it. Below it: "possible triangle flips (k): ...";
+  click an entry to flip. Pointing at an entry highlights it in the graph and its faces.
 - Settings: Display (colour scheme: Standard (default), rainbow, rainbow2, rainbow3-2, rainbow3-k;
   line width 0.5 to 8, default 4) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
   defaults for all. Layout holds only the parameters of the drawing (iterated Tutte embedding; model 1 as in

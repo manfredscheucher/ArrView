@@ -131,7 +131,7 @@ private val WIDGETS_TEXT = listOf(
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
         "a menu lists them with their faces (several triples: a submenu per triple). Below it: the possible " +
         "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it " +
-        "(several triangles: a menu).",
+        "(several triangles: a menu); pointing at one highlights the triple and its faces.",
     "Settings: Display and Layout. Display: the colour scheme of the circles (default " +
         "${ColorScheme.DEFAULT.label}; Standard is a fixed list of 12 colours, the rainbow schemes are computed " +
         "from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +

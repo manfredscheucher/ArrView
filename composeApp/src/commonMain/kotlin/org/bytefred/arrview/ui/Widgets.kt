@@ -34,8 +34,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -345,55 +347,87 @@ private fun ActionList(
     menu: @Composable (List<Int>, Offset, () -> Unit) -> Unit,
 ) {
     val style = MaterialTheme.typography.bodyMedium
-    var open by remember(state.arrangement) { mutableStateOf<List<Int>?>(null) }
+    // not a remember key: the tap handlers keep the state object they saw first
+    var open by remember { mutableStateOf<List<Int>?>(null) }
+    LaunchedEffect(state.arrangement) { open = null }
     val text = possibleList(what, entries)
     FlowRow(Modifier.testTag(tag).semantics { this.text = AnnotatedString(text) }) {
         Text("possible $what (${entries.size}): ", style = style)
         if (entries.isEmpty()) Text("none", style = style)
-        for ((k, entry) in entries.withIndex()) {
+        for ((k, entry) in entries.withIndex()) key(entry.first) {
             val (c, m) = entry
-            val label = circlesLabel(c) + if (m >= 2) " (x$m)" else ""
-            var height by remember { mutableStateOf(0) }
             // the comma stays with its entry when the line wraps
             Row {
-                Box {
-                    Text(
-                        label,
-                        style = style.copy(textDecoration = TextDecoration.Underline),
-                        color = LINK_COLOR,
-                        modifier = Modifier
-                            .testTag("$tag-${c.joinToString("-") { "${it + 1}" }}")
-                            .onSizeChanged { height = it.height }
-                            .pointerInput(c) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        when (awaitPointerEvent().type) {
-                                            PointerEventType.Enter -> {
-                                                state.graphHighlight = c
-                                                state.menuHighlight = Highlight(state.cellsOf(c))
-                                            }
-                                            PointerEventType.Exit -> if (state.graphHighlight == c) {
-                                                state.graphHighlight = null
-                                                if (open == null) state.menuHighlight = null
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            // a tap, not clickable: the entry must not take the keyboard focus (it may vanish with
-                            // the click, and the shortcuts such as Ctrl+Z need the focus in the app)
-                            .pointerInput(c) { detectTapGestures { if (act(c)) open = c } }
-                            .pointerHoverIcon(PointerIcon.Hand)
-                            .semantics {
-                                role = Role.Button
-                                onClick { if (act(c)) open = c; true }
-                            },
-                    )
-                    if (open == c) menu(c, Offset(0f, height.toFloat())) { open = null }
+                val label = circlesLabel(c) + if (m >= 2) " (x$m)" else ""
+                val entryTag = "$tag-${c.joinToString("-") { "${it + 1}" }}"
+                ActionEntry(state, c, label, entryTag, open == c, onClick = { if (act(c)) open = c }) { at ->
+                    menu(c, at) { open = null }
                 }
                 if (k < entries.size - 1) Text(", ", style = style)
             }
         }
+    }
+}
+
+/**
+ * One entry of an [ActionList]: a link for the pair or triple [c]. Pointing at it highlights [c] in
+ * the graph and its cells on the canvas; [menu] shows below it while [menuOpen].
+ */
+@Composable
+private fun ActionEntry(
+    state: AppState,
+    c: List<Int>,
+    label: String,
+    tag: String,
+    menuOpen: Boolean,
+    onClick: () -> Unit,
+    menu: @Composable (Offset) -> Unit,
+) {
+    val cells = Highlight(state.cellsOf(c))
+    val click by rememberUpdatedState(onClick)
+    val opened by rememberUpdatedState(menuOpen)
+    var height by remember { mutableStateOf(0) }
+    // a widget closed or scrolled away under the pointer gets no Exit
+    DisposableEffect(c) {
+        onDispose {
+            if (state.graphHighlight == c) state.graphHighlight = null
+            if (state.menuHighlight == cells) state.menuHighlight = null
+        }
+    }
+    Box {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
+            color = LINK_COLOR,
+            modifier = Modifier
+                .testTag(tag)
+                .onSizeChanged { height = it.height }
+                .pointerInput(c) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            when (awaitPointerEvent().type) {
+                                PointerEventType.Enter -> {
+                                    state.graphHighlight = c
+                                    state.menuHighlight = cells
+                                }
+                                PointerEventType.Exit -> {
+                                    if (state.graphHighlight == c) state.graphHighlight = null
+                                    if (!opened && state.menuHighlight == cells) state.menuHighlight = null
+                                }
+                            }
+                        }
+                    }
+                }
+                // a tap, not clickable: the entry must not take the keyboard focus (it may vanish with
+                // the click, and the shortcuts such as Ctrl+Z need the focus in the app)
+                .pointerInput(c) { detectTapGestures { click() } }
+                .pointerHoverIcon(PointerIcon.Hand)
+                .semantics {
+                    role = Role.Button
+                    onClick { click(); true }
+                },
+        )
+        if (menuOpen) menu(Offset(0f, height.toFloat()))
     }
 }
 

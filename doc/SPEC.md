@@ -31,6 +31,7 @@ clickable.
   as: the entry's pair (an orange line over its stripe) or triple (an orange outline) in the graph,
   and all cells of its actions (every create cell of the pair, its digon, or every triangle of the
   triple) in yellow on the canvas, as hovering a menu entry does.
+- A comma stays on the line of its entry when the list wraps.
 - The entries react to a tap but do not take the keyboard focus (an entry may disappear with its
   click, and Ctrl+Z must still work); they have a button role for accessibility.
 
@@ -90,7 +91,8 @@ with a reviewer and confirmed by Manfred.
   double strength. It is the same set and the same count as the menus. Collapses can never be
   ambiguous, so they never get one.
 - Empty list: "possible digon creates (0): none". Lines are always shown.
-- Small text in the same style as the count line above the graph. Plain text, not clickable,
+- Small text in the same style as the count line above the graph. Plain text, not clickable (the
+  entries became links: "Clickable action lists"),
   wrapping; the widget scrolls if needed, no truncation.
 - The lists must be exactly the pairs/triples that get stripes/triangles and are clickable (same
   source: CellActions). Test that on several examples, including a big one.
@@ -121,7 +123,8 @@ are implemented there) and offer the scheme as a dropdown; the colours are compu
 
 ### Decisions
 
-- Port `blurred-memory/shared/src/commonMain/kotlin/org/bytefred/blurredmemory/shared/ColorPalettes.kt`
+- (Formulas superseded by "Rainbow schemes in OKLCH".) Port
+  `blurred-memory/shared/src/commonMain/kotlin/org/bytefred/blurredmemory/shared/ColorPalettes.kt`
   unchanged in its formulas: rainbow, rainbow2, rainbow3-2, rainbow3-k (see blurred-memory
   docs/11-color-palettes.md), with count = n and index = circle index. Also port its unit tests
   (ColorPaletteTest) where they apply.

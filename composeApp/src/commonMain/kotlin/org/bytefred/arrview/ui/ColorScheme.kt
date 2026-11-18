@@ -5,7 +5,7 @@ import org.bytefred.arrview.core.ColorPalette
 
 /**
  * The colours of the circles (Settings widget): Standard, ArrView's fixed list, or one of the
- * palettes of blurred-memory, computed from n ([ColorPalette.color] with count = n, index = circle).
+ * rainbow schemes in OKLCH, computed from n ([ColorPalette.color] with count = n, index = circle).
  */
 enum class ColorScheme(val label: String, private val palette: ColorPalette?) {
     STANDARD("Standard", null),
