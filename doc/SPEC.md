@@ -21,6 +21,30 @@ list them."
   a pair with several options in the cell gets a submenu with the starred descriptions (same labels,
   hover highlight and submenu mechanics as the left-click menu).
 
+### Implementation (2026-11-18)
+
+- `Arrangement.sidePosition(a)`: the index of a side's arc (crossing k to the next one) in its
+  circle's list; `createOrder`: by the side of i, then the side of j. `CellActions.createsOf(i, j)`
+  is in this order, so the intersection graph menu lists its cells by the first side of i (in list
+  order) from which a create through that cell starts, and the options inside a cell (submenu) in
+  the same order. The canvas menus (left and right click) list the pairs by i, then j, and the
+  options of a pair in this order.
+- Right-click menu, top to bottom: Flip triangle / Collapse digon (as before), then one entry
+  "Create digon i j" per pair (pairs by i, then j; a pair with several options opens the starred
+  options as a submenu; with one option the entry does it), then Make outer face. It now uses the
+  same menu as the left click (hover highlight, submenu column, Escape, outside click).
+- Tests: `DigonCreateTest.createsOfAPairAreOrderedAlongTheCircles`, `ActionsUiTest`
+  (`graphMenuOfCellsWithSubmenus` checks the on-screen order of cells and options,
+  `rightClickMenuListsTheCreatesOfTheFace`: single create, submenu, order).
+
+### Claude's choices (to confirm)
+
+- "Starting at its first edge": the first edge of circle i is the arc from the first to the second
+  entry of its list; a side traversed backwards counts with its arc's position.
+- Right-click entries are labelled "Create digon 1 3" (verb as the other items "Flip triangle",
+  "Collapse digon"); they come after Flip / Collapse and before Make outer face. Unlike the left
+  click, the pair level is kept even when the face has only one pair ("one entry per pair").
+
 ## 2026-11-18: Outer face clickable, submenus for ambiguous creates
 
 ### Request (Manfred)

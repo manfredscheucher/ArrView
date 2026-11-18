@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ import org.bytefred.arrview.core.defaultOuterFace
 import org.bytefred.arrview.core.digonCollapse
 import org.bytefred.arrview.core.digonCreate
 import org.bytefred.arrview.core.digonCreates
+import org.bytefred.arrview.core.sidePosition
 import org.bytefred.arrview.core.triangleFlip
 import kotlin.math.abs
 import kotlin.test.BeforeTest
@@ -107,6 +109,9 @@ class ActionsUiTest {
         waitForIdle()
         assertEquals(expected, s.menuHighlight, label)
     }
+
+    /** The top of a menu entry on the screen. */
+    private fun ComposeUiTest.top(label: String): Float = menuItem(label).fetchSemanticsNode().boundsInRoot.top
 
     /** An option of [ops] whose star label is unique, with that label. */
     private fun AppState.uniqueOption(ops: List<DigonCreate>): Pair<DigonCreate, String> {
@@ -226,6 +231,48 @@ class ActionsUiTest {
             assertEquals(arr.digonCreate(single.single()), s.arrangement)
             undoGivesBack(s, arr)
         }
+    }
+
+    @Test
+    fun rightClickMenuListsTheCreatesOfTheFace() = runComposeUiTest {
+        // a cell with a pair with one option and a pair with several (a submenu)
+        val (arr, f) = findFace(outer = false) { a, f -> a.pairsIn(f).values.any { it.size == 1 } && a.pairsIn(f).values.any { it.size >= 2 } }
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, arr)
+        val pairs = s.actions.pairsIn(f)
+        fun rightClick() {
+            onNodeWithTag("canvas").performMouseInput { rightClick(view.at(s.currentDrawing!!, f)) }
+            waitForIdle()
+        }
+        rightClick()
+        onNodeWithText("Face with ${arr.faces[f].size} sides").assertExists()
+        menuItem("Make outer face").assertExists()
+        for ((i, j) in pairs.keys) menuItem("Create digon ${i + 1} ${j + 1}").assertExists()
+        // the entries top to bottom: creates by pair, then Make outer face
+        val labels = pairs.keys.sortedWith(compareBy({ it.first }, { it.second })).map { (i, j) -> "Create digon ${i + 1} ${j + 1}" } + "Make outer face"
+        assertEquals(labels, labels.sortedBy { top(it) })
+        // a pair with one option: a click creates it
+        val (single, one) = pairs.entries.first { it.value.size == 1 }
+        menuItem("Create digon ${single.first + 1} ${single.second + 1}").performClick()
+        waitForIdle()
+        assertEquals(arr.digonCreate(one.single()), s.arrangement)
+        undoGivesBack(s, arr)
+        // a pair with several: a submenu with the starred options along the circles
+        rightClick()
+        val (pair, ops) = pairs.entries.first { it.value.size >= 2 }
+        hoverEntry(s, "Create digon ${pair.first + 1} ${pair.second + 1}", Highlight(setOf(f)))
+        onNodeWithTag("action-submenu").assertExists()
+        val ordered = ops.sortedWith(compareBy({ arr.sidePosition(it.dartI) }, { arr.sidePosition(it.dartJ) }))
+        val optionLabels = menuLabels(ordered.map { s.createNode(it).label })
+        for (l in optionLabels) assertEquals(2, l.count { it == '*' }, l)
+        assertEquals(optionLabels, optionLabels.sortedBy { top(it) })
+        val (op, label) = s.uniqueOption(ordered)
+        hoverEntry(s, label, Highlight(setOf(f), setOf(op.dartI, op.dartJ)))
+        menuItem(label).performClick()
+        waitForIdle()
+        assertEquals(arr.digonCreate(op), s.arrangement)
+        undoGivesBack(s, arr)
     }
 
     @Test
@@ -394,8 +441,17 @@ class ActionsUiTest {
         val cellLabels = menuLabels(byFace.map { (g, o) -> o.singleOrNull()?.let { s.createNode(it).label } ?: s.cellLabel(g) })
         val cellLabel = cellLabels[byFace.keys.indexOf(f)]
         assertTrue('*' !in cellLabel, cellLabel)
+        // the cells top to bottom along circle i: by the first side of i (in its list order) where a create starts
+        val pos = { op: DigonCreate -> arr.sidePosition(op.dartI) to arr.sidePosition(op.dartJ) }
+        val alongI = byFace.keys.sortedBy { g -> byFace.getValue(g).minOf { arr.sidePosition(it.dartI) } }
+        assertEquals(alongI, byFace.keys.toList())
+        assertEquals(cellLabels, cellLabels.sortedBy { top(it) }, "cells in the menu along circle ${i + 1}")
         hoverEntry(s, cellLabel, Highlight(setOf(f)))
         onNodeWithTag("action-submenu").assertExists()
+        // the options of the cell top to bottom along circle i, then j
+        assertEquals(ops.sortedWith(compareBy({ pos(it).first }, { pos(it).second })), ops)
+        val optionLabels = menuLabels(ops.map { s.createNode(it).label })
+        assertEquals(optionLabels, optionLabels.sortedBy { top(it) }, "options in the submenu along the circles")
         val (op, label) = s.uniqueOption(ops)
         hoverEntry(s, label, Highlight(setOf(f), setOf(op.dartI, op.dartJ)))
         menuItem(label).performClick()

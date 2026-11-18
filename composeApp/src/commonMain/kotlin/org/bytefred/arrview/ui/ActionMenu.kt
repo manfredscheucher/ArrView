@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.DigonCreate
 import org.bytefred.arrview.core.cellDescription
+import org.bytefred.arrview.core.createOrder
 import kotlin.math.roundToInt
 
 /** What a menu entry highlights in the canvas while the pointer is on it: faces and sides (darts). */
@@ -194,9 +195,9 @@ fun AppState.createNode(op: DigonCreate): MenuNode =
 /** The circles of a pair or triple, 1-based, separated by spaces. */
 fun circlesLabel(circles: List<Int>): String = circles.joinToString(" ") { "${it + 1}" }
 
-/** The digon creates of face [f] by pair, pairs in order. */
+/** The digon creates of face [f] by pair, pairs in order, the options of a pair along its circles ([createOrder]). */
 private fun AppState.createPairs(f: Int): Map<Pair<Int, Int>, List<DigonCreate>> =
-    actions.createsIn(f).sortedWith(compareBy({ it.i }, { it.j })).groupBy { it.i to it.j }
+    actions.createsIn(f).sortedWith(compareBy<DigonCreate>({ it.i }, { it.j }).then(arrangement.createOrder)).groupBy { it.i to it.j }
 
 /** The canvas menu heading of face [f]: "Create a digon", with the pair if there is only one. */
 fun AppState.createHeading(f: Int): String =
@@ -213,6 +214,13 @@ fun AppState.createEntries(f: Int): List<MenuNode> {
     return pairs.map { (pair, ops) -> group(circlesLabel(pair.toList()), Highlight(setOf(f)), ops.map(::createNode)) }
 }
 
+/**
+ * The digon creates in the right-click menu of face [f]: one entry per pair ("Create digon 1 3"),
+ * a pair with several options in the cell opens them as a submenu.
+ */
+fun AppState.faceCreateEntries(f: Int): List<MenuNode> =
+    createPairs(f).map { (pair, ops) -> group("Create digon " + circlesLabel(pair.toList()), Highlight(setOf(f)), ops.map(::createNode)) }
+
 /** The heading of the intersection graph menu of pair [i] < [j]. */
 fun AppState.pairHeading(i: Int, j: Int): String =
     (if (actions.createsOf(i, j).isNotEmpty()) "Create a digon of " else "Collapse a digon of ") + circlesLabel(listOf(i, j))
@@ -220,7 +228,8 @@ fun AppState.pairHeading(i: Int, j: Int): String =
 /**
  * The intersection graph menu of pair [i] < [j]: one entry per cell to create through, whose
  * options open as a submenu (a cell with one option is that option, with its stars); with only
- * one cell, its options directly. For a pair that crosses: the digons to collapse.
+ * one cell, its options directly. Cells and options in [createOrder] (a cell where circle i first
+ * reaches it). For a pair that crosses: the digons to collapse.
  */
 fun AppState.pairEntries(i: Int, j: Int): List<MenuNode> {
     val byFace = actions.createsOf(i, j).groupBy { it.face }

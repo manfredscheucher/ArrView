@@ -124,6 +124,9 @@ class HelpClaimsTest {
         assertSays(HelpPage.GENERAL, "Pointing at a menu entry highlights its face in yellow")
         assertSays(HelpPage.GENERAL, "the face with a star after the two sides that are pushed together. The outer face works the same.")
         assertSays(HelpPage.GENERAL, "(for the outer face in a corner of the canvas)")
+        assertSays(HelpPage.GENERAL, "one Create digon entry per pair of circles that can create a digon there (several ways: a submenu)")
+        assertSays(HelpPage.GENERAL, "they are listed along circle i (the smaller number), in the order of its sequence, then along circle j.")
+        assertTrue("\"Create digon i j\" per pair" in guide && "listed along circle i" in guide, "USER_GUIDE.md: right-click creates, order")
         assertSays(HelpPage.GENERAL, "the two sides of a digon create in orange")
         // orange: red > green > blue
         assertTrue(HIGHLIGHT_SIDE.red > HIGHLIGHT_SIDE.green && HIGHLIGHT_SIDE.green > HIGHLIGHT_SIDE.blue)

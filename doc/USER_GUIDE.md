@@ -12,7 +12,10 @@ https://manfredscheucher.github.io/ArrView/
 - A "!" in the face under the mouse (for the outer face in a corner): a click does something there.
   In menus a face is written as the circles of its sides around it; pointing at an entry highlights
   the face in yellow and the two sides of a create in orange.
-- Right-click a face (Ctrl+click on a Mac) for its menu; "Make outer face" draws it outside.
+- Right-click a face (Ctrl+click on a Mac) for its menu: flip, collapse, "Create digon i j" per pair
+  (several ways: a submenu), "Make outer face" (draws it outside).
+- Several ways to create a digon of i and j are listed along circle i (the smaller number), in the
+  order of its sequence, then along circle j.
 - Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu.
 - Model 1 draws digons as touching points (intersecting arrangements of at least 3 circles), Model 2
   draws them as regions (every arrangement).

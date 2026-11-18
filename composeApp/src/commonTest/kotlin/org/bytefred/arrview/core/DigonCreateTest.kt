@@ -172,6 +172,28 @@ class DigonCreateTest {
     }
 
     @Test
+    fun createsOfAPairAreOrderedAlongTheCircles() {
+        var checked = 0
+        for (arr in samples.take(600)) {
+            val actions = CellActions(arr)
+            for (i in 0 until arr.n) for (j in i + 1 until arr.n) {
+                val ops = actions.createsOf(i, j)
+                val keys = ops.map { arr.sidePosition(it.dartI) to arr.sidePosition(it.dartJ) }
+                assertEquals(keys.sortedWith(compareBy({ it.first }, { it.second })), keys)
+                // sidePosition: the side's arc in the circle's list (crossing k to the next)
+                for (op in ops) {
+                    val p = arr.sidePosition(op.dartI)
+                    assertTrue(p in 0 until arr.lengthOf(i))
+                    val k = op.dartI / 2
+                    assertEquals(if (op.dartI % 2 == 0) k - arr.offset(i) else arr.previousOnCircle(k) - arr.offset(i), p)
+                }
+                if (ops.map { it.face }.toSet().size >= 2) checked++
+            }
+        }
+        assertTrue(checked > 50, "only $checked pairs with several cells")
+    }
+
+    @Test
     fun actionsOfTheLargestExamples() {
         // computed on the UI thread after every change: must stay fast
         for (name in listOf("n42-great-fueredi-palasti", "n14-digonfree-some-min-triangles")) {

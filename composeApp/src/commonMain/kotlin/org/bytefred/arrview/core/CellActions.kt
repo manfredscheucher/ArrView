@@ -22,6 +22,16 @@ fun Arrangement.cellDescription(f: Int, marked: Set<Int> = emptySet()): String {
     }
 }
 
+/** Position of side (dart) [a] along its circle: the index of its arc (a crossing to the next one) in the circle's list. */
+fun Arrangement.sidePosition(a: Int): Int = arcOfDart(a) - offset(circleOfDart(a))
+
+/**
+ * The order of digon creates of one pair i < j: along circle i (its list order, from its first
+ * side), by the side of i that is pushed, then along circle j by the side of j.
+ */
+val Arrangement.createOrder: Comparator<DigonCreate>
+    get() = compareBy({ sidePosition(it.dartI) }, { sidePosition(it.dartJ) })
+
 /**
  * The flips that can be done in an arrangement, by face, by pair of circles and by triple of
  * circles: triangle flips, digon collapses that keep the arrangement connected, digon creates.
@@ -49,14 +59,15 @@ class CellActions(val arrangement: Arrangement) {
         face.size == 3 || f in collapsible || createsIn(f).isNotEmpty()
     } == true
 
-    private val createsByPair: Map<Pair<Int, Int>, List<DigonCreate>> = creates.groupBy { it.i to it.j }
+    private val createsByPair: Map<Pair<Int, Int>, List<DigonCreate>> =
+        creates.groupBy { it.i to it.j }.mapValues { (_, ops) -> ops.sortedWith(arr.createOrder) }
 
     private val collapsesByPair: Map<Pair<Int, Int>, List<Int>> = collapsible.groupBy { f ->
         val (c, d) = arr.faceCircles(f)
         minOf(c, d) to maxOf(c, d)
     }
 
-    /** The digon creates of circles [i] < [j]. */
+    /** The digon creates of circles [i] < [j], in [Arrangement.createOrder]. */
     fun createsOf(i: Int, j: Int): List<DigonCreate> = createsByPair[i to j].orEmpty()
 
     /** The collapsible digons of circles [i] < [j]. */

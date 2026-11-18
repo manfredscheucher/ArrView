@@ -4,11 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +31,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
 import org.bytefred.arrview.core.Arrangement
@@ -47,7 +42,6 @@ import org.bytefred.arrview.core.canBeOuter
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /** World (drawing coordinates, y up) <-> screen (pixels, y down): screen = origin + (x, -y) * scale. */
 class ViewTransform {
@@ -149,7 +143,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
     }
 
     // the face whose context menu is open and where it opens
-    var faceMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
+    var faceMenu by remember { mutableStateOf<Triple<Arrangement, Int, Offset>?>(null) }
     // the face with several digon creates whose menu is open, where it opens and for which
     // arrangement (not a remember key: the pointer handler below keeps the state object it saw first)
     var createMenu by remember { mutableStateOf<Triple<Arrangement, Int, Offset>?>(null) }
@@ -197,7 +191,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                         onInteract()
                                         if (ev.buttons.isSecondaryPressed || ctrlClickIsRightClick && ev.keyboardModifiers.isCtrlPressed) {
                                             down = null
-                                            if (pressed.size == 1) hit(pressed[0].position)?.let { faceMenu = it to pressed[0].position }
+                                            if (pressed.size == 1) hit(pressed[0].position)?.let { faceMenu = Triple(st.arrangement, it, pressed[0].position) }
                                         } else if (pressed.size == 1) {
                                             down = pressed[0].position
                                             last = pressed[0].position
@@ -278,14 +272,12 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                     drawText(layout, topLeft = topLeft)
             }
         }
-        faceMenu?.let { (f, at) ->
-            // a zero-size anchor at the pointer: the menu opens right there
-            Box(Modifier.offset { IntOffset(at.x.roundToInt(), at.y.roundToInt()) }) {
-                FaceMenu(state, f) { faceMenu = null }
-            }
+        // menus of a previous arrangement are dropped
+        LaunchedEffect(state.arrangement) {
+            if (createMenu?.first != state.arrangement) createMenu = null
+            if (faceMenu?.first != state.arrangement) faceMenu = null
         }
-        // a menu of a previous arrangement is dropped
-        LaunchedEffect(state.arrangement) { if (createMenu?.first != state.arrangement) createMenu = null }
+        faceMenu?.takeIf { it.first == state.arrangement }?.let { (_, f, at) -> FaceMenu(state, f, at) { faceMenu = null } }
         createMenu?.takeIf { it.first == state.arrangement }?.let { (_, f, at) ->
             val entries = remember(state.arrangement, f) { state.createEntries(f) }
             if (entries.isNotEmpty()) ActionMenu(state, at, state.createHeading(f), entries) { createMenu = null }
@@ -296,21 +288,25 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
 /** Pixels between a curve and its label. */
 private const val LABEL_OFFSET = 14.0
 
-/** The context menu of face [f]: what can be done with it. */
+/**
+ * The context menu of face [f] at [at]: what can be done with it (Flip triangle, Collapse digon,
+ * its digon creates with submenus, Make outer face).
+ */
 @Composable
-private fun FaceMenu(state: AppState, f: Int, close: () -> Unit) {
+private fun FaceMenu(state: AppState, f: Int, at: Offset, close: () -> Unit) {
     val arr = state.arrangement
-    // the arrangement may have changed meanwhile: only a face that still exists
-    val size = arr.faces.getOrNull(f)?.size ?: return close()
+    val size = arr.faces.getOrNull(f)?.size ?: return
     val outer = f == state.outerFace
-    DropdownMenu(expanded = true, onDismissRequest = close) {
-        MenuHeading(faceName(size) + if (outer) " (outer face)" else "")
-        if (size == 3) DropdownMenuItem(text = { Text("Flip triangle") }, onClick = { close(); state.flipTriangle(f) })
-        if (size == 2) DropdownMenuItem(text = { Text("Collapse digon") }, onClick = { close(); state.collapseDigon(f) })
-        if (!outer && arr.canBeOuter(f, state.model)) {
-            DropdownMenuItem(text = { Text("Make outer face") }, onClick = { close(); state.makeOuterFace(f) })
+    val entries = remember(arr, f, outer, state.model) {
+        val cell = Highlight(setOf(f))
+        buildList {
+            if (size == 3) add(MenuNode("Flip triangle", cell) { state.flipTriangle(f) })
+            if (size == 2) add(MenuNode("Collapse digon", cell) { state.collapseDigon(f) })
+            addAll(state.faceCreateEntries(f))
+            if (!outer && arr.canBeOuter(f, state.model)) add(MenuNode("Make outer face", cell) { state.makeOuterFace(f) })
         }
     }
+    ActionMenu(state, at, faceName(size) + if (outer) " (outer face)" else "", entries, close)
 }
 
 private fun faceName(sides: Int) = when (sides) {

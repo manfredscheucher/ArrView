@@ -87,8 +87,11 @@ private val GENERAL_TEXT = listOf(
     "In menus a face is written as the circles of its sides in order around it, for example 1 2 1 3. " +
         "Pointing at a menu entry highlights its face in yellow (the outer face: its boundary, and the entry " +
         "says (outer face)), the two sides of a digon create in orange.",
-    "Right-click a face (Ctrl+click on a Mac) for its menu; Make outer face there draws that face " +
-        "around the rest. Drag to pan, zoom with the wheel or by pinching.",
+    "Right-click a face (Ctrl+click on a Mac) for its menu: Flip triangle, Collapse digon, one Create " +
+        "digon entry per pair of circles that can create a digon there (several ways: a submenu), and Make " +
+        "outer face, which draws that face around the rest. Drag to pan, zoom with the wheel or by pinching.",
+    "Where there are several ways to create a digon of circles i and j, they are listed along circle i " +
+        "(the smaller number), in the order of its sequence, then along circle j.",
     "Model 1 and Model 2 (toolbar, View menu, Layout widget) are two ways to draw. Model 1 draws the " +
         "crossings only, a digon is a point where its two circles touch (blue dot). It needs an " +
         "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
