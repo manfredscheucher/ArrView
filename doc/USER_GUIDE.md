@@ -37,8 +37,10 @@ https://manfredscheucher.github.io/ArrView/
 - Intersection graph: an edge for every pair of crossing circles, dashed for a non-crossing pair that
   can create a digon; a yellow stripe (twice as strong if ambiguous) for every pair that can create or
   collapse one. Click a striped pair to do it (several ways: a menu of the faces, then submenus).
+  Below it: "possible digon creates (k): 1 3 (x2), 2 4" and "possible digon collapses (k): ...";
+  "(xm)" marks m ways.
 - Triangle hypergraph: a transparent triangle per triple of circles bounding a triangle face (twice as
-  strong for two or more). Click a triangle to flip it.
+  strong for two or more). Click a triangle to flip it. Below it: "possible triangle flips (k): ...".
 - Settings: Display (colour scheme: Standard, rainbow, rainbow2 (default), rainbow3-2, rainbow3-k;
   line width 0.5 to 8, default 3) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
   defaults for all.

@@ -78,4 +78,22 @@ class CellActions(val arrangement: Arrangement) {
 
     /** The triangles per triple of circles (sorted `a < b < c`), in face order. */
     val triples: Map<List<Int>, List<Int>> = triangles.groupBy { f -> arr.faceCircles(f).sorted() }
+
+    /** The pairs i < j with a digon create and their numbers of options, by i, then j. */
+    val createPairs: List<Pair<List<Int>, Int>> = sortedCounts(createsByPair.map { (p, ops) -> p.toList() to ops.size })
+
+    /** The pairs i < j with a collapsible digon and their numbers of digons (always 1), by i, then j. */
+    val collapsePairs: List<Pair<List<Int>, Int>> = sortedCounts(collapsesByPair.map { (p, fs) -> p.toList() to fs.size })
+
+    /** The triples with a triangle and their numbers of triangles, sorted numerically. */
+    val triangleTriples: List<Pair<List<Int>, Int>> = sortedCounts(triples.map { (t, fs) -> t to fs.size })
+
+    /** The pairs with an action (the striped, clickable ones of the intersection graph), by i, then j. */
+    val actionPairs: List<Pair<Int, Int>> = (createPairs + collapsePairs).map { (p, _) -> p[0] to p[1] }.sortedWith(compareBy({ it.first }, { it.second }))
 }
+
+/** [entries] sorted lexicographically on their circle numbers. */
+private fun sortedCounts(entries: List<Pair<List<Int>, Int>>): List<Pair<List<Int>, Int>> =
+    entries.sortedWith { (a, _), (b, _) ->
+        (0 until minOf(a.size, b.size)).firstOrNull { a[it] != b[it] }?.let { a[it].compareTo(b[it]) } ?: a.size.compareTo(b.size)
+    }

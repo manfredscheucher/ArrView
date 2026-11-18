@@ -109,6 +109,17 @@ class HelpClaimsTest {
     }
 
     @Test
+    fun listsBelowTheGraphs() {
+        // the Help examples are in the format of the lists
+        assertEquals("possible digon creates (3): 1 3 (x2), 2 4, 2 5", possibleList("digon creates", listOf(listOf(0, 2) to 2, listOf(1, 3) to 1, listOf(1, 4) to 1)))
+        assertSays(HelpPage.WIDGETS, "possible digon creates (3): 1 3 (x2), 2 4, 2 5,")
+        assertEquals("possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6", possibleList("triangle flips", listOf(listOf(0, 1, 2) to 2, listOf(0, 1, 3) to 1, listOf(2, 3, 5) to 1)))
+        assertSays(HelpPage.WIDGETS, "possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6.")
+        assertEquals("possible digon collapses (0): none", possibleList("digon collapses", emptyList()))
+        assertTrue("\"possible digon creates (k): 1 3 (x2), 2 4\"" in guide.replace("\n  ", " "))
+    }
+
+    @Test
     fun settingsWidget() {
         assertSays(HelpPage.WIDGETS, "colour scheme of the circles (default rainbow2;")
         assertEquals("rainbow2", ColorScheme.DEFAULT.label)

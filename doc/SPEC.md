@@ -2,6 +2,45 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Lists of possible actions below the graphs
+
+### Request (Manfred)
+
+Below the intersection graph and the triangle hypergraph, show all pairs and triples where an action
+is possible, e.g. "possible triangle flips (13): ..." followed by the 13 entries. Format clarified
+with a reviewer and confirmed by Manfred.
+
+### Decisions
+
+- Intersection graph, two lines below the graph:
+  - "possible digon creates (k): 1 3 (x2), 2 4, 2 5"
+  - "possible digon collapses (k): 1 2, 3 4"
+- Triangle hypergraph, one line below the graph:
+  - "possible triangle flips (k): 1 2 3 (x2), 1 2 4, 3 4 6"
+- k is the number of listed pairs or triples (entries, not options).
+- Each pair or triple is written as space-separated circle numbers, ascending inside. Entries are
+  separated by ", " and sorted numerically (lexicographic on the numbers).
+- "(xm)" marks a pair or triple with m >= 2 options, i.e. the ones that open a menu or are drawn
+  double strength. It is the same set and the same count as the menus. Collapses can never be
+  ambiguous, so they never get one.
+- Empty list: "possible digon creates (0): none". Lines are always shown.
+- Small text in the same style as the count line above the graph. Plain text, not clickable,
+  wrapping; the widget scrolls if needed, no truncation.
+- The lists must be exactly the pairs/triples that get stripes/triangles and are clickable (same
+  source: CellActions). Test that on several examples, including a big one.
+
+### Implementation (2026-11-18)
+
+- `CellActions.createPairs`, `collapsePairs`, `triangleTriples` (entries with their numbers of
+  options, sorted), `actionPairs` (the striped and clickable pairs; the intersection graph now uses
+  it for stripes and hits). `possibleList(...)` writes a line. Tests: `DigonCreateTest`
+  (lists = stripes / triangles on 300 samples and the n = 24, 42 Fueredi-Palasti examples),
+  `ActionsUiTest` (the lines in the widgets), `HelpClaimsTest`.
+
+### Claude's choices (to confirm)
+
+- The lines use the same text style as the count line (bodyMedium), below the graph canvas.
+
 ## 2026-11-18: Colour scheme and line width, Settings widget
 
 ### Request (Manfred)

@@ -249,9 +249,7 @@ private fun IntersectionGraphWidget(state: AppState) {
     val arr = state.arrangement
     val edges = remember(arr) { arr.intersectionGraph() }
     val actions = state.actions
-    val striped = remember(actions) {
-        (0 until arr.n).flatMap { i -> (i + 1 until arr.n).map { j -> i to j } }.filter { (i, j) -> actions.pairActionCount(i, j) > 0 }
-    }
+    val striped = actions.actionPairs
     val measurer = rememberTextMeasurer()
     val edgeColor = MaterialTheme.colorScheme.outline
     var menu by remember(arr) { mutableStateOf<Pair<Pair<Int, Int>, Offset>?>(null) }
@@ -293,7 +291,22 @@ private fun IntersectionGraphWidget(state: AppState) {
             ActionMenu(state, at, state.pairHeading(i, j), entries) { menu = null }
         }
     }
+    ActionList(possibleList("digon creates", actions.createPairs), "possible-creates")
+    ActionList(possibleList("digon collapses", actions.collapsePairs), "possible-collapses")
 }
+
+/** A line below a graph view listing the possible actions (small text as the count line, wrapping). */
+@Composable
+private fun ActionList(text: String, tag: String) =
+    Text(text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag(tag))
+
+/**
+ * "possible <what> (k): 1 3 (x2), 2 4": the pairs or triples (0-based [entries] with their numbers
+ * of options, already sorted) written 1-based, "(xm)" for m >= 2 options; "none" if empty.
+ */
+internal fun possibleList(what: String, entries: List<Pair<List<Int>, Int>>): String =
+    "possible $what (${entries.size}): " +
+        if (entries.isEmpty()) "none" else entries.joinToString(", ") { (c, m) -> circlesLabel(c) + if (m >= 2) " (x$m)" else "" }
 
 /**
  * The triangle cells as a 3-uniform hypergraph on the vertices of the intersection graph: a
@@ -344,6 +357,7 @@ private fun TriangleHypergraphWidget(state: AppState) {
             ActionMenu(state, at, "Flip a triangle", entries) { menu = null }
         }
     }
+    ActionList(possibleList("triangle flips", actions.triangleTriples), "possible-flips")
 }
 
 private fun plural(k: Int, word: String) = if (k == 1) "1 $word" else "$k ${word}s"

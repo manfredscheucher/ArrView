@@ -38,6 +38,7 @@ import kotlin.math.abs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -536,6 +537,43 @@ class ActionsUiTest {
         waitForIdle()
         assertEquals(krupp.triangleFlip(faces[2]), s.arrangement)
         undoGivesBack(s, krupp)
+    }
+
+    @Test
+    fun listsOfPossibleActionsBelowTheGraphs() = runComposeUiTest {
+        // circle 1 crosses four small circles 2..5, which do not cross each other: every pair of
+        // them can create a digon inside or outside circle 1; no collapse (it would cut a circle off)
+        val star = Arrangement.parse("{1: [2, -2, 3, -3, 4, -4, 5, -5], 2: [-1, 1], 3: [-1, 1], 4: [-1, 1], 5: [-1, 1]}")
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, star, widget = Widget.INTERSECTION_GRAPH)
+        runOnIdle { s.toggleWidget(Widget.TRIANGLE_HYPERGRAPH) }
+        waitForIdle()
+        assertEquals("possible digon creates (6): 2 3 (x2), 2 4 (x2), 2 5 (x2), 3 4 (x2), 3 5 (x2), 4 5 (x2)", onNodeWithTag("possible-creates").text())
+        assertEquals("possible digon collapses (0): none", onNodeWithTag("possible-collapses").text())
+        assertEquals("possible triangle flips (0): none", onNodeWithTag("possible-flips").text())
+        // a create of 2 and 3 by a click on its stripe: the lists follow
+        val size = graphSize("intersection-graph")
+        val at = assertNotNull(pairPoint(star, s.actions, size, 1, 2))
+        onNodeWithTag("intersection-graph").performMouseInput { click(at) }
+        waitForIdle()
+        menuLabels(s.pairEntries(1, 2).map { it.label }).first().let { menuItem(it).performClick() }
+        waitForIdle()
+        assertNotEquals(star, s.arrangement)
+        val a = s.actions
+        assertEquals(possibleList("digon creates", a.createPairs), onNodeWithTag("possible-creates").text())
+        assertEquals(possibleList("digon collapses", a.collapsePairs), onNodeWithTag("possible-collapses").text())
+        assertEquals(possibleList("triangle flips", a.triangleTriples), onNodeWithTag("possible-flips").text())
+        // the created pair crosses now: 2 3 is no create any more but a collapse; and 1 2, 1 3 can
+        // collapse too, since 2 and 3 stay connected through each other
+        assertTrue("2 3" !in onNodeWithTag("possible-creates").text()!!.substringAfter(": "))
+        assertEquals("possible digon collapses (3): 1 2, 1 3, 2 3", onNodeWithTag("possible-collapses").text())
+        // the start example: no creates or collapses, triangles on 4 triples with 2 each
+        runOnIdle { s.load("start", Examples.start.arrangement()) }
+        awaitFitted(s, view)
+        assertEquals("possible digon creates (0): none", onNodeWithTag("possible-creates").text())
+        val flips = onNodeWithTag("possible-flips").text()!!
+        assertTrue(Regex("""possible triangle flips \(4\): (\d \d \d \(x2\)(, )?){4}""").matches(flips), flips)
     }
 
     @Test

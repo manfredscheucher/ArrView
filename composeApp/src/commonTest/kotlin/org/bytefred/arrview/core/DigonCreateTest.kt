@@ -195,6 +195,23 @@ class DigonCreateTest {
     }
 
     @Test
+    fun listsOfPossibleActionsAreTheStripedPairsAndTheTriples() {
+        val big = listOf("n42-great-fueredi-palasti", "n24-great-fueredi-palasti").map { Examples.byName(it)!!.arrangement(0) }
+        for (arr in samples.take(300) + big) {
+            val a = CellActions(arr)
+            val pairs = (0 until arr.n).flatMap { i -> (i + 1 until arr.n).map { j -> i to j } }
+            // the striped / clickable pairs of the intersection graph
+            assertEquals(pairs.filter { (i, j) -> a.pairActionCount(i, j) > 0 }, a.actionPairs)
+            assertEquals(pairs.filter { (i, j) -> a.createsOf(i, j).isNotEmpty() }.map { (i, j) -> listOf(i, j) to a.createsOf(i, j).size }, a.createPairs)
+            assertEquals(pairs.filter { (i, j) -> a.collapsesOf(i, j).isNotEmpty() }.map { (i, j) -> listOf(i, j) to 1 }, a.collapsePairs)
+            // the triangles of the hypergraph, triples sorted numerically
+            val triples = (0 until arr.n).flatMap { x -> (x + 1 until arr.n).flatMap { y -> (y + 1 until arr.n).map { z -> listOf(x, y, z) } } }
+            assertEquals(triples.filter { it in a.triples }.map { it to a.triples.getValue(it).size }, a.triangleTriples)
+            assertEquals(arr.triangleCount, a.triangleTriples.sumOf { it.second })
+        }
+    }
+
+    @Test
     fun actionsOfTheLargestExamples() {
         // computed on the UI thread after every change: must stay fast
         for (name in listOf("n42-great-fueredi-palasti", "n14-digonfree-some-min-triangles")) {
