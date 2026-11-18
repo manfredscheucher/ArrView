@@ -147,6 +147,9 @@ class AppState(
     /** The faces and sides (of the current arrangement) highlighted in the canvas while the pointer is on a menu entry for them. */
     var menuHighlight by mutableStateOf<Highlight?>(null)
 
+    /** The pair or triple (circles) of a hovered list entry below a graph view, highlighted in the graph. */
+    var graphHighlight by mutableStateOf<List<Int>?>(null)
+
     private var actionsCache: CellActions? = null
 
     /** What can be flipped, collapsed or created in the current arrangement (computed once per arrangement). */
@@ -378,6 +381,7 @@ class AppState(
         outerKey = e.outerKey
         hoverFace = null
         menuHighlight = null
+        graphHighlight = null
         relayout()
     }
 
@@ -393,6 +397,7 @@ class AppState(
         outerKey = keep
         hoverFace = null
         menuHighlight = null
+        graphHighlight = null
         relayout()
     }
 

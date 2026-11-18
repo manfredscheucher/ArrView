@@ -101,6 +101,9 @@ fun ProvideMonoStyle(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalMonoStyle provides style, content = content)
 }
 
+/** The colour of links (underlined text that does something on a click). */
+internal val LINK_COLOR = Color(0xFF1A4FB0)
+
 /** A clickable link (PoCoView's). */
 @Composable
 fun LinkText(label: String, url: String, style: TextStyle = LocalTextStyle.current) {
@@ -108,7 +111,7 @@ fun LinkText(label: String, url: String, style: TextStyle = LocalTextStyle.curre
     Text(
         label,
         style = style.copy(textDecoration = TextDecoration.Underline),
-        color = Color(0xFF1A4FB0),
+        color = LINK_COLOR,
         modifier = Modifier.clickable { openUriSafely(uri, url) }.padding(vertical = 2.dp),
     )
 }

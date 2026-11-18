@@ -576,6 +576,92 @@ class ActionsUiTest {
         assertTrue(Regex("""possible triangle flips \(4\): \d \d \d \(x2\)(, \d \d \d \(x2\)){3}""").matches(flips), flips)
     }
 
+    /** The list entry of [c] (0-based circles) in the list [tag]. */
+    private fun ComposeUiTest.entry(tag: String, c: List<Int>) = onNodeWithTag("$tag-${c.joinToString("-") { "${it + 1}" }}")
+
+    @Test
+    fun listEntriesActLikeTheGraph() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        // a unique create and a collapse: an arrangement with a create pair of one option and a collapsible digon
+        val arr = candidates.first { a -> CellActions(a).let { x -> x.createPairs.any { it.second == 1 } && x.collapsePairs.isNotEmpty() } }
+        show(s, view, arr, widget = Widget.INTERSECTION_GRAPH)
+        val a = s.actions
+        val (single, _) = a.createPairs.first { it.second == 1 }
+        entry("possible-creates", single).assertExists()
+        // pointing at an entry highlights the pair in the graph and its cell on the canvas
+        entry("possible-creates", single).performMouseInput { moveTo(center) }
+        waitForIdle()
+        assertEquals(single, s.graphHighlight)
+        assertEquals(Highlight(setOf(a.createsOf(single[0], single[1]).single().face)), s.menuHighlight)
+        entry("possible-creates", single).performMouseInput { click(center) }
+        waitForIdle()
+        assertEquals(arr.digonCreate(a.createsOf(single[0], single[1]).single()), s.arrangement)
+        // Ctrl+Z right after the click (the entry does not take the focus)
+        undoGivesBack(s, arr)
+        val (collapse, _) = s.actions.collapsePairs.first()
+        val digon = s.actions.collapsesOf(collapse[0], collapse[1]).single()
+        entry("possible-collapses", collapse).performMouseInput { click(center) }
+        waitForIdle()
+        assertEquals(arr.digonCollapse(digon), s.arrangement)
+        undoGivesBack(s, arr)
+    }
+
+    @Test
+    fun anAmbiguousListEntryOpensTheMenu() = runComposeUiTest {
+        // the star: every create pair has two cells (inside and outside circle 1)
+        val star = Arrangement.parse("{1: [2, -2, 3, -3, 4, -4, 5, -5], 2: [-1, 1], 3: [-1, 1], 4: [-1, 1], 5: [-1, 1]}")
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, star, widget = Widget.INTERSECTION_GRAPH)
+        onNodeWithTag("possible-creates-2-3").assertExists()
+        assertEquals("2 3 (x2)", onNodeWithTag("possible-creates-2-3").text())
+        onNodeWithTag("possible-creates-2-3").performMouseInput { click(center) }
+        waitForIdle()
+        assertEquals(star, s.arrangement)
+        onNodeWithText("Create a digon of 2 3").assertExists()
+        val nodes = s.pairEntries(1, 2)
+        val labels = menuLabels(nodes.map { it.label })
+        hoverEntry(s, labels[1], nodes[1].highlight)
+        menuItem(labels[1]).performClick()
+        waitForIdle()
+        assertEquals(star.digonCreate(s.let { CellActions(star).createsOf(1, 2)[1] }), s.arrangement)
+        undoGivesBack(s, star)
+    }
+
+    @Test
+    fun tripleListEntriesFlipOrOpenTheMenu() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        // a triple with one triangle flips directly
+        val arr = candidates.first { a -> CellActions(a).triangleTriples.any { it.second == 1 } }
+        show(s, view, arr, widget = Widget.TRIANGLE_HYPERGRAPH)
+        val (t, _) = s.actions.triangleTriples.first { it.second == 1 }
+        entry("possible-flips", t).performMouseInput { moveTo(center) }
+        waitForIdle()
+        assertEquals(t, s.graphHighlight)
+        entry("possible-flips", t).performMouseInput { click(center) }
+        waitForIdle()
+        assertEquals(arr.triangleFlip(CellActions(arr).triples.getValue(t).single()), s.arrangement)
+        undoGivesBack(s, arr)
+        // the start example: every triple has two triangles, the entry opens the menu of its cells
+        val start = Examples.start.arrangement()
+        runOnIdle { s.load("start", start) }
+        awaitFitted(s, view)
+        val (t2, m) = s.actions.triangleTriples.first()
+        assertEquals(2, m)
+        assertEquals("${circlesLabel(t2)} (x2)", entry("possible-flips", t2).text())
+        entry("possible-flips", t2).performMouseInput { click(center) }
+        waitForIdle()
+        onNodeWithText("Flip a triangle").assertExists()
+        val faces = s.actions.triples.getValue(t2)
+        val labels = menuLabels(faces.map { s.cellLabel(it) })
+        menuItem(labels[1]).performClick()
+        waitForIdle()
+        assertEquals(start.triangleFlip(faces[1]), s.arrangement)
+        undoGivesBack(s, start)
+    }
+
     @Test
     fun graphClickOnAUniquePairFlipsIt() = runComposeUiTest {
         val s = state()

@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,9 +26,9 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -48,19 +48,29 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.crosses
 import org.bytefred.arrview.core.intersectionGraph
@@ -261,14 +271,7 @@ private fun IntersectionGraphWidget(state: AppState) {
                     val circle = vertexCircle(arr.n, size.toSize())
                     val pair = striped.map { (i, j) -> (i to j) to segmentDistance(pos, circle.at(i), circle.at(j)) }
                         .filter { it.second <= PAIR_HIT.toPx() }.minByOrNull { it.second }?.first ?: return@detectTapGestures
-                    val (i, j) = pair
-                    val creates = actions.createsOf(i, j)
-                    val collapses = actions.collapsesOf(i, j)
-                    when {
-                        creates.size + collapses.size >= 2 -> menu = pair to pos
-                        creates.size == 1 -> state.createDigon(creates.single())
-                        collapses.size == 1 -> state.collapseDigon(collapses.single())
-                    }
+                    if (state.actOnPair(pair.first, pair.second)) menu = pair to pos
                 }
             },
         ) {
@@ -277,6 +280,10 @@ private fun IntersectionGraphWidget(state: AppState) {
             for ((i, j) in striped) {
                 // twice as strong for several ways: drawn twice
                 repeat(if (actions.pairActionCount(i, j) >= 2) 2 else 1) { drawLine(STRIPE_COLOR, circle.at(i), circle.at(j), strokeWidth = stripe) }
+            }
+            // the pair of a hovered list entry
+            state.graphHighlight?.takeIf { it.size == 2 }?.let { (i, j) ->
+                if (i < arr.n && j < arr.n) drawLine(HIGHLIGHT_SIDE, circle.at(i), circle.at(j), strokeWidth = stripe)
             }
             for ((c, d) in edges) drawLine(edgeColor, circle.at(c), circle.at(d), strokeWidth = 1.5f)
             val dashes = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
@@ -291,14 +298,101 @@ private fun IntersectionGraphWidget(state: AppState) {
             ActionMenu(state, at, state.pairHeading(i, j), entries) { menu = null }
         }
     }
-    ActionList(possibleList("digon creates", actions.createPairs), "possible-creates")
-    ActionList(possibleList("digon collapses", actions.collapsePairs), "possible-collapses")
+    val pairMenu: @Composable (List<Int>, Offset, () -> Unit) -> Unit = { c, at, close ->
+        val (i, j) = c
+        val entries = remember(arr, c) { state.pairEntries(i, j) }
+        ActionMenu(state, at, state.pairHeading(i, j), entries, close)
+    }
+    ActionList(state, "digon creates", actions.createPairs, "possible-creates", { (i, j) -> state.actOnPair(i, j) }, pairMenu)
+    ActionList(state, "digon collapses", actions.collapsePairs, "possible-collapses", { (i, j) -> state.actOnPair(i, j) }, pairMenu)
 }
 
-/** A line below a graph view listing the possible actions (small text as the count line, wrapping). */
+/**
+ * A click on pair [i] < [j] (a stripe of the intersection graph or a list entry): a single create
+ * or collapse is done; true if there are several ways, then the caller opens the pair's menu.
+ */
+private fun AppState.actOnPair(i: Int, j: Int): Boolean {
+    val creates = actions.createsOf(i, j)
+    val collapses = actions.collapsesOf(i, j)
+    when {
+        creates.size + collapses.size >= 2 -> return true
+        creates.size == 1 -> createDigon(creates.single())
+        collapses.size == 1 -> collapseDigon(collapses.single())
+    }
+    return false
+}
+
+/** The cells of the actions of a pair or a triple [c] (highlighted on the canvas while its list entry is hovered). */
+private fun AppState.cellsOf(c: List<Int>): Set<Int> = when (c.size) {
+    2 -> (actions.createsOf(c[0], c[1]).map { it.face } + actions.collapsesOf(c[0], c[1])).toSet()
+    else -> actions.triples[c].orEmpty().toSet()
+}
+
+/**
+ * A line below a graph view listing the possible actions: "possible <what> (k): " and the entries
+ * ([possibleList]), each a link. A click does what a click on the pair or triple in the graph does
+ * ([act] returns true when the menu of [c] has to open, shown by [menu] below the entry); pointing
+ * at an entry highlights it in the graph and its cells on the canvas.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ActionList(text: String, tag: String) =
-    Text(text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag(tag))
+private fun ActionList(
+    state: AppState,
+    what: String,
+    entries: List<Pair<List<Int>, Int>>,
+    tag: String,
+    act: (List<Int>) -> Boolean,
+    menu: @Composable (List<Int>, Offset, () -> Unit) -> Unit,
+) {
+    val style = MaterialTheme.typography.bodyMedium
+    var open by remember(state.arrangement) { mutableStateOf<List<Int>?>(null) }
+    val text = possibleList(what, entries)
+    FlowRow(Modifier.testTag(tag).semantics { this.text = AnnotatedString(text) }) {
+        Text("possible $what (${entries.size}): ", style = style)
+        if (entries.isEmpty()) Text("none", style = style)
+        for ((k, entry) in entries.withIndex()) {
+            val (c, m) = entry
+            val label = circlesLabel(c) + if (m >= 2) " (x$m)" else ""
+            var height by remember { mutableStateOf(0) }
+            Box {
+                Text(
+                    label,
+                    style = style.copy(textDecoration = TextDecoration.Underline),
+                    color = LINK_COLOR,
+                    modifier = Modifier
+                        .testTag("$tag-${c.joinToString("-") { "${it + 1}" }}")
+                        .onSizeChanged { height = it.height }
+                        .pointerInput(c) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    when (awaitPointerEvent().type) {
+                                        PointerEventType.Enter -> {
+                                            state.graphHighlight = c
+                                            state.menuHighlight = Highlight(state.cellsOf(c))
+                                        }
+                                        PointerEventType.Exit -> if (state.graphHighlight == c) {
+                                            state.graphHighlight = null
+                                            if (open == null) state.menuHighlight = null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // a tap, not clickable: the entry must not take the keyboard focus (it may vanish with
+                        // the click, and the shortcuts such as Ctrl+Z need the focus in the app)
+                        .pointerInput(c) { detectTapGestures { if (act(c)) open = c } }
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .semantics {
+                            role = Role.Button
+                            onClick { if (act(c)) open = c; true }
+                        },
+                )
+                if (open == c) menu(c, Offset(0f, height.toFloat())) { open = null }
+            }
+            if (k < entries.size - 1) Text(", ", style = style)
+        }
+    }
+}
 
 /**
  * "possible <what> (k): 1 3 (x2), 2 4": the pairs or triples (0-based [entries] with their numbers
@@ -328,11 +422,7 @@ private fun TriangleHypergraphWidget(state: AppState) {
                 detectTapGestures { pos ->
                     val circle = vertexCircle(arr.n, size.toSize())
                     val hits = triples.keys.sortedWith(compareBy({ it[0] }, { it[1] }, { it[2] })).filter { t -> inTriangle(pos, circle.at(t[0]), circle.at(t[1]), circle.at(t[2])) }
-                    val single = hits.singleOrNull()?.let { triples.getValue(it).singleOrNull() }
-                    when {
-                        single != null -> state.flipTriangle(single)
-                        hits.isNotEmpty() -> menu = hits to pos
-                    }
+                    if (state.actOnTriples(hits)) menu = hits to pos
                 }
             },
         ) {
@@ -349,6 +439,8 @@ private fun TriangleHypergraphWidget(state: AppState) {
                     drawPath(path, HYPEREDGE_FILL)
                     drawPath(path, HYPEREDGE_LINE, style = Stroke(1f))
                 }
+                // the triple of a hovered list entry
+                if (state.graphHighlight == t) drawPath(path, HIGHLIGHT_SIDE, style = Stroke(3.dp.toPx()))
             }
             drawVertices(circle, measurer, state.colorScheme)
         }
@@ -357,7 +449,23 @@ private fun TriangleHypergraphWidget(state: AppState) {
             ActionMenu(state, at, "Flip a triangle", entries) { menu = null }
         }
     }
-    ActionList(possibleList("triangle flips", actions.triangleTriples), "possible-flips")
+    ActionList(state, "triangle flips", actions.triangleTriples, "possible-flips", { t -> state.actOnTriples(listOf(t)) }) { t, at, close ->
+        val entries = remember(arr, t) { state.triangleEntries(mapOf(t to triples[t].orEmpty())) }
+        ActionMenu(state, at, "Flip a triangle", entries, close)
+    }
+}
+
+/**
+ * A click on the triples [hits] (under the pointer in the hypergraph, or a list entry): one
+ * triple with one triangle flips it; true if there are several, then the caller opens the menu.
+ */
+private fun AppState.actOnTriples(hits: List<List<Int>>): Boolean {
+    val single = hits.singleOrNull()?.let { actions.triples[it]?.singleOrNull() }
+    when {
+        single != null -> flipTriangle(single)
+        hits.isNotEmpty() -> return true
+    }
+    return false
 }
 
 private fun plural(k: Int, word: String) = if (k == 1) "1 $word" else "$k ${word}s"

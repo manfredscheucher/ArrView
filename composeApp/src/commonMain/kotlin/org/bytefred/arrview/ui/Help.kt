@@ -124,12 +124,14 @@ private val WIDGETS_TEXT = listOf(
         "that can create or collapse a digon, twice as strong if there are several ways; click it to do it " +
         "(a menu lists the faces if there are several, a face with several ways opens a submenu). Below the " +
         "graph: the possible digon creates and collapses, e.g. possible digon creates (3): 1 3 (x2), 2 4, 2 5. " +
-        "(x2) marks a pair with 2 ways.",
+        "(x2) marks a pair with 2 ways. The entries are links: a click does what a click on the pair in the " +
+        "graph does, and pointing at one highlights the pair and its faces.",
     "Triangle hypergraph: the same vertices, and a transparent triangle for every triple of circles that " +
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
         "a menu lists them with their faces (several triples: a submenu per triple). Below it: the possible " +
-        "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6.",
+        "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it " +
+        "(several triangles: a menu).",
     "Settings: Display and Layout. Display: the colour scheme of the circles (default " +
         "${ColorScheme.DEFAULT.label}; Standard is a fixed list of 12 colours, the rainbow schemes are computed " +
         "from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +

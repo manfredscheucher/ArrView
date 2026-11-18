@@ -2,6 +2,38 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Clickable action lists
+
+### Request (Manfred)
+
+The entries of "possible digon creates / collapses / triangle flips" below the graphs become
+clickable.
+
+### Decisions
+
+- A click on an entry does exactly what a click on that pair's stripe or that triple does: a unique
+  entry acts directly, an ambiguous one opens the same menu / submenu.
+- Hovering an entry highlights it in the graph and its cell(s) on the canvas, like hovering the graph.
+- The link style of the app (LinkText) or an equivalent clearly clickable style; "(xm)" and the
+  counts stay.
+
+### Implementation (2026-11-18)
+
+- Each entry ("1 3 (x2)") is a link (LinkText's colour, underlined, hand cursor); the prefix, the
+  commas and "none" stay plain text, the line wraps (FlowRow). The click goes through the same code
+  as the graph (`actOnPair`, `actOnTriples`); a menu opens below the entry.
+- Tests (`ActionsUiTest`): unique create, collapse, ambiguous create with its menu, triple with one
+  triangle, triple with two (menu), hover highlights, Ctrl+Z right after an entry click.
+
+### Claude's choices (to confirm)
+
+- Hovering the graph itself highlights nothing (it never did); "like hovering the graph" is read
+  as: the entry's pair (an orange line over its stripe) or triple (an orange outline) in the graph,
+  and all cells of its actions (every create cell of the pair, its digon, or every triangle of the
+  triple) in yellow on the canvas, as hovering a menu entry does.
+- The entries react to a tap but do not take the keyboard focus (an entry may disappear with its
+  click, and Ctrl+Z must still work); they have a button role for accessibility.
+
 ## 2026-11-18: Rainbow schemes in OKLCH
 
 ### Request (Manfred)
