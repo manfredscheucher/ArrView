@@ -45,7 +45,14 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
 - Tests: `DigonCreateTest` (every create of the n <= 4 sets, all of `n5-connected-all`, samples of the
   others up to n = 14: valid, +2 crossings, +2 faces, one digon of the pair, p2 + 1 minus the digons
   across the two sides, collapse of the new digon gives the exact sequences back; collapse then create
-  gives the original back, canonically and exactly up to list rotation), `ActionsUiTest` (clicks).
+  gives the original back exactly (up to list rotation) through the face the digon merged into),
+  `ActionsUiTest` (clicks). Sample sets: every set with n <= 4 or at most 30 members and
+  `n5-connected-all` in full, about 25 members of the others up to n = 14.
+
+- Finding: a pair never has two collapsible digons. Two digons of one pair use three or four of its
+  four arcs, so one circle crosses no other one and a collapse would cut it off. So "several digons
+  to collapse" does not occur; double stripes and graph menus come from creates only (the code
+  handles collapses generally; `DigonCreateTest` checks this on all samples).
 
 ### Claude's choices (to confirm)
 
@@ -74,6 +81,10 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
   with >= 2 triangle cells drawn twice. Above it "p3 triangles on k triples". A click on a point in a
   single triangle of a triple with one cell flips; otherwise a menu of all hit triples and cells.
 - Status after a create: "Created a digon of i and j".
+- Menu order: canvas create menu by pair (i, then j); graph menu by face; hypergraph menu by triple.
+- "Triangle hypergraph" sits after "Intersection graph" in the toolbar chips and the View menu.
+- The canvas "!" sits at the grid point farthest from the boundary (24 x 24 grid over the face); for
+  a face too thin for the grid, the middle of its widest horizontal chord.
 - The right-click face menu is unchanged (no create entries there; see open questions).
 
 ### Extra requests (Manfred, 2026-11-18)

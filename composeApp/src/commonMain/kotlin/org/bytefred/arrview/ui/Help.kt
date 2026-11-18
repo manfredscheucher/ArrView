@@ -78,12 +78,14 @@ private val GENERAL_TEXT = listOf(
         "twice or not at all, and together they are connected. Triangles are filled light orange, digons light blue.",
     "Click a triangle to flip it. Click a digon to collapse it, so that its two circles no longer cross; " +
         "this is refused if the arrangement would fall apart. Click a face where two circles that do not " +
-        "cross both have a side to create a digon: one is pushed across the other, they cross twice. If a " +
+        "cross both have a side to create a digon: one is pushed across the other, they cross twice (not in " +
+        "the outer face; for that use the intersection graph). If a " +
         "face offers several digon creates, a menu lists them as the two circles and the face, with the two " +
         "sides in brackets. A \"!\" appears in the face under the mouse when a click does something there. " +
         "Undo and Redo are in the Edit menu.",
     "In menus a face is written as the circles of its sides in order around it, for example 1 2 1 3. " +
-        "Pointing at a menu entry highlights its face in yellow.",
+        "Pointing at a menu entry highlights its face in yellow (the outer face: its boundary, and the entry " +
+        "says (outer face)).",
     "Right-click a face (Ctrl+click on a Mac) for its menu; Make outer face there draws that face " +
         "around the rest. Drag to pan, zoom with the wheel or by pinching.",
     "Model 1 and Model 2 (toolbar, View menu, Layout widget) are two ways to draw. Model 1 draws the " +

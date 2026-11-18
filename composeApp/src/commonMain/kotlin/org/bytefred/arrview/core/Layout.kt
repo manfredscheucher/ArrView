@@ -124,7 +124,19 @@ class Drawing(
             val d = poly.indices.minOf { distanceToSegment(p, poly[it], poly[(it + 1) % poly.size]) }
             if (d > bestDist) { best = p; bestDist = d }
         }
-        best ?: poly.first()
+        best ?: widestChordMiddle(poly)
+    }
+
+    /** The middle of the longest horizontal chord through the middle of the polygon's height. */
+    private fun widestChordMiddle(poly: List<Point>): Point {
+        val y = (poly.minOf { it.y } + poly.maxOf { it.y }) / 2
+        val xs = poly.indices.mapNotNull { i ->
+            val a = poly[i]
+            val b = poly[(i + 1) % poly.size]
+            if ((a.y > y) != (b.y > y)) a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y) else null
+        }.sorted()
+        val chord = xs.chunked(2).filter { it.size == 2 }.maxByOrNull { it[1] - it[0] } ?: return poly.first()
+        return Point((chord[0] + chord[1]) / 2, y)
     }
 
     companion object {

@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.TimeSource
 
 /** Digon create, its inverse digon collapse, and the actions per face / pair / triple. */
 class DigonCreateTest {
@@ -37,6 +38,25 @@ class DigonCreateTest {
         }
         assertEquals(1, digons.size, "the pair has one digon after the create")
         assertEquals(arr, created.digonCollapse(digons.single()), "collapse after create $op of $arr")
+        // the faces at the two corners of the new digon are the two parts of op.face: together
+        // they have its sides, plus one more side of i and of j (the split sides)
+        val corners = cornerFaces(created, digons.single())
+        assertEquals(2, corners.size, "two faces at the corners of the new digon")
+        assertEquals(
+            (arr.faceCircles(op.face) + op.i + op.j).sorted(),
+            corners.flatMap { created.faceCircles(it) }.sorted(),
+            "the new digon lies in face ${op.face}: create $op of $arr",
+        )
+    }
+
+    /** The faces at the two corners of digon [d], opposite to it (not across its sides). */
+    private fun cornerFaces(arr: Arrangement, d: Int): Set<Int> {
+        val across = arr.faces[d].map { arr.faceOfDart[arr.alpha(it)] }.toSet()
+        return arr.faces[d].flatMap { a ->
+            val k = a / 2
+            val p = arr.partners[k]
+            listOf(2 * k, 2 * k + 1, 2 * p, 2 * p + 1).map { arr.faceOfDart[it] }
+        }.toSet() - across - d
     }
 
     @Test
@@ -55,10 +75,13 @@ class DigonCreateTest {
         for (arr in samples) for (f in arr.faces.indices.filter { arr.faces[it].size == 2 }) {
             val collapsed = arr.digonCollapse(f) ?: continue
             val (c, d) = arr.faceCircles(f).sorted()
-            // the digon and the faces at its corners merge into one: some create through it gives arr back
-            val options = collapsed.digonCreates().filter { it.i == c && it.j == d }
-            assertTrue(options.any { collapsed.digonCreate(it).canonical == arr.canonical }, "collapse of $f in $arr")
-            // and exactly: some option gives the very same sequences up to a rotation of the lists
+            // the digon and the faces at its corners merge into one face: its sides are theirs minus
+            // one side of c and one of d; a create through that face gives arr back exactly
+            val corners = cornerFaces(arr, f)
+            assertEquals(2, corners.size)
+            val merged = corners.flatMap { arr.faceCircles(it) }.toMutableList().apply { remove(c); remove(d) }.sorted()
+            val options = collapsed.digonCreates().filter { it.i == c && it.j == d && collapsed.faceCircles(it.face).sorted() == merged }
+            assertTrue(options.isNotEmpty(), "no create through the merged face after collapse of $f in $arr")
             assertTrue(options.any { sameUpToRotation(collapsed.digonCreate(it), arr) }, "exact inverse of collapse $f in $arr")
             count++
         }
@@ -132,6 +155,9 @@ class DigonCreateTest {
                 assertEquals(expected, actions.hasAction(f))
             }
             for (i in 0 until arr.n) for (j in i + 1 until arr.n) {
+                // two digons of a pair use three or four of its four arcs, so one of the two circles
+                // crosses no other circle and a collapse would cut it off: never two collapses
+                assertTrue(actions.collapsesOf(i, j).size <= 1)
                 if (arr.crosses(i, j)) assertTrue(actions.createsOf(i, j).isEmpty())
                 else assertTrue(actions.collapsesOf(i, j).isEmpty())
             }
@@ -143,6 +169,18 @@ class DigonCreateTest {
         assertTrue(two.collapsible.isEmpty())
         assertEquals(0, two.pairActionCount(0, 1))
         assertTrue(Arrangement.two().faces.indices.none(two::hasAction))
+    }
+
+    @Test
+    fun actionsOfTheLargestExamples() {
+        // computed on the UI thread after every change: must stay fast
+        for (name in listOf("n42-great-fueredi-palasti", "n14-digonfree-some-min-triangles")) {
+            val set = Examples.byName(name) ?: continue
+            val arr = set.arrangement(0)
+            val start = TimeSource.Monotonic.markNow()
+            val actions = CellActions(arr)
+            println("CellActions $name: ${start.elapsedNow()} (${actions.creates.size} creates, ${actions.collapsible.size} collapsible)")
+        }
     }
 
     @Test

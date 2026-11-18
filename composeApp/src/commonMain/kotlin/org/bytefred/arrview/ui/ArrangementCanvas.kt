@@ -145,7 +145,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
     // the face whose context menu is open and where it opens
     var faceMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
     // the face with several digon creates whose menu is open and where it opens
-    var createMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
+    var createMenu by remember(state.arrangement) { mutableStateOf<Pair<Int, Offset>?>(null) }
 
     /** The face at a screen position, if the drawing shows the current arrangement. */
     fun hit(pos: Offset): Int? {
@@ -276,9 +276,8 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
             }
         }
         createMenu?.let { (f, at) ->
-            val entries = state.createEntries(f)
-            if (entries.isEmpty()) createMenu = null
-            else ActionMenu(state, at, "Create a digon", entries) { createMenu = null }
+            val entries = remember(state.arrangement, f) { state.createEntries(f) }
+            if (entries.isNotEmpty()) ActionMenu(state, at, "Create a digon", entries) { createMenu = null }
         }
     }
 }

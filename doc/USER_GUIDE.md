@@ -7,7 +7,7 @@ https://manfredscheucher.github.io/ArrView/
 
 - Click a triangle to flip it, a digon to collapse it (refused if the arrangement would fall apart).
 - Click a face where two non-crossing circles both have a side to create a digon (the two circles then
-  cross twice). Several options: a menu, e.g. `1 3: [1] 2 [3] 2` (the two sides in brackets).
+  cross twice; not in the outer face, use the intersection graph for that). Several options: a menu, e.g. `1 3: [1] 2 [3] 2` (the two sides in brackets).
 - A "!" in the face under the mouse: a click does something there. In menus a face is written as the
   circles of its sides around it; pointing at an entry highlights the face in yellow.
 - Right-click a face (Ctrl+click on a Mac) for its menu; "Make outer face" draws it outside.

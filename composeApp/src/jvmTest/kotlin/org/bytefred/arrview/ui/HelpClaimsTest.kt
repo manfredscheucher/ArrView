@@ -121,7 +121,8 @@ class HelpClaimsTest {
     fun flipsInTheGraphViewsAndTheMenuNotation() {
         assertSays(HelpPage.GENERAL, "Click a face where two circles that do not cross both have a side to create a digon")
         assertSays(HelpPage.GENERAL, "A \"!\" appears in the face under the mouse")
-        assertSays(HelpPage.GENERAL, "Pointing at a menu entry highlights its face in yellow.")
+        assertSays(HelpPage.GENERAL, "Pointing at a menu entry highlights its face in yellow")
+        assertSays(HelpPage.GENERAL, "not in the outer face; for that use the intersection graph")
         assertSays(HelpPage.WIDGETS, "A dashed edge: the two circles do not cross but can create a digon.")
         assertSays(HelpPage.WIDGETS, "A yellow stripe marks every pair")
         assertSays(HelpPage.WIDGETS, "A triple with two or more triangle faces is twice as strong.")

@@ -303,7 +303,7 @@ private fun TriangleHypergraphWidget(state: AppState) {
             Modifier.size(GRAPH_SIZE).testTag("triangle-hypergraph").pointerInput(actions) {
                 detectTapGestures { pos ->
                     val circle = vertexCircle(arr.n, size.toSize())
-                    val hits = triples.keys.filter { t -> inTriangle(pos, circle.at(t[0]), circle.at(t[1]), circle.at(t[2])) }
+                    val hits = triples.keys.sortedWith(compareBy({ it[0] }, { it[1] }, { it[2] })).filter { t -> inTriangle(pos, circle.at(t[0]), circle.at(t[1]), circle.at(t[2])) }
                     val single = hits.singleOrNull()?.let { triples.getValue(it).singleOrNull() }
                     when {
                         single != null -> state.flipTriangle(single)
