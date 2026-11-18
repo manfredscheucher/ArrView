@@ -37,7 +37,7 @@ are implemented there) and offer the scheme as a dropdown; the colours are compu
   provenance note changed). `ui/ColorScheme.kt`: Standard + the four palettes, `color(c, n)`.
 - Settings widget as PoCoView's Display widget: "Display" heading (titleSmall), Colour scheme
   (PoCoView's `SelectField` dropdown), "Line width: 3.0 px" + slider; 12 dp space, "Layout" heading,
-  model chips, Max. iterations, eps; 8 dp space, Reset to defaults (enabled when anything differs).
+  model chips, Max. iterations, eps; 8 dp space, Reset to defaults (always enabled, as in PoCoView).
 - Prefs `colorScheme` (enum name, unknown -> default) and `lineWidth` (clamped to 0.5..8).
 - Tests: `SettingsUiTest` (dropdown by clicks with pixel check of the graph vertices, slider by
   swipes with more inked canvas pixels, Reset, remembered and corrupt prefs, old "LAYOUT" id, SVG).
@@ -50,6 +50,17 @@ are implemented there) and offer the scheme as a dropdown; the colours are compu
   pixels), so the SVG curves look relatively thinner on a big canvas.
 - The colour scheme does not change the triangle/digon fills, the stripes or the highlights.
 - Unlike PoCoView's Display widget, the first subgroup has a heading too ("Display"), as the spec says.
+- As in PoCoView, Reset to defaults is always enabled; the colour scheme dropdown is a row with the
+  label left and the field (150 dp) right, like PoCoView's dropdowns.
+
+### Open questions
+
+- "Layout" now names two things: the Settings subgroup (model, iterations, eps) and the View menu
+  heading for auto / portrait / landscape (how the widgets are arranged). Rename the View menu one
+  (e.g. "Window layout")?
+- `SelectField` (PoCoView) and `ColorPalettes.kt` (blurred-memory) are now copies in ArrView;
+  candidates for kotlin-common. PoCoView's line width label has the "3" instead of "3.0" web issue
+  fixed here with `oneDecimal`.
 
 ## 2026-11-18: Create options ordered along the circle, creates in the right-click menu
 

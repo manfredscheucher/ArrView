@@ -116,7 +116,7 @@ class AppState(
     /** Width of the curves in pixels, on the canvas and in the SVG export (Settings widget). */
     var lineWidth by mutableFloatStateOf(DEFAULT_LINE_WIDTH)
 
-    /** Everything of the Settings widget is at its default (then Reset to defaults is off). */
+    /** Everything of the Settings widget is at its default. */
     val settingsAreDefault: Boolean
         get() = colorScheme == ColorScheme.DEFAULT && lineWidth == DEFAULT_LINE_WIDTH &&
             preferredModel == DrawModel.MODEL1 && layoutSettings == LayoutSettings()

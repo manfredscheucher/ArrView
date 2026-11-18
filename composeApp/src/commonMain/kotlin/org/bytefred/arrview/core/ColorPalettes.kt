@@ -17,7 +17,8 @@ import kotlin.math.sqrt
  *
  * so the colour interval is divided by `count` and each `index` gets its slice. Lightness bounds
  * ([lmin]/[lmax]) are parameters (not hard-coded) with hex610-like defaults, so they can be tuned in one
- * place. Pure Kotlin (no Compose): colours travel as 0xAARRGGBB Longs; the UI just wraps them in a Color. All schemes sweep the FULL 360° hue wheel and NEVER emit black (real rainbows).
+ * place. Pure Kotlin (no Compose): colours travel as 0xAARRGGBB Longs; the UI just wraps them in a
+ * Color. All schemes sweep the FULL 360° hue wheel and NEVER emit black (real rainbows).
  */
 enum class ColorPalette {
     /** rainbow: hue sweeps the full wheel by index, fixed mid lightness. */

@@ -98,7 +98,7 @@ class WidgetsUiTest {
     }
 
     @Test
-    fun layoutSettingsAndReset() = runComposeUiTest {
+    fun settingsLayoutFieldsAndReset() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         onNodeWithText("Settings").performClick()

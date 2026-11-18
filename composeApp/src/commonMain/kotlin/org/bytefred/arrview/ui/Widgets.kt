@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusChanged
@@ -382,10 +383,12 @@ private val GRAPH_SIZE = 240.dp
 private fun SettingsWidget(state: AppState) {
     val settings = state.layoutSettings
     Text("Display", style = MaterialTheme.typography.titleSmall)
-    SelectField(
-        "Colour scheme", state.colorScheme.label, ColorScheme.entries, { it.label },
-        Modifier.width(200.dp).testTag("color-scheme"),
-    ) { state.colorScheme = it }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Colour scheme", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        SelectField(null, state.colorScheme.label, ColorScheme.entries, { it.label }, Modifier.width(150.dp).testTag("color-scheme")) {
+            state.colorScheme = it
+        }
+    }
     Text("Line width: ${oneDecimal(state.lineWidth)} px", style = MaterialTheme.typography.bodyMedium)
     Slider(state.lineWidth, { state.lineWidth = it }, valueRange = AppState.LINE_WIDTH_RANGE, modifier = Modifier.testTag("line-width"))
 
@@ -401,9 +404,7 @@ private fun SettingsWidget(state: AppState) {
         "a positive number", Modifier.width(160.dp).testTag("eps"),
     ) { e -> if (e != null) state.changeLayoutSettings(state.layoutSettings.copy(eps = e)) }
     Spacer(Modifier.height(8.dp))
-    OutlinedButton(onClick = state::resetSettings, enabled = !state.settingsAreDefault) {
-        Text("Reset to defaults")
-    }
+    OutlinedButton(onClick = state::resetSettings) { Text("Reset to defaults") }
 }
 
 /** [v] with one decimal, the same on the JVM and the web (where 3.0 prints as "3"). */

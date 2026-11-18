@@ -1,12 +1,11 @@
 package org.bytefred.arrview.ui
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.percentOffset
 import androidx.compose.ui.test.click
@@ -62,7 +61,8 @@ class SettingsUiTest {
     @Test
     fun colourSchemeLineWidthAndReset() = runComposeUiTest {
         val s = state()
-        setContent { App(s, initialDialog = DialogKind.NONE) }
+        val view = ViewTransform()
+        setContent { App(s, view, DialogKind.NONE) }
         runOnIdle {
             s.toggleWidget(Widget.PROPERTIES)
             s.toggleWidget(Widget.SETTINGS)
@@ -72,8 +72,9 @@ class SettingsUiTest {
         waitForIdle()
         val n = s.arrangement.n
         onNodeWithText("Display").assertExists()
+        onNodeWithText("Colour scheme").assertExists()
         onNodeWithText("Layout").assertExists()
-        onNodeWithText("Reset to defaults").assertIsNotEnabled()
+        assertTrue(s.settingsAreDefault)
         // the default rainbow2 colours the graph's vertices
         assertEquals(ColorScheme.RAINBOW2, s.colorScheme)
         for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW2.color(c, n)), "vertex $c: $color")
@@ -86,6 +87,21 @@ class SettingsUiTest {
         assertEquals(ColorScheme.RAINBOW3_K, s.colorScheme)
         for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW3_K.color(c, n)), "vertex $c: $color")
         assertNotEquals(ColorScheme.RAINBOW2.color(1, n), ColorScheme.RAINBOW3_K.color(1, n))
+        // the canvas curves too: the middle of a long piece of every circle, drawn 8 px wide
+        runOnIdle { s.lineWidth = 8f }
+        waitForIdle()
+        val map = onNodeWithTag("canvas").captureToImage().toPixelMap()
+        val d = s.currentDrawing!!
+        fun pixel(p: Offset) =
+            map[p.x.toInt().coerceIn(0, map.width - 1), p.y.toInt().coerceIn(0, map.height - 1)]
+        for ((c, pieces) in d.circles.withIndex()) {
+            // points along the curve (where no other curve crosses over it) have its colour
+            val points = pieces.flatMap { piece -> listOf(0.3, 0.5, 0.7).map { view.toScreen(piece.at(it)) } }
+            val hits = points.count { close(pixel(it), ColorScheme.RAINBOW3_K.color(c, n)) }
+            assertTrue(hits >= points.size / 2, "curve $c: $hits of ${points.size} points in its colour")
+        }
+        runOnIdle { s.lineWidth = AppState.DEFAULT_LINE_WIDTH }
+        waitForIdle()
         // the slider: far right is 8 px, the curves get wider
         val before = inkedPixels()
         onNodeWithTag("line-width").performTouchInput { swipe(center, percentOffset(1f, 0.5f)) }
@@ -100,13 +116,13 @@ class SettingsUiTest {
         assertTrue(s.lineWidth < 1f, "line width ${s.lineWidth}")
         // Reset to defaults: everything in the widget
         runOnIdle { s.changeModel(DrawModel.MODEL2); s.changeLayoutSettings(LayoutSettings(9, 1e-3)) }
-        onNodeWithText("Reset to defaults").assertIsEnabled().performClick()
+        onNodeWithText("Reset to defaults").performClick()
         waitForIdle()
         assertEquals(ColorScheme.DEFAULT, s.colorScheme)
         assertEquals(AppState.DEFAULT_LINE_WIDTH, s.lineWidth)
         assertEquals(DrawModel.MODEL1, s.preferredModel)
         assertEquals(LayoutSettings(), s.layoutSettings)
-        onNodeWithText("Reset to defaults").assertIsNotEnabled()
+        assertTrue(s.settingsAreDefault)
     }
 
     @Test

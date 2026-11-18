@@ -48,7 +48,7 @@ fun ToolBar(state: AppState) {
     }
 }
 
-/** Model 1 / Model 2 (toolbar, Layout widget); model 1 only where it exists. */
+/** Model 1 / Model 2 (toolbar, Settings widget); model 1 only where it exists. */
 @Composable
 fun ModelChips(state: AppState) {
     for (m in DrawModel.entries) FilterChip(

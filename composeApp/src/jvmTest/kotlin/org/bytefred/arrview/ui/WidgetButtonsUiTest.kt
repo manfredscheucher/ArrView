@@ -40,7 +40,7 @@ import kotlin.test.assertTrue
 
 /**
  * Every button and field of the widgets and the toolbar, with its effect: the Properties values,
- * Copy / Revert / Apply in Sequences and Encoding, the Layout widget's chips and fields, the widget
+ * Copy / Revert / Apply in Sequences and Encoding, the Settings widget's chips and fields, the widget
  * chips and the close buttons. (WidgetsUiTest has applying valid and invalid sequences, sparse6
  * apply, the intersection graph and the Layout fields with Reset.)
  */
@@ -197,10 +197,9 @@ class WidgetButtonsUiTest {
     }
 
     @Test
-    fun layoutWidgetChipsFieldsAndReset() = runComposeUiTest {
+    fun settingsWidgetChipsFieldsAndReset() = runComposeUiTest {
         val s = state(Widget.SETTINGS)
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        onNodeWithText("Reset to defaults").assertIsNotEnabled()
         // the widget's model chips (the toolbar has the same)
         onAllNodesWithText("Model 2").assertCountEquals(2)
         onAllNodesWithText("Model 2").onLast().performClick()
@@ -226,9 +225,14 @@ class WidgetButtonsUiTest {
         assertEquals(1000, s.layoutSettings.maxIterations)
         assertEquals("0.0001234567", onNodeWithTag("eps").text())
         assertEquals(0.0001234567, s.layoutSettings.eps)
+        // the widget's Model 2 chip; Reset brings back Model 1 and the layout settings
+        onAllNodesWithText("Model 2").onLast().performClick()
+        waitForIdle()
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
         onNodeWithText("Reset to defaults").assertIsEnabled().performClick()
         waitForIdle()
         assertEquals(LayoutSettings(), s.layoutSettings)
+        assertEquals(DrawModel.MODEL1, s.preferredModel)
     }
 
     @Test
