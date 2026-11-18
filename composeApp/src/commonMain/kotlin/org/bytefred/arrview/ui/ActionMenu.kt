@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -111,7 +112,7 @@ fun ActionMenu(state: AppState, at: Offset, heading: String, nodes: List<MenuNod
             val focus = remember { FocusRequester() }
             LaunchedEffect(Unit) { focus.requestFocus() }
             Row(
-                Modifier.width(IntrinsicSize.Max).focusRequester(focus).focusable().onKeyEvent {
+                Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min).focusRequester(focus).focusable().onKeyEvent {
                     if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
                         done()
                         true
