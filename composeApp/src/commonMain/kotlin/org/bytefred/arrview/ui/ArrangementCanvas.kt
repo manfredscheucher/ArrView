@@ -113,8 +113,8 @@ private const val SIDE_WIDTH = 10f
 
 /**
  * The drawing of the arrangement: faces (triangles and digons filled), the curves and their labels.
- * Click a triangle to flip it, a digon to collapse it; right-click a face for its menu (also
- * "Make outer face"); drag to pan, wheel to zoom.
+ * Click a triangle to flip it, a digon to collapse it; right-click (or long press) a face for its
+ * menu (also "Make outer face"); drag to pan, wheel to zoom.
  */
 @Composable
 fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier = Modifier, onInteract: () -> Unit = {}) {
@@ -133,7 +133,8 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
         }
     }
 
-    // the face whose context menu is open and where it opens
+    // the face whose context menu is open (right-click or long press on it) and where it opens
+    val gestures = LocalMenuGestures.current
     var faceMenu by remember { mutableStateOf<Triple<Arrangement, Int, Offset>?>(null) }
     // the face with several digon creates whose menu is open, where it opens and for which
     // arrangement (not a remember key: the pointer handler below keeps the state object it saw first)
@@ -154,15 +155,29 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 .clipToBounds()
                 .background(MaterialTheme.colorScheme.surface)
                 .onSizeChanged { view.resize(it) }
-                .pointerInput(Unit) {
+                .pointerInput(gestures) {
                     awaitPointerEventScope {
                         var down: Offset? = null
                         var last = Offset.Zero
                         var moved = false
                         var pinchDist = 0f
                         var pinchCenter = Offset.Zero
+                        // a one-finger press held still until then is a long press (event time)
+                        var longPressAt: Long? = null
+                        var lastTime = 0L
                         while (true) {
-                            val ev = awaitPointerEvent()
+                            val deadline = longPressAt?.takeIf { down != null && !moved }
+                            val ev = if (deadline == null) awaitPointerEvent()
+                            else withTimeoutOrNull((deadline - lastTime).coerceAtLeast(0L)) { awaitPointerEvent() }
+                            if (ev == null) {
+                                // long press: the face menu like a right-click, the release then does nothing
+                                longPressAt = null
+                                val at = down
+                                val f = if (at != null) hit(at) else null
+                                if (at != null && f != null) { faceMenu = Triple(st.arrangement, f, at); down = null }
+                                continue
+                            }
+                            lastTime = ev.changes.first().uptimeMillis
                             val pressed = ev.changes.filter { it.pressed }
                             when (ev.type) {
                                 PointerEventType.Scroll -> {
@@ -180,13 +195,14 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                         down = null
                                     } else {
                                         onInteract()
-                                        if (ev.buttons.isSecondaryPressed || ctrlClickIsRightClick && ev.keyboardModifiers.isCtrlPressed) {
+                                        if (gestures.rightClick && (ev.buttons.isSecondaryPressed || ctrlClickIsRightClick && ev.keyboardModifiers.isCtrlPressed)) {
                                             down = null
                                             if (pressed.size == 1) hit(pressed[0].position)?.let { faceMenu = Triple(st.arrangement, it, pressed[0].position) }
                                         } else if (pressed.size == 1) {
                                             down = pressed[0].position
                                             last = pressed[0].position
                                             moved = false
+                                            longPressAt = if (gestures.longPress) lastTime + viewConfiguration.longPressTimeoutMillis else null
                                         } else if (pressed.size == 2) {
                                             // second finger: pinch zoom + two-finger pan
                                             moved = true

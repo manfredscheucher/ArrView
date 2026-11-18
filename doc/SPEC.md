@@ -2,6 +2,20 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Long press opens the face menu
+
+Manfred: "On the phone a long press is like a right-click, so make the browser do that too." A touch
+screen has no right-click, so a long press opens the same face menu as a right-click.
+
+- Ported from ktoy (`EditGestures`): `MenuGestures(rightClick, longPress)` per platform with
+  `LocalMenuGestures` for tests. Web: right-click and long press. JVM desktop: right-click only
+  (like ktoy).
+- A one-finger press held still for the long-press timeout (Compose's `longPressTimeoutMillis`) on
+  any face, the outer face included, opens its menu at the press position. Moving more than the
+  touch slop before that pans as before; after the menu opened, moving and releasing do nothing (no
+  flip, collapse or create). A short tap keeps its action.
+- Help (General and Shortcuts) and the user guide say "long press on touch screens".
+
 ## 2026-11-18: Welcome text says what pseudocircles are
 
 Manfred: the Welcome dialog and the first Help paragraph briefly explain arrangements of
