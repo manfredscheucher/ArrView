@@ -129,7 +129,9 @@ private val WIDGETS_TEXT = listOf(
     "Triangle hypergraph: the same vertices, and a transparent triangle for every triple of circles that " +
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
-        "a menu lists them with their faces (several triples: a submenu per triple). Below it: the possible " +
+        "a menu lists them with their faces (several triples: a submenu per triple). A triple is always written " +
+        "ascending, as in the menu title Flip a triangle of 1 2 3; the entries are the faces in their own " +
+        "order around, e.g. 1 3 2. Below it: the possible " +
         "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it " +
         "(several triangles: a menu); pointing at one highlights the triple and its faces.",
     "Settings: Display and Layout. Display: the colour scheme of the circles (default " +

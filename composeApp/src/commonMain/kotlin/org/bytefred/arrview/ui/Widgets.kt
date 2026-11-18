@@ -483,12 +483,12 @@ private fun TriangleHypergraphWidget(state: AppState) {
         }
         menu?.let { (hits, at) ->
             val entries = remember(arr, hits) { state.triangleEntries(hits.associateWith { triples[it].orEmpty() }) }
-            ActionMenu(state, at, "Flip a triangle", entries) { menu = null }
+            ActionMenu(state, at, triangleHeading(hits), entries) { menu = null }
         }
     }
     ActionList(state, "triangle flips", actions.triangleTriples, "possible-flips", { t -> state.actOnTriples(listOf(t)) }) { t, at, close ->
         val entries = remember(arr, t) { state.triangleEntries(mapOf(t to triples[t].orEmpty())) }
-        ActionMenu(state, at, "Flip a triangle", entries, close)
+        ActionMenu(state, at, triangleHeading(listOf(t)), entries, close)
     }
 }
 

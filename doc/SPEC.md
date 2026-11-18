@@ -2,6 +2,38 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Triples ascending, faces oriented
+
+### Request (Manfred; decided with a reviewer, confirmed by Manfred)
+
+"1 5 3" meant a triple in the list and in the group headings, but an oriented face in the menu
+entries; a menu with a single triple never named it. Make it uniform.
+
+### Decisions
+
+- Triples are always written ascending: in the list ("possible triangle flips (3): 1 2 3, 1 2 4,
+  3 5 6 (x2)"), in group headings and in menu titles. (xm) counts the triangle faces of the triple.
+- The menu title names the triple: "Flip a triangle of 3 5 6", wherever such a menu opens with a
+  single triple (list click, hypergraph click, canvas if applicable). Several triples under the
+  pointer keep their submenus, headed by the ascending triple.
+- The menu entries are the triangle faces in their oriented description ("3 5 6", "3 6 5"); equal
+  descriptions numbered as now. The Krupp: "possible triangle flips (1): 1 2 3 (x8)", eight entries
+  under "Flip a triangle of 1 2 3". A single face still flips directly.
+- Check the digon side for the same issue and fix it if inconsistent.
+
+### Implementation (2026-11-18)
+
+- `triangleHeading(triples)`: "Flip a triangle of a b c" (sorted) for one triple, else "Flip a
+  triangle"; used by the hypergraph click and the list click. The list, the group entries and their
+  submenu headings were already ascending (sorted triples); the entries are the oriented cell
+  descriptions (`cellDescription`), the outer face marked " (outer face)" as everywhere.
+- Digon side checked, already uniform: pairs ascending in the lists, in the canvas pair entries
+  ("1 3", "Create digon 1 3"), in the headings ("Create a digon of 1 3", "Collapse a digon of 1 3")
+  and as submenu headings; the entries are the oriented cell descriptions (with stars for creates).
+  No change needed.
+- The canvas has no triple menus (a triangle face flips on click; its right-click item is "Flip
+  triangle").
+
 ## 2026-11-18: Clickable action lists
 
 ### Request (Manfred)

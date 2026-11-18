@@ -240,6 +240,10 @@ fun AppState.pairEntries(i: Int, j: Int): List<MenuNode> {
     return creates + actions.collapsesOf(i, j).map { f -> MenuNode(cellLabel(f), Highlight(setOf(f))) { collapseDigon(f) } }
 }
 
+/** The heading of a triangle menu: "Flip a triangle of 1 2 3" for one triple (ascending), else "Flip a triangle". */
+fun triangleHeading(triples: List<List<Int>>): String =
+    "Flip a triangle" + (triples.singleOrNull()?.let { " of " + circlesLabel(it.sorted()) } ?: "")
+
 /**
  * The triangle hypergraph menu for the hit [triples] (with their triangle cells): one triple, its
  * cells; several, one entry per triple whose cells open as a submenu.

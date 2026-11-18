@@ -497,10 +497,14 @@ class ActionsUiTest {
         onNodeWithTag("triangle-hypergraph").performMouseInput { click(at) }
         waitForIdle()
         assertEquals(start, s.arrangement)
+        // several triples: the plain title, the triples ascending as group entries
         onNodeWithText("Flip a triangle").assertExists()
         val circle = with(density) { vertexCircle(start.n, size) }
         val hits = s.actions.triples.filterKeys { inTriangle(at, circle.at(it[0]), circle.at(it[1]), circle.at(it[2])) }
-        for (t in hits.keys) menuItem(circlesLabel(t)).assertExists()
+        for (t in hits.keys) {
+            assertEquals(t.sorted(), t)
+            menuItem(circlesLabel(t)).assertExists()
+        }
         // the start example: every triple has two triangles, so each triple opens a submenu
         val (t, faces) = hits.entries.first()
         assertEquals(2, faces.size)
@@ -526,11 +530,14 @@ class ActionsUiTest {
         onNodeWithTag("triangle-hypergraph").performMouseInput { click((circle.at(0) + circle.at(1) + circle.at(2)) / 3f) }
         waitForIdle()
         assertEquals(krupp, s.arrangement)
-        onNodeWithText("Flip a triangle").assertExists()
+        // one triple: the title names it (ascending), the entries are the oriented faces, numbered
+        assertEquals("possible triangle flips (1): 1 2 3 (x8)", onNodeWithTag("possible-flips").text())
+        onNodeWithText("Flip a triangle of 1 2 3").assertExists()
         onNodeWithTag("action-submenu").assertDoesNotExist()
         val faces = s.actions.triples.getValue(listOf(0, 1, 2))
         val labels = menuLabels(faces.map { s.cellLabel(it) })
         assertEquals(8, labels.size)
+        assertTrue("1 2 3 (1)" in labels || "1 3 2 (1)" in labels, "$labels")
         assertTrue(labels.all { Regex("""1 (2 3|3 2) (\(\d\)|\(outer face\))""").matches(it) }, "$labels")
         for (l in labels) menuItem(l).assertExists()
         menuItem(labels[2]).performClick()
@@ -664,7 +671,8 @@ class ActionsUiTest {
         assertEquals("${circlesLabel(t2)} (x2)", entry("possible-flips", t2).text())
         entry("possible-flips", t2).performMouseInput { click(center) }
         waitForIdle()
-        onNodeWithText("Flip a triangle").assertExists()
+        assertEquals(t2.sorted(), t2)
+        onNodeWithText("Flip a triangle of ${circlesLabel(t2)}").assertExists()
         val faces = s.actions.triples.getValue(t2)
         val labels = menuLabels(faces.map { s.cellLabel(it) })
         menuItem(labels[1]).performClick()
