@@ -25,6 +25,7 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,7 +74,8 @@ class MenusAndDialogsUiTest {
     }
 
     @Test
-    fun theMenusHaveTheirItems() = runComposeUiTest {
+    // tall enough for the View menu below its title (in a shorter window it moves up over the title)
+    fun theMenusHaveTheirItems() = runDesktopComposeUiTest(1200, 1000) {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         val items = mapOf(

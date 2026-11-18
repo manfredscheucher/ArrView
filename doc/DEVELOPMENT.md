@@ -34,7 +34,8 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 | `Models.kt` | model 1 (dual graph) and model 2 (vertex-edge-face graph, NEW and OLD encoding) | `program/basics.py`, `model2_program/model2basics.sage`, `model2.rs` |
 | `PlanarEmbedding.kt` | faces of a planar 2-connected graph (Demoucron–Malgrange–Pertuiset), for model 1 | (new; sage used its planarity test) |
 | `PlaneGraph.kt`, `Graphs.kt` | embedded graphs: primal graph, vertex-edge-face graph | |
-| `Operations.kt` | intersection graph, class tests (Krupp, great, cylindrical, …), triangle flip, digon collapse, relabel/reverse/mirror | `flip_potential.rs::flip`, `test_*.sage` |
+| `Operations.kt` | intersection graph, class tests (Krupp, great, cylindrical, …), triangle flip, digon collapse, digon create, relabel/reverse/mirror | `flip_potential.rs::flip`, `test_*.sage` |
+| `CellActions.kt` | what can be flipped / collapsed / created per face, pair and triple; cell descriptions for menus | |
 | `Examples.kt` | catalogue of the bundled examples (data: `composeApp/examples/`) | |
 | `Formats.kt` | text forms (sequences, model 1 / 2 sparse6), file formats (JSON, text), reading with format detection | |
 | `Json.kt` | small strict JSON reader | PoCoView `core/Json.kt` |
@@ -49,7 +50,7 @@ Ported from PoCoView (package renamed, PoCoView-specific parts dropped): `Theme.
 `jvmMain` actuals). Also from PoCoView: `Dialogs.kt` (Import, Export, Save, "Save changes?", Welcome, About),
 `ExamplesDialog.kt` (tree, `ExamplesState`), `Help.kt`, `Svg.kt` (Export SVG). ArrView's own:
 `AppState.kt` (state, undo, drafts, saving, background layout), `ArrangementCanvas.kt` (drawing,
-clicks, zoom / pan), `Panels.kt` (toolbar), `Widgets.kt` (the widgets), `App.kt`. A new widget is
+clicks, zoom / pan), `ActionMenu.kt` (the flip menus of the canvas and the graph views), `Panels.kt` (toolbar), `Widgets.kt` (the widgets), `App.kt`. A new widget is
 an entry of `Widget` plus a branch in `WidgetContent`.
 
 ## Example data
@@ -103,7 +104,7 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 `RenderTest` renders the app offscreen and writes screenshots to `composeApp/build/screenshots/`
 (start example in both models and portrait, examples with digons, n = 24, n = 2, every widget, every
 dialog and Help page): look at them after changing the UI. UI tests with real clicks:
-`CanvasUiTest`, `CanvasInteractionUiTest`, `WidgetsUiTest`, `WidgetButtonsUiTest`, `DialogsUiTest`,
+`CanvasUiTest`, `CanvasInteractionUiTest`, `ActionsUiTest`, `WidgetsUiTest`, `WidgetButtonsUiTest`, `DialogsUiTest`,
 `MenusAndDialogsUiTest`, `ExamplesDialogUiTest`; `HelpClaimsTest` checks the Help texts and this
 user guide against the code.
 
@@ -114,7 +115,7 @@ user guide against the code.
 | Core combinatorics | `ArrangementTest`, `OperationsTest`, `LinhartOrtnerTest` (every rejection reason), `SymmetryTest`, `FormatsTest`, `FilesTest`, `DataFilesTest` |
 | Examples | `ExamplesTest` (sizes, valid, distinct, class), `ExampleCatalogTest` (every member through sequences, JSON, text, model 1 / 2 sparse6; group claims: Krupp triples, digon-free, min / max triangles, Füredi–Palásti, named ones) |
 | Drawing | `LayoutTest` (every example with n <= 5, both models), `ExampleDrawingTest` (n >= 6, long lists sampled, both models, SVG) |
-| Flips, collapses, undo | `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
+| Flips, collapses, undo | `DigonCreateTest`, `ActionsUiTest` (digon create, graph view clicks, "!"), `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
 | Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |
 | Menus | `MenusAndDialogsUiTest` (every item clicked), `MenuBarTest` |
 | Dialogs | `ExamplesDialogUiTest` (a member of every set by clicks, member chooser), `DialogsUiTest`, `MenusAndDialogsUiTest` (Import, Export, Save file, Help, About, Welcome, error, "Save changes?" per trigger) |

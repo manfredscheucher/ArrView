@@ -35,6 +35,53 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
   separated by spaces, e.g. "1 2 1 3 1 3 1 4 1 4 1 5 1 5". Hovering a menu entry highlights that cell in the
   canvas.
 
+### Implementation (2026-11-18)
+
+- Core: `DigonCreate(face, i, j, dartI, dartJ)`, `digonCreates()` / `digonCreatesIn(f)` (every face,
+  every non-crossing pair with a side on it, every choice of those sides), `digonCreate(op)`: each of
+  the two sides gets two new entries `-o, +o` in list order (`o` the other circle, negated if the
+  other side is a backward dart). `CellActions` (per arrangement): creates per face and pair,
+  collapsible digons, triangles per triple. `cellDescription(f, marked)`.
+- Tests: `DigonCreateTest` (every create of the n <= 4 sets, all of `n5-connected-all`, samples of the
+  others up to n = 14: valid, +2 crossings, +2 faces, one digon of the pair, p2 + 1 minus the digons
+  across the two sides, collapse of the new digon gives the exact sequences back; collapse then create
+  gives the original back, canonically and exactly up to list rotation), `ActionsUiTest` (clicks).
+
+### Claude's choices (to confirm)
+
+- "Possible" means the flip succeeds: a digon whose collapse is refused (the arrangement would fall
+  apart) gets no "!", no stripe and is not counted for ambiguity.
+- Outer face: as before, a click into the outer face does nothing on the canvas and it never shows a
+  "!". The graph views include the outer face (creates through it, a triangle as outer face); in
+  menus it is marked " (outer face)", and its highlight is a thick yellow line along its boundary.
+- Ambiguous = more than one option: in the canvas a cell with two creates of the same pair (one of
+  the circles has several sides on it) opens the menu too; in the graph such a pair is "several
+  cells to create through" (double stripe, menu).
+- Menu texts: canvas heading "Create a digon", entries `1 3: [1] 2 [3] 2` (pair, then the cell with
+  the two sides of the create in brackets). Graph: heading "Create a digon of 1 3" or "Collapse a
+  digon of 1 3", entries the cells (creates with the two sides in brackets). Hypergraph: heading
+  "Flip a triangle", entries `1 2 3: 1 3 2` (triple, then the cell). Equal entries get " (1)",
+  " (2)", ... The cell description starts at its lexicographically smallest rotation, in the
+  boundary order of the face (face to the right of its darts).
+- Highlight of a hovered menu entry: yellow `#FFD600` at alpha 0.53 filled over the cell (model 1
+  digon: a yellow disc around its touching dot).
+- "!": a drawn badge (dark teal disc of radius 9 px with a white bar and dot, no font), at the grid
+  point of the cell farthest from its boundary; for a model 1 digon 16 px above the touching dot.
+- Intersection graph: stripe `#FFD600` at alpha 0.4, 10 dp wide; twice as strong = drawn twice.
+  Dashed edge 5 dp dash / 4 dp gap, same colour as the solid edges. A click hits the nearest striped
+  pair within 8 dp of its edge.
+- Triangle hypergraph: fill orange `#FB8C00` at alpha 0.18 with a thin outline at alpha 0.4, a triple
+  with >= 2 triangle cells drawn twice. Above it "p3 triangles on k triples". A click on a point in a
+  single triangle of a triple with one cell flips; otherwise a menu of all hit triples and cells.
+- Status after a create: "Created a digon of i and j".
+- The right-click face menu is unchanged (no create entries there; see open questions).
+
+### Open questions
+
+- Should the right-click face menu also list the digon creates of the face?
+- Should creates through the outer face be possible on the canvas (today only via the intersection
+  graph)?
+
 ## 2026-11-17: Broad tests
 
 ### Request (Manfred)

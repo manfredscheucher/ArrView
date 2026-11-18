@@ -1,0 +1,70 @@
+package org.bytefred.arrview.core
+
+/**
+ * Face [f] described by the circles of its sides (labels `1..n`) in cyclic boundary order,
+ * separated by spaces, starting at the lexicographically smallest rotation, e.g. `1 2 1 3`. Sides
+ * whose dart is in [marked] are put in brackets: `[1] 2 1 [3]`.
+ */
+fun Arrangement.cellDescription(f: Int, marked: Set<Int> = emptySet()): String {
+    val darts = faces[f]
+    val labels = darts.map { circleOfDart(it) + 1 }
+    val start = labels.indices.minWithOrNull { a, b ->
+        for (t in labels.indices) {
+            val x = labels[(a + t) % labels.size]
+            val y = labels[(b + t) % labels.size]
+            if (x != y) return@minWithOrNull x.compareTo(y)
+        }
+        0
+    } ?: 0
+    return labels.indices.joinToString(" ") { t ->
+        val s = (start + t) % labels.size
+        if (darts[s] in marked) "[${labels[s]}]" else "${labels[s]}"
+    }
+}
+
+/**
+ * The flips that can be done in an arrangement, by face, by pair of circles and by triple of
+ * circles: triangle flips, digon collapses that keep the arrangement connected, digon creates.
+ * Computed once per arrangement.
+ */
+class CellActions(val arrangement: Arrangement) {
+    private val arr = arrangement
+
+    /** All digon creates ([Arrangement.digonCreates]). */
+    val creates: List<DigonCreate> = arr.digonCreates()
+
+    private val createsByFace: Map<Int, List<DigonCreate>> = creates.groupBy { it.face }
+
+    /** The digons whose collapse is allowed (the arrangement stays connected). */
+    val collapsible: List<Int> = arr.faces.indices.filter { arr.faces[it].size == 2 && arr.digonCollapse(it) != null }
+
+    /** The triangles (every one can be flipped). */
+    val triangles: List<Int> = arr.faces.indices.filter { arr.faces[it].size == 3 }
+
+    /** The digon creates through face [f]. */
+    fun createsIn(f: Int): List<DigonCreate> = createsByFace[f].orEmpty()
+
+    /** Whether face [f] can be flipped, collapsed or used for a digon create. */
+    fun hasAction(f: Int): Boolean = arr.faces.getOrNull(f)?.let { face ->
+        face.size == 3 || f in collapsible || createsIn(f).isNotEmpty()
+    } == true
+
+    private val createsByPair: Map<Pair<Int, Int>, List<DigonCreate>> = creates.groupBy { it.i to it.j }
+
+    private val collapsesByPair: Map<Pair<Int, Int>, List<Int>> = collapsible.groupBy { f ->
+        val (c, d) = arr.faceCircles(f)
+        minOf(c, d) to maxOf(c, d)
+    }
+
+    /** The digon creates of circles [i] < [j]. */
+    fun createsOf(i: Int, j: Int): List<DigonCreate> = createsByPair[i to j].orEmpty()
+
+    /** The collapsible digons of circles [i] < [j]. */
+    fun collapsesOf(i: Int, j: Int): List<Int> = collapsesByPair[i to j].orEmpty()
+
+    /** Number of flips of the pair [i] < [j] (creates or collapses; a pair has only one kind). */
+    fun pairActionCount(i: Int, j: Int): Int = createsOf(i, j).size + collapsesOf(i, j).size
+
+    /** The triangles per triple of circles (sorted `a < b < c`), in face order. */
+    val triples: Map<List<Int>, List<Int>> = triangles.groupBy { f -> arr.faceCircles(f).sorted() }
+}

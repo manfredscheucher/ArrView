@@ -2,6 +2,7 @@ package org.bytefred.arrview.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +33,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +75,7 @@ fun WidgetContent(state: AppState, w: Widget) {
             Widget.SEQUENCES -> SequencesWidget(state)
             Widget.ENCODING -> EncodingWidget(state)
             Widget.INTERSECTION_GRAPH -> IntersectionGraphWidget(state)
+            Widget.TRIANGLE_HYPERGRAPH -> TriangleHypergraphWidget(state)
             Widget.LAYOUT -> LayoutWidget(state)
         }
     }
@@ -185,31 +197,166 @@ private fun DraftEditor(state: AppState, format: TextFormat, wrap: Boolean, copy
     }
 }
 
-/** K_n on a circle, labelled 1..n in the circle colours; an edge where two circles cross. */
+/** The vertices 1..n of the graph views on a circle in a [width] x [height] canvas: vertex 1 on top, then clockwise. */
+internal class VertexCircle(val n: Int, width: Float, height: Float, val label: Float) {
+    val radius = min(width, height) / 2 - label
+    val center = Offset(width / 2, height / 2)
+
+    fun at(c: Int, r: Float = radius): Offset {
+        val a = -PI / 2 + 2 * PI * c / n
+        return center + Offset((r * cos(a)).toFloat(), (r * sin(a)).toFloat())
+    }
+}
+
+/** The vertex circle of a graph view canvas of [size] pixels (labels need [GRAPH_LABEL] around it). */
+internal fun Density.vertexCircle(n: Int, size: Size) = VertexCircle(n, size.width, size.height, GRAPH_LABEL.toPx())
+
+/** The vertices as dots with their labels in the circle colours. */
+private fun DrawScope.drawVertices(circle: VertexCircle, measurer: TextMeasurer) {
+    for (c in 0 until circle.n) {
+        drawCircle(circleColor(c), 4.dp.toPx(), circle.at(c))
+        val layout = measurer.measure("${c + 1}", TextStyle(color = circleColor(c), fontSize = 11.sp, fontWeight = FontWeight.Bold))
+        drawText(layout, topLeft = circle.at(c, circle.radius + circle.label / 2) - Offset(layout.size.width / 2f, layout.size.height / 2f))
+    }
+}
+
+/** Distance from [p] to the segment [a]-[b]. */
+internal fun segmentDistance(p: Offset, a: Offset, b: Offset): Float {
+    val ab = b - a
+    val len2 = ab.x * ab.x + ab.y * ab.y
+    val t = if (len2 > 0f) (((p - a).x * ab.x + (p - a).y * ab.y) / len2).coerceIn(0f, 1f) else 0f
+    return (p - (a + ab * t)).getDistance()
+}
+
+/**
+ * K_n on a circle, labelled 1..n in the circle colours; an edge where two circles cross, dashed
+ * where they do not cross but can create a digon. A yellow stripe behind every pair that can
+ * create or collapse a digon (twice as strong if there are several ways); a click on it does it,
+ * or opens a menu of the cells.
+ */
 @Composable
 private fun IntersectionGraphWidget(state: AppState) {
     val arr = state.arrangement
     val edges = remember(arr) { arr.intersectionGraph() }
+    val actions = state.actions
+    val striped = remember(actions) {
+        (0 until arr.n).flatMap { i -> (i + 1 until arr.n).map { j -> i to j } }.filter { (i, j) -> actions.pairActionCount(i, j) > 0 }
+    }
     val measurer = rememberTextMeasurer()
     val edgeColor = MaterialTheme.colorScheme.outline
+    var menu by remember(arr) { mutableStateOf<Pair<Pair<Int, Int>, Offset>?>(null) }
     Text("${edges.size} of ${arr.n * (arr.n - 1) / 2} pairs cross", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("intersection-graph-count"))
-    Canvas(Modifier.size(GRAPH_SIZE).testTag("intersection-graph")) {
-        val label = 22.dp.toPx()
-        val radius = min(size.width, size.height) / 2 - label
-        val center = Offset(size.width / 2, size.height / 2)
-        // vertex 1 on top, then clockwise
-        fun at(c: Int, r: Float): Offset {
-            val a = -PI / 2 + 2 * PI * c / arr.n
-            return center + Offset((r * cos(a)).toFloat(), (r * sin(a)).toFloat())
+    Box {
+        Canvas(
+            Modifier.size(GRAPH_SIZE).testTag("intersection-graph").pointerInput(actions) {
+                detectTapGestures { pos ->
+                    val circle = vertexCircle(arr.n, size.toSize())
+                    val pair = striped.map { (i, j) -> (i to j) to segmentDistance(pos, circle.at(i), circle.at(j)) }
+                        .filter { it.second <= PAIR_HIT.toPx() }.minByOrNull { it.second }?.first ?: return@detectTapGestures
+                    val (i, j) = pair
+                    val creates = actions.createsOf(i, j)
+                    val collapses = actions.collapsesOf(i, j)
+                    when {
+                        creates.size + collapses.size >= 2 -> menu = pair to pos
+                        creates.size == 1 -> state.createDigon(creates.single())
+                        collapses.size == 1 -> state.collapseDigon(collapses.single())
+                    }
+                }
+            },
+        ) {
+            val circle = vertexCircle(arr.n, size)
+            val stripe = STRIPE_WIDTH.toPx()
+            for ((i, j) in striped) {
+                // twice as strong for several ways: drawn twice
+                repeat(if (actions.pairActionCount(i, j) >= 2) 2 else 1) { drawLine(STRIPE_COLOR, circle.at(i), circle.at(j), strokeWidth = stripe) }
+            }
+            for ((c, d) in edges) drawLine(edgeColor, circle.at(c), circle.at(d), strokeWidth = 1.5f)
+            val dashes = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
+            for ((i, j) in striped) if (actions.createsOf(i, j).isNotEmpty()) {
+                drawLine(edgeColor, circle.at(i), circle.at(j), strokeWidth = 1.5f, pathEffect = dashes)
+            }
+            drawVertices(circle, measurer)
         }
-        for ((c, d) in edges) drawLine(edgeColor, at(c, radius), at(d, radius), strokeWidth = 1.5f)
-        for (c in 0 until arr.n) {
-            drawCircle(circleColor(c), 4.dp.toPx(), at(c, radius))
-            val layout = measurer.measure("${c + 1}", TextStyle(color = circleColor(c), fontSize = 11.sp, fontWeight = FontWeight.Bold))
-            drawText(layout, topLeft = at(c, radius + label / 2) - Offset(layout.size.width / 2f, layout.size.height / 2f))
+        menu?.let { (pair, at) ->
+            val (i, j) = pair
+            ActionMenu(state, at, state.pairHeading(i, j), state.pairEntries(i, j)) { menu = null }
         }
     }
 }
+
+/**
+ * The triangle cells as a 3-uniform hypergraph on the vertices of the intersection graph: a
+ * transparent triangle per triple of circles that bounds a triangle cell (overlaps add up), twice
+ * as strong for a triple with several triangle cells. A click flips the triangle under the
+ * pointer, or opens a menu if there are several.
+ */
+@Composable
+private fun TriangleHypergraphWidget(state: AppState) {
+    val arr = state.arrangement
+    val actions = state.actions
+    val triples = actions.triples
+    val measurer = rememberTextMeasurer()
+    var menu by remember(arr) { mutableStateOf<Pair<List<List<Int>>, Offset>?>(null) }
+    Text("${arr.triangleCount} triangles on ${triples.size} triples", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("triangle-hypergraph-count"))
+    Box {
+        Canvas(
+            Modifier.size(GRAPH_SIZE).testTag("triangle-hypergraph").pointerInput(actions) {
+                detectTapGestures { pos ->
+                    val circle = vertexCircle(arr.n, size.toSize())
+                    val hits = triples.keys.filter { t -> inTriangle(pos, circle.at(t[0]), circle.at(t[1]), circle.at(t[2])) }
+                    val single = hits.singleOrNull()?.let { triples.getValue(it).singleOrNull() }
+                    when {
+                        single != null -> state.flipTriangle(single)
+                        hits.isNotEmpty() -> menu = hits to pos
+                    }
+                }
+            },
+        ) {
+            val circle = vertexCircle(arr.n, size)
+            for ((t, faces) in triples) {
+                val path = Path().apply {
+                    val (a, b, c) = t.map { circle.at(it) }
+                    moveTo(a.x, a.y)
+                    lineTo(b.x, b.y)
+                    lineTo(c.x, c.y)
+                    close()
+                }
+                repeat(if (faces.size >= 2) 2 else 1) {
+                    drawPath(path, HYPEREDGE_FILL)
+                    drawPath(path, HYPEREDGE_LINE, style = Stroke(1f))
+                }
+            }
+            drawVertices(circle, measurer)
+        }
+        menu?.let { (hits, at) ->
+            ActionMenu(state, at, "Flip a triangle", hits.flatMap { t -> state.triangleEntries(t, triples[t].orEmpty()) }) { menu = null }
+        }
+    }
+}
+
+/** Whether [p] is inside the triangle [a] [b] [c] (either orientation, boundary included). */
+internal fun inTriangle(p: Offset, a: Offset, b: Offset, c: Offset): Boolean {
+    fun side(u: Offset, v: Offset) = (v.x - u.x) * (p.y - u.y) - (v.y - u.y) * (p.x - u.x)
+    val s1 = side(a, b)
+    val s2 = side(b, c)
+    val s3 = side(c, a)
+    return (s1 >= 0 && s2 >= 0 && s3 >= 0) || (s1 <= 0 && s2 <= 0 && s3 <= 0)
+}
+
+/** Room for the vertex labels around the graph views. */
+internal val GRAPH_LABEL = 22.dp
+
+/** Pixels around an edge of the intersection graph that hit its pair. */
+private val PAIR_HIT = 8.dp
+
+private val STRIPE_WIDTH = 10.dp
+
+/** The stripe behind a pair that can create or collapse a digon (drawn twice for several ways). */
+internal val STRIPE_COLOR = Color(0x66FFD600)
+
+/** A triangle of the hypergraph (drawn twice for a triple with several triangle cells). */
+internal val HYPEREDGE_FILL = Color(0x2EFB8C00)
+private val HYPEREDGE_LINE = Color(0x66FB8C00)
 
 private val GRAPH_SIZE = 240.dp
 

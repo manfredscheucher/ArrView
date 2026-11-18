@@ -74,6 +74,8 @@ class Drawing(
     val touchings: Map<Int, Point>,
     /** Where the label of every circle goes: a point on its curve and the outward direction there. */
     val labels: List<Pair<Point, Point>>,
+    /** The boundary of the outer face (for highlighting it). */
+    val outerBoundary: List<Cubic> = emptyList(),
 ) {
     /** The face boundaries as polygons (for hit tests and fills of the hover highlight). */
     val polygons: List<List<Point>> by lazy { faces.map { flatten(it) } }
@@ -101,7 +103,41 @@ class Drawing(
         return best ?: outerFace
     }
 
+    private val interiorPoints = HashMap<Int, Point?>()
+
+    /**
+     * A point well inside the bounded face [f]: the point of a grid over the face farthest from its
+     * boundary (a model 1 digon: its touching point); null for the outer face.
+     */
+    fun interiorPoint(f: Int): Point? = interiorPoints.getOrPut(f) {
+        touchings[f]?.let { return@getOrPut it }
+        val poly = polygons.getOrNull(f)?.takeIf { it.size >= 3 } ?: return@getOrPut null
+        val minX = poly.minOf { it.x }
+        val maxX = poly.maxOf { it.x }
+        val minY = poly.minOf { it.y }
+        val maxY = poly.maxOf { it.y }
+        var best: Point? = null
+        var bestDist = -1.0
+        for (gx in 1 until GRID) for (gy in 1 until GRID) {
+            val p = Point(minX + (maxX - minX) * gx / GRID, minY + (maxY - minY) * gy / GRID)
+            if (!contains(poly, p)) continue
+            val d = poly.indices.minOf { distanceToSegment(p, poly[it], poly[(it + 1) % poly.size]) }
+            if (d > bestDist) { best = p; bestDist = d }
+        }
+        best ?: poly.first()
+    }
+
     companion object {
+        /** Grid steps per axis for [interiorPoint]. */
+        private const val GRID = 24
+
+        fun distanceToSegment(p: Point, a: Point, b: Point): Double {
+            val ab = b - a
+            val len2 = ab.dot(ab)
+            val t = if (len2 > 0.0) ((p - a).dot(ab) / len2).coerceIn(0.0, 1.0) else 0.0
+            return (p - (a + ab * t)).length
+        }
+
         /** Points per cubic piece when flattening. */
         private const val SAMPLES = 12
 
@@ -290,13 +326,11 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
                 arcPieces[k] = arc
             }
         }
-        val faces = arr.faces.mapIndexed { f, darts ->
-            if (f == outerFace || f in touchings) emptyList()
-            else darts.flatMap { a ->
-                if (a % 2 == 0) arcPieces[a / 2]!! else arcPieces[arr.arcOfDart(a)]!!.reversed().map { it.reversed() }
-            }
+        fun boundary(darts: IntArray) = darts.flatMap { a ->
+            if (a % 2 == 0) arcPieces[a / 2]!! else arcPieces[arr.arcOfDart(a)]!!.reversed().map { it.reversed() }
         }
-        return Drawing(arr, model, outerFace, circles, faces, touchings, labels(circles))
+        val faces = arr.faces.mapIndexed { f, darts -> if (f == outerFace || f in touchings) emptyList() else boundary(darts) }
+        return Drawing(arr, model, outerFace, circles, faces, touchings, labels(circles), boundary(arr.faces[outerFace]))
     }
 
     /**

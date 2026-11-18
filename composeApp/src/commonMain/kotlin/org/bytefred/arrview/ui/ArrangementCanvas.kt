@@ -144,6 +144,8 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
 
     // the face whose context menu is open and where it opens
     var faceMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
+    // the face with several digon creates whose menu is open and where it opens
+    var createMenu by remember { mutableStateOf<Pair<Int, Offset>?>(null) }
 
     /** The face at a screen position, if the drawing shows the current arrangement. */
     fun hit(pos: Offset): Int? {
@@ -227,7 +229,10 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                 PointerEventType.Release -> {
                                     if (pressed.isEmpty()) {
                                         val start = down
-                                        if (start != null && !moved) hit(start)?.let { st.clickFace(it) }
+                                        if (start != null && !moved) hit(start)?.let { f ->
+                                            if (f != st.outerFace && st.actions.createsIn(f).size >= 2) createMenu = f to start
+                                            else st.clickFace(f)
+                                        }
                                         down = null
                                         pinchDist = 0f
                                     } else {
@@ -243,7 +248,18 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                     }
                 },
         ) {
-            if (drawing != null) drawArrangement(drawing, view, state.hoverFace.takeIf { drawing.arrangement == state.arrangement })
+            if (drawing != null) {
+                val current = drawing.arrangement == state.arrangement
+                val hover = state.hoverFace.takeIf { current }
+                drawArrangement(drawing, view, hover, state.menuHighlight.takeIf { current })
+                // "!" in the hovered cell when a click does something there (not the outer face)
+                if (hover != null && hover != drawing.outerFace && state.actions.hasAction(hover)) {
+                    drawing.interiorPoint(hover)?.let { p ->
+                        val shift = if (hover in drawing.touchings) Offset(0f, -MARK_LIFT) else Offset.Zero
+                        drawActionMark(view.toScreen(p) + shift)
+                    }
+                }
+            }
             drawing?.labels?.forEachIndexed { c, (at, outward) ->
                 val s = view.toScreen(at) + Offset((outward.x * LABEL_OFFSET).toFloat(), (-outward.y * LABEL_OFFSET).toFloat())
                 val layout = textMeasurer.measure("${c + 1}", TextStyle(color = circleColor(c), fontSize = 14.sp, fontWeight = FontWeight.Bold))
@@ -258,6 +274,11 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
             Box(Modifier.offset { IntOffset(at.x.roundToInt(), at.y.roundToInt()) }) {
                 FaceMenu(state, f) { faceMenu = null }
             }
+        }
+        createMenu?.let { (f, at) ->
+            val entries = state.createEntries(f)
+            if (entries.isEmpty()) createMenu = null
+            else ActionMenu(state, at, "Create a digon", entries) { createMenu = null }
         }
     }
 }
@@ -302,7 +323,22 @@ private fun path(pieces: List<Cubic>, view: ViewTransform, close: Boolean): Path
     if (close) close()
 }
 
-private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?) {
+/** Pixels a "!" is lifted above a model 1 touching point, so the dot stays visible. */
+private const val MARK_LIFT = 16f
+
+internal val MARK_FILL = Color(0xFF2F5D62)
+
+/** The "!" of a cell with an action: a round badge with a bar and a dot, drawn (no font needed). */
+private fun DrawScope.drawActionMark(at: Offset) {
+    drawCircle(MARK_FILL, 9f, at)
+    drawLine(Color.White, at + Offset(0f, -5f), at + Offset(0f, 1.5f), strokeWidth = 2.6f, cap = StrokeCap.Round)
+    drawCircle(Color.White, 1.5f, at + Offset(0f, 5f))
+}
+
+/** A face highlighted from a menu entry: yellow, stronger than the hover. */
+internal val HIGHLIGHT_FILL = Color(0x88FFD600)
+
+private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Int?) {
     val faces = d.arrangement.faces
     for ((f, pieces) in d.faces.withIndex()) {
         if (pieces.isEmpty()) continue
@@ -316,12 +352,20 @@ private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: In
     if (hover != null && hover != d.outerFace) d.faces.getOrNull(hover)?.takeIf { it.isNotEmpty() }?.let {
         drawPath(path(it, view, close = true), HOVER_FILL)
     }
+    if (highlight != null) {
+        val pieces = d.faces.getOrNull(highlight).orEmpty()
+        when {
+            highlight == d.outerFace -> drawPath(path(d.outerBoundary, view, close = true), HIGHLIGHT_FILL, style = Stroke(12f, cap = StrokeCap.Round))
+            pieces.isNotEmpty() -> drawPath(path(pieces, view, close = true), HIGHLIGHT_FILL)
+        }
+    }
     for ((c, pieces) in d.circles.withIndex()) {
         drawPath(path(pieces, view, close = true), circleColor(c), style = Stroke(CURVE_WIDTH, cap = StrokeCap.Round))
     }
     // model 1: a digon is the point where its two circles touch
     for ((f, at) in d.touchings) {
         val s = view.toScreen(at)
+        if (f == highlight) drawCircle(HIGHLIGHT_FILL, 14f, s)
         drawCircle(DIGON_MARK, if (f == hover) 7f else 4.5f, s)
     }
 }

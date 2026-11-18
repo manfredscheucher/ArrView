@@ -18,6 +18,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.ArrangementLayout
+import org.bytefred.arrview.core.CellActions
+import org.bytefred.arrview.core.DigonCreate
 import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.Drawing
 import org.bytefred.arrview.core.Examples
@@ -31,6 +33,7 @@ import org.bytefred.arrview.core.arrangementFile
 import org.bytefred.arrview.core.canBeOuter
 import org.bytefred.arrview.core.defaultOuterFace
 import org.bytefred.arrview.core.digonCollapse
+import org.bytefred.arrview.core.digonCreate
 import org.bytefred.arrview.core.faceKey
 import org.bytefred.arrview.core.faceWithKey
 import org.bytefred.arrview.core.hasModel1
@@ -46,6 +49,7 @@ enum class Widget(val label: String) {
     SEQUENCES("Sequences"),
     ENCODING("Encoding"),
     INTERSECTION_GRAPH("Intersection graph"),
+    TRIANGLE_HYPERGRAPH("Triangle hypergraph"),
     LAYOUT("Layout"),
 }
 
@@ -115,6 +119,15 @@ class AppState(
 
     /** The face under the mouse (indices of the drawing's arrangement). */
     var hoverFace by mutableStateOf<Int?>(null)
+
+    /** The face (of the current arrangement) highlighted in the canvas while the pointer is on a menu entry for it. */
+    var menuHighlight by mutableStateOf<Int?>(null)
+
+    private var actionsCache: CellActions? = null
+
+    /** What can be flipped, collapsed or created in the current arrangement (computed once per arrangement). */
+    val actions: CellActions
+        get() = actionsCache?.takeIf { it.arrangement == arrangement } ?: CellActions(arrangement).also { actionsCache = it }
 
     /** Number of focused text fields: keyboard shortcuts are off while one has focus. */
     var textFieldsFocused by mutableIntStateOf(0)
@@ -336,6 +349,7 @@ class AppState(
         loaded = e.loaded
         outerKey = e.outerKey
         hoverFace = null
+        menuHighlight = null
         relayout()
     }
 
@@ -350,6 +364,7 @@ class AppState(
         arrangement = next
         outerKey = keep
         hoverFace = null
+        menuHighlight = null
         relayout()
     }
 
@@ -515,15 +530,31 @@ class AppState(
     }
 
     /**
-     * A click on face [f] of the [drawing]: a triangle flips, a digon collapses; other faces and
-     * the outer face do nothing. Ignored while the drawing still shows a previous arrangement.
+     * A click on face [f] of the [drawing]: a triangle flips, a digon collapses, a face with
+     * exactly one digon create does it (with several, the canvas opens a menu instead); other
+     * faces and the outer face do nothing. Ignored while the drawing still shows a previous
+     * arrangement.
      */
     fun clickFace(f: Int) {
         if (f == (outerFace ?: return)) return
         when (arrangement.faces.getOrNull(f)?.size) {
+            null -> return
             3 -> flipTriangle(f)
             2 -> collapseDigon(f)
+            else -> actions.createsIn(f).singleOrNull()?.let(::createDigon)
         }
+    }
+
+    /** Digon create (undoable): circles i and j get two crossings and a digon in the face. */
+    fun createDigon(op: DigonCreate) {
+        val next = try {
+            arrangement.digonCreate(op)
+        } catch (e: IllegalArgumentException) {
+            showNote("Cannot create the digon: ${e.message}")
+            return
+        }
+        change(next)
+        showInfo("Created a digon of ${op.i + 1} and ${op.j + 1}")
     }
 
     /** Triangle flip of face [f] (undoable). */

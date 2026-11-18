@@ -6,6 +6,10 @@ https://manfredscheucher.github.io/ArrView/
 ## Basics
 
 - Click a triangle to flip it, a digon to collapse it (refused if the arrangement would fall apart).
+- Click a face where two non-crossing circles both have a side to create a digon (the two circles then
+  cross twice). Several options: a menu, e.g. `1 3: [1] 2 [3] 2` (the two sides in brackets).
+- A "!" in the face under the mouse: a click does something there. In menus a face is written as the
+  circles of its sides around it; pointing at an entry highlights the face in yellow.
 - Right-click a face (Ctrl+click on a Mac) for its menu; "Make outer face" draws it outside.
 - Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu.
 - Model 1 draws digons as touching points (intersecting arrangements of at least 3 circles), Model 2
@@ -25,7 +29,11 @@ https://manfredscheucher.github.io/ArrView/
   NonKrupp triples, classes.
 - Sequences: the intersection sequences, one line per circle. Edit, then Apply or Revert.
 - Encoding: model 1 and model 2 sparse6, editable, with Copy.
-- Intersection graph: an edge for every pair of crossing circles.
+- Intersection graph: an edge for every pair of crossing circles, dashed for a non-crossing pair that
+  can create a digon; a yellow stripe (twice as strong if ambiguous) for every pair that can create or
+  collapse one. Click a striped pair to do it.
+- Triangle hypergraph: a transparent triangle per triple of circles bounding a triangle face (twice as
+  strong for two or more). Click a triangle to flip it.
 - Layout: model, max. iterations (5), eps (1e-8), Reset to defaults.
 
 ## Formats

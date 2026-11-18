@@ -6,6 +6,8 @@ import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.arrangementFile
+import org.bytefred.arrview.core.cellDescription
+import org.bytefred.arrview.core.digonCreates
 import org.bytefred.arrview.core.hasModel1
 import org.bytefred.arrview.core.parseJson
 import java.io.File
@@ -115,4 +117,23 @@ class HelpClaimsTest {
         assertTrue(nonKrupp.toString().startsWith(example.substringBefore(" 2:")))
     }
 
+    @Test
+    fun flipsInTheGraphViewsAndTheMenuNotation() {
+        assertSays(HelpPage.GENERAL, "Click a face where two circles that do not cross both have a side to create a digon")
+        assertSays(HelpPage.GENERAL, "A \"!\" appears in the face under the mouse")
+        assertSays(HelpPage.GENERAL, "Pointing at a menu entry highlights its face in yellow.")
+        assertSays(HelpPage.WIDGETS, "A dashed edge: the two circles do not cross but can create a digon.")
+        assertSays(HelpPage.WIDGETS, "A yellow stripe marks every pair")
+        assertSays(HelpPage.WIDGETS, "A triple with two or more triangle faces is twice as strong.")
+        // yellow: red and green high, blue low; transparent so overlaps add up
+        for (c in listOf(STRIPE_COLOR, HIGHLIGHT_FILL)) assertTrue(c.red > 0.9f && c.green > 0.8f && c.blue < 0.2f && c.alpha < 1f, "$c is yellow")
+        assertTrue(HYPEREDGE_FILL.alpha < 0.5f)
+        // the example of the user guide is a real menu entry: the chain 1-2-3 (1 and 3 do not cross)
+        val chain = Arrangement.parse("{1: [2, -2], 2: [1, -1, 3, -3], 3: [2, -2]}")
+        val entries = chain.digonCreates().map { op -> "${op.i + 1} ${op.j + 1}: " + chain.cellDescription(op.face, setOf(op.dartI, op.dartJ)) }
+        val example = "1 3: [1] 2 [3] 2"
+        assertTrue(example in entries, "$entries")
+        assertTrue("`$example`" in guide, "USER_GUIDE.md: create menu example")
+        assertTrue("Triangle hypergraph: " in guide && "dashed for a non-crossing pair" in guide, "USER_GUIDE.md: graph views")
+    }
 }
