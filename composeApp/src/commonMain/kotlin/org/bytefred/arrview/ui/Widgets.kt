@@ -386,7 +386,7 @@ private fun SettingsWidget(state: AppState) {
         "Colour scheme", state.colorScheme.label, ColorScheme.entries, { it.label },
         Modifier.width(200.dp).testTag("color-scheme"),
     ) { state.colorScheme = it }
-    Text("Line width: ${(state.lineWidth * 10).roundToInt() / 10.0} px", style = MaterialTheme.typography.bodyMedium)
+    Text("Line width: ${oneDecimal(state.lineWidth)} px", style = MaterialTheme.typography.bodyMedium)
     Slider(state.lineWidth, { state.lineWidth = it }, valueRange = AppState.LINE_WIDTH_RANGE, modifier = Modifier.testTag("line-width"))
 
     Spacer(Modifier.height(12.dp))
@@ -404,6 +404,12 @@ private fun SettingsWidget(state: AppState) {
     OutlinedButton(onClick = state::resetSettings, enabled = !state.settingsAreDefault) {
         Text("Reset to defaults")
     }
+}
+
+/** [v] with one decimal, the same on the JVM and the web (where 3.0 prints as "3"). */
+internal fun oneDecimal(v: Float): String {
+    val tenths = (v * 10).roundToInt()
+    return "${tenths / 10}.${tenths % 10}"
 }
 
 /** A real dropdown: read-only text field with an arrow; click opens the list (PoCoView's). */

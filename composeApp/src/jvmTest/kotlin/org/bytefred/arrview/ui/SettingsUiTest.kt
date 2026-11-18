@@ -25,7 +25,6 @@ import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.defaultOuterFace
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -93,7 +92,9 @@ class SettingsUiTest {
         waitForIdle()
         assertTrue(s.lineWidth > 7.5f, "line width ${s.lineWidth}")
         assertTrue(inkedPixels() > before, "wider curves")
-        onNodeWithText("Line width: ${(s.lineWidth * 10).roundToInt() / 10.0} px").assertExists()
+        onNodeWithText("Line width: ${oneDecimal(s.lineWidth)} px").assertExists()
+        assertEquals("3.0", oneDecimal(3f))
+        assertEquals("0.5", oneDecimal(0.5f))
         onNodeWithTag("line-width").performTouchInput { swipe(center, percentOffset(0f, 0.5f)) }
         waitForIdle()
         assertTrue(s.lineWidth < 1f, "line width ${s.lineWidth}")
