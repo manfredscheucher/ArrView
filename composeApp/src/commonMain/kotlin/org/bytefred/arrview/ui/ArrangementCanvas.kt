@@ -95,14 +95,6 @@ class ViewTransform {
     }
 }
 
-/** Distinct colours of the circles (circle i gets colour i mod size). */
-private val CIRCLE_COLORS = listOf(
-    Color(0xFFE53935), Color(0xFF1E88E5), Color(0xFF43A047), Color(0xFFFB8C00), Color(0xFF8E24AA),
-    Color(0xFF00ACC1), Color(0xFF6D4C41), Color(0xFFD81B60), Color(0xFF7CB342), Color(0xFF3949AB),
-    Color(0xFFFFB300), Color(0xFF546E7A),
-)
-
-fun circleColor(c: Int): Color = CIRCLE_COLORS[c % CIRCLE_COLORS.size]
 
 internal val TRIANGLE_FILL = Color(0xFFFFE3A3)
 internal val DIGON_FILL = Color(0xFFC9D8F7)
@@ -115,7 +107,6 @@ private const val TOUCH_SLOP = 4f
 /** Pixels around a model 1 touching point that hit its digon. */
 private const val TOUCH_RADIUS = 10.0
 
-private const val CURVE_WIDTH = 2.5f
 
 /** Width of a highlighted side under its curve. */
 private const val SIDE_WIDTH = 10f
@@ -252,7 +243,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
             if (drawing != null) {
                 val current = drawing.arrangement == state.arrangement
                 val hover = state.hoverFace.takeIf { current }
-                drawArrangement(drawing, view, hover, state.menuHighlight.takeIf { current })
+                drawArrangement(drawing, view, hover, state.menuHighlight.takeIf { current }, state.colorScheme, state.lineWidth)
                 // "!" in the hovered cell when a click does something there; for the outer face in a corner
                 if (hover != null && state.actions.hasAction(hover)) {
                     if (hover == drawing.outerFace) {
@@ -265,7 +256,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
             }
             drawing?.labels?.forEachIndexed { c, (at, outward) ->
                 val s = view.toScreen(at) + Offset((outward.x * LABEL_OFFSET).toFloat(), (-outward.y * LABEL_OFFSET).toFloat())
-                val layout = textMeasurer.measure("${c + 1}", TextStyle(color = circleColor(c), fontSize = 14.sp, fontWeight = FontWeight.Bold))
+                val layout = textMeasurer.measure("${c + 1}", TextStyle(color = state.colorScheme.color(c, drawing.arrangement.n), fontSize = 14.sp, fontWeight = FontWeight.Bold))
                 val topLeft = s - Offset(layout.size.width / 2f, layout.size.height / 2f)
                 // only labels inside the canvas: drawText needs room right of / below its position
                 if (topLeft.x >= 0f && topLeft.y >= 0f && topLeft.x + layout.size.width < size.width && topLeft.y + layout.size.height < size.height)
@@ -365,7 +356,7 @@ internal val HIGHLIGHT_SIDE = Color(0xFFFFB300)
 /** A face highlighted from a menu entry: yellow, stronger than the hover. */
 internal val HIGHLIGHT_FILL = Color(0x88FFD600)
 
-private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Highlight?) {
+private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Highlight?, scheme: ColorScheme, lineWidth: Float) {
     val faces = d.arrangement.faces
     for ((f, pieces) in d.faces.withIndex()) {
         if (pieces.isEmpty()) continue
@@ -394,7 +385,7 @@ private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: In
         }
     }
     for ((c, pieces) in d.circles.withIndex()) {
-        drawPath(path(pieces, view, close = true), circleColor(c), style = Stroke(CURVE_WIDTH, cap = StrokeCap.Round))
+        drawPath(path(pieces, view, close = true), scheme.color(c, d.arrangement.n), style = Stroke(lineWidth, cap = StrokeCap.Round))
     }
     // model 1: a digon is the point where its two circles touch
     for ((f, at) in d.touchings) {

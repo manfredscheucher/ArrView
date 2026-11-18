@@ -39,7 +39,9 @@ https://manfredscheucher.github.io/ArrView/
   collapse one. Click a striped pair to do it (several ways: a menu of the faces, then submenus).
 - Triangle hypergraph: a transparent triangle per triple of circles bounding a triangle face (twice as
   strong for two or more). Click a triangle to flip it.
-- Layout: model, max. iterations (5), eps (1e-8), Reset to defaults.
+- Settings: Display (colour scheme: Standard, rainbow, rainbow2 (default), rainbow3-2, rainbow3-k;
+  line width 0.5 to 8, default 3) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
+  defaults for all.
 
 ## Formats
 

@@ -92,7 +92,7 @@ private val GENERAL_TEXT = listOf(
         "outer face, which draws that face around the rest. Drag to pan, zoom with the wheel or by pinching.",
     "Where there are several ways to create a digon of circles i and j, they are listed along circle i " +
         "(the smaller number), in the order of its sequence, then along circle j.",
-    "Model 1 and Model 2 (toolbar, View menu, Layout widget) are two ways to draw. Model 1 draws the " +
+    "Model 1 and Model 2 (toolbar, View menu, Settings widget) are two ways to draw. Model 1 draws the " +
         "crossings only, a digon is a point where its two circles touch (blue dot). It needs an " +
         "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
         "works for every arrangement. The drawing is an iterated Tutte embedding as in the paper by " +
@@ -127,9 +127,13 @@ private val WIDGETS_TEXT = listOf(
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
         "a menu lists them with their faces (several triples: a submenu per triple).",
-    "Layout: Max. iterations (default ${LayoutSettings().maxIterations}) and eps (default " +
+    "Settings: Display and Layout. Display: the colour scheme of the circles (default " +
+        "${ColorScheme.DEFAULT.label}; Standard is a fixed list of 12 colours, the rainbow schemes are computed " +
+        "from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +
+        "scheme colours the curves, labels, SVG and the vertices of the graph views. Layout: Model 1 / Model 2, " +
+        "Max. iterations (default ${LayoutSettings().maxIterations}) and eps (default " +
         "${epsText(LayoutSettings().eps)}). The drawing stops after max. iterations, or earlier when the " +
-        "weights change by less than eps. Reset restores the defaults.",
+        "weights change by less than eps. Reset to defaults resets everything in the widget.",
 )
 
 private val FORMATS_TEXT = listOf(

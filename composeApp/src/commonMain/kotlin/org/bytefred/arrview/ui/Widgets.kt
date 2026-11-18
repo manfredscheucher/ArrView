@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,7 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -52,7 +60,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.crosses
 import org.bytefred.arrview.core.intersectionGraph
@@ -64,6 +71,7 @@ import org.bytefred.arrview.core.nonIntersectingPairCount
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /** The content of a widget (without scrolling; the caller scrolls). */
@@ -76,7 +84,7 @@ fun WidgetContent(state: AppState, w: Widget) {
             Widget.ENCODING -> EncodingWidget(state)
             Widget.INTERSECTION_GRAPH -> IntersectionGraphWidget(state)
             Widget.TRIANGLE_HYPERGRAPH -> TriangleHypergraphWidget(state)
-            Widget.LAYOUT -> LayoutWidget(state)
+            Widget.SETTINGS -> SettingsWidget(state)
         }
     }
 }
@@ -212,10 +220,11 @@ internal class VertexCircle(val n: Int, width: Float, height: Float, val label: 
 internal fun Density.vertexCircle(n: Int, size: Size) = VertexCircle(n, size.width, size.height, GRAPH_LABEL.toPx())
 
 /** The vertices as dots with their labels in the circle colours. */
-private fun DrawScope.drawVertices(circle: VertexCircle, measurer: TextMeasurer) {
+private fun DrawScope.drawVertices(circle: VertexCircle, measurer: TextMeasurer, scheme: ColorScheme) {
     for (c in 0 until circle.n) {
-        drawCircle(circleColor(c), 4.dp.toPx(), circle.at(c))
-        val layout = measurer.measure("${c + 1}", TextStyle(color = circleColor(c), fontSize = 11.sp, fontWeight = FontWeight.Bold))
+        val color = scheme.color(c, circle.n)
+        drawCircle(color, 4.dp.toPx(), circle.at(c))
+        val layout = measurer.measure("${c + 1}", TextStyle(color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold))
         drawText(layout, topLeft = circle.at(c, circle.radius + circle.label / 2) - Offset(layout.size.width / 2f, layout.size.height / 2f))
     }
 }
@@ -275,7 +284,7 @@ private fun IntersectionGraphWidget(state: AppState) {
             for ((i, j) in striped) if (actions.createsOf(i, j).isNotEmpty()) {
                 drawLine(edgeColor, circle.at(i), circle.at(j), strokeWidth = 1.5f, pathEffect = dashes)
             }
-            drawVertices(circle, measurer)
+            drawVertices(circle, measurer, state.colorScheme)
         }
         menu?.let { (pair, at) ->
             val (i, j) = pair
@@ -327,7 +336,7 @@ private fun TriangleHypergraphWidget(state: AppState) {
                     drawPath(path, HYPEREDGE_LINE, style = Stroke(1f))
                 }
             }
-            drawVertices(circle, measurer)
+            drawVertices(circle, measurer, state.colorScheme)
         }
         menu?.let { (hits, at) ->
             val entries = remember(arr, hits) { state.triangleEntries(hits.associateWith { triples[it].orEmpty() }) }
@@ -364,11 +373,24 @@ private val HYPEREDGE_LINE = Color(0x66FB8C00)
 
 private val GRAPH_SIZE = 240.dp
 
-/** Model and the settings of the iterated Tutte embedding. */
+/**
+ * Display (colour scheme, line width) and Layout (model, max. iterations, eps), each under a
+ * heading as PoCoView's widget subgroups, and one Reset to defaults for all of it.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LayoutWidget(state: AppState) {
+private fun SettingsWidget(state: AppState) {
     val settings = state.layoutSettings
+    Text("Display", style = MaterialTheme.typography.titleSmall)
+    SelectField(
+        "Colour scheme", state.colorScheme.label, ColorScheme.entries, { it.label },
+        Modifier.width(200.dp).testTag("color-scheme"),
+    ) { state.colorScheme = it }
+    Text("Line width: ${(state.lineWidth * 10).roundToInt() / 10.0} px", style = MaterialTheme.typography.bodyMedium)
+    Slider(state.lineWidth, { state.lineWidth = it }, valueRange = AppState.LINE_WIDTH_RANGE, modifier = Modifier.testTag("line-width"))
+
+    Spacer(Modifier.height(12.dp))
+    Text("Layout", style = MaterialTheme.typography.titleSmall)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ModelChips(state) }
     ParsedField(
         state, "Max. iterations", settings.maxIterations.toString(), { it.toIntOrNull()?.takeIf { n -> n >= 1 } },
@@ -378,8 +400,31 @@ private fun LayoutWidget(state: AppState) {
         state, "eps", epsText(settings.eps), { it.toDoubleOrNull()?.takeIf { e -> e.isFinite() && e > 0.0 } },
         "a positive number", Modifier.width(160.dp).testTag("eps"),
     ) { e -> if (e != null) state.changeLayoutSettings(state.layoutSettings.copy(eps = e)) }
-    OutlinedButton(onClick = { state.changeLayoutSettings(LayoutSettings()) }, enabled = settings != LayoutSettings()) {
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(onClick = state::resetSettings, enabled = !state.settingsAreDefault) {
         Text("Reset to defaults")
+    }
+}
+
+/** A real dropdown: read-only text field with an arrow; click opens the list (PoCoView's). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> SelectField(
+    label: String?, current: String, items: List<T>, itemLabel: (T) -> String, modifier: Modifier = Modifier,
+    onSelect: (T) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(open, onExpandedChange = { open = it }, modifier = modifier) {
+        OutlinedTextField(
+            current, onValueChange = {}, readOnly = true, singleLine = true,
+            label = label?.let { { Text(it) } },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
+            textStyle = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+        )
+        ExposedDropdownMenu(open, onDismissRequest = { open = false }) {
+            for (it in items) DropdownMenuItem(text = { Text(itemLabel(it)) }, onClick = { onSelect(it); open = false })
+        }
     }
 }
 

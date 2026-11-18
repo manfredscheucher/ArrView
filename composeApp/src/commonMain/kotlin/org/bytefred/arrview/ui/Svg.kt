@@ -39,7 +39,7 @@ fun Color.toHex(): String = "#" + (toArgb() and 0xFFFFFF).toString(16).padStart(
  * SVG of [d] as the canvas draws it (triangles and digons filled, the curves in their colours,
  * model 1 touching points, the labels), in a 1000 x 1000 box.
  */
-fun drawingSvg(d: Drawing): String {
+fun drawingSvg(d: Drawing, scheme: ColorScheme, lineWidth: Float): String {
     val fr = ExportFrame(d.bounds, SVG_SIZE, SVG_MARGIN)
     fun pt(p: Point) = "${fmt(fr.x(p))},${fmt(fr.y(p))}"
     fun path(pieces: List<Cubic>) = buildString {
@@ -63,7 +63,7 @@ fun drawingSvg(d: Drawing): String {
         }
         for ((c, pieces) in d.circles.withIndex()) {
             if (pieces.isEmpty()) continue
-            append("<path d=\"${path(pieces)}\" fill=\"none\" stroke=\"${circleColor(c).toHex()}\" stroke-width=\"3\"/>\n")
+            append("<path d=\"${path(pieces)}\" fill=\"none\" stroke=\"${scheme.color(c, d.arrangement.n).toHex()}\" stroke-width=\"${fmt(lineWidth.toDouble())}\"/>\n")
         }
         for (at in d.touchings.values) {
             append("<circle cx=\"${fmt(fr.x(at))}\" cy=\"${fmt(fr.y(at))}\" r=\"5\" fill=\"${DIGON_MARK.toHex()}\"/>\n")
@@ -73,7 +73,7 @@ fun drawingSvg(d: Drawing): String {
             val x = fr.x(at) + outward.x * SVG_LABEL_OFFSET
             val y = fr.y(at) - outward.y * SVG_LABEL_OFFSET
             append(
-                "<text x=\"${fmt(x)}\" y=\"${fmt(y)}\" fill=\"${circleColor(c).toHex()}\" font-size=\"20\" " +
+                "<text x=\"${fmt(x)}\" y=\"${fmt(y)}\" fill=\"${scheme.color(c, d.arrangement.n).toHex()}\" font-size=\"20\" " +
                     "font-weight=\"bold\" font-family=\"sans-serif\" text-anchor=\"middle\" dominant-baseline=\"central\">${c + 1}</text>\n",
             )
         }

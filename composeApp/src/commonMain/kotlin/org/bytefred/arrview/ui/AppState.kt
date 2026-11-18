@@ -1,6 +1,7 @@
 package org.bytefred.arrview.ui
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -50,8 +51,11 @@ enum class Widget(val label: String) {
     ENCODING("Encoding"),
     INTERSECTION_GRAPH("Intersection graph"),
     TRIANGLE_HYPERGRAPH("Triangle hypergraph"),
-    LAYOUT("Layout"),
+    SETTINGS("Settings"),
 }
+
+/** The widget stored under [id] (an old "LAYOUT" is the Settings widget, which replaced it). */
+internal fun widgetById(id: String): Widget? = if (id == "LAYOUT") Widget.SETTINGS else Widget.entries.firstOrNull { it.name == id }
 
 enum class LayoutMode { AUTO, PORTRAIT, LANDSCAPE }
 
@@ -105,6 +109,26 @@ class AppState(
     /** The outer face of the drawing, if it shows the current arrangement and model. */
     val outerFace: Int?
         get() = currentDrawing?.outerFace
+
+    /** The colours of the circles (Settings widget). */
+    var colorScheme by mutableStateOf(ColorScheme.DEFAULT)
+
+    /** Width of the curves in pixels, on the canvas and in the SVG export (Settings widget). */
+    var lineWidth by mutableFloatStateOf(DEFAULT_LINE_WIDTH)
+
+    /** Everything of the Settings widget is at its default (then Reset to defaults is off). */
+    val settingsAreDefault: Boolean
+        get() = colorScheme == ColorScheme.DEFAULT && lineWidth == DEFAULT_LINE_WIDTH &&
+            preferredModel == DrawModel.MODEL1 && layoutSettings == LayoutSettings()
+
+    /** Settings widget "Reset to defaults": colour scheme, line width, model, max. iterations, eps. */
+    fun resetSettings() {
+        colorScheme = ColorScheme.DEFAULT
+        lineWidth = DEFAULT_LINE_WIDTH
+        preferredModel = DrawModel.MODEL1
+        layoutSettings = LayoutSettings()
+        relayout()
+    }
 
     /** Settings of the iterated Tutte embedding (edited in a widget). */
     var layoutSettings by mutableStateOf(LayoutSettings())
@@ -223,6 +247,8 @@ class AppState(
         MODEL_PREF to preferredModel.name,
         MAX_ITERATIONS_PREF to layoutSettings.maxIterations.toString(),
         EPS_PREF to layoutSettings.eps.toString(),
+        COLOR_SCHEME_PREF to colorScheme.name,
+        LINE_WIDTH_PREF to lineWidth.toString(),
     )
 
     /** What [displayPrefs] was at the last load or save: only changed settings are written. */
@@ -249,7 +275,7 @@ class AppState(
     private fun loadDisplayPrefs() {
         enumPref<LayoutMode>(LAYOUT_PREF)?.let { layoutMode = it }
         loadPref(OPEN_WIDGETS_PREF)?.let { stored ->
-            val open = stored.split(',').mapNotNull { name -> Widget.entries.firstOrNull { it.name == name } }.distinct()
+            val open = stored.split(',').mapNotNull(::widgetById).distinct()
             openWidgets.clear()
             openWidgets.addAll(open)
         }
@@ -258,6 +284,8 @@ class AppState(
         enumPref<DrawModel>(MODEL_PREF)?.let { preferredModel = it }
         loadPref(MAX_ITERATIONS_PREF)?.toIntOrNull()?.takeIf { it >= 1 }?.let { layoutSettings = layoutSettings.copy(maxIterations = it) }
         loadPref(EPS_PREF)?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }?.let { layoutSettings = layoutSettings.copy(eps = it) }
+        enumPref<ColorScheme>(COLOR_SCHEME_PREF)?.let { colorScheme = it }
+        loadPref(LINE_WIDTH_PREF)?.toFloatOrNull()?.takeIf { it.isFinite() }?.let { lineWidth = it.coerceIn(LINE_WIDTH_RANGE) }
         savedDisplay = displayPrefs()
     }
 
@@ -593,6 +621,9 @@ class AppState(
         private const val PREF_SAVE_DELAY_MS = 500L
 
         private const val MAX_UNDO = 500
+
+        const val DEFAULT_LINE_WIDTH = 3f
+        val LINE_WIDTH_RANGE = 0.5f..8f
 
         /** Drawings kept for undo / redo and switching back and forth. */
         private const val CACHE_SIZE = 32

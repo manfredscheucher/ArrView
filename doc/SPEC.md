@@ -2,6 +2,55 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Colour scheme and line width, Settings widget
+
+### Request (Manfred)
+
+Line width and colour spectrum adjustable. Port the colour schemes of ~/github/blurred-memory (several
+are implemented there) and offer the scheme as a dropdown; the colours are computed from n.
+
+### Decisions
+
+- Port `blurred-memory/shared/src/commonMain/kotlin/org/bytefred/blurredmemory/shared/ColorPalettes.kt`
+  unchanged in its formulas: rainbow, rainbow2, rainbow3-2, rainbow3-k (see blurred-memory
+  docs/11-color-palettes.md), with count = n and index = circle index. Also port its unit tests
+  (ColorPaletteTest) where they apply.
+- Dropdown entries: Standard (ArrView's current fixed colours), rainbow, rainbow2, rainbow3-2,
+  rainbow3-k. Default rainbow2 (Manfred).
+- Line width: slider 0.5 to 8, default 3 (Manfred), for the curves on the canvas and in the SVG export.
+- Placement (Manfred: "Layout is really settings, layout is a subgroup"; decided with a reviewer): the
+  Layout widget becomes "Settings", in the same toolbar slot. It has two subgroups with headings in
+  PoCoView's style (copy it exactly):
+  - "Display": Colour scheme dropdown, then Line width.
+  - "Layout": Model 1/2 chips, Max. iterations, eps.
+
+  One "Reset to defaults" at the bottom resets everything in the widget, as in PoCoView. The View menu
+  item and the remembered open-widget pref follow the rename (an old stored "Layout" id still opens
+  Settings).
+- The scheme colours everything that uses the circle colours: curves, labels, SVG export, and the
+  vertices of the intersection graph and of the triangle hypergraph. Colour scheme and line width are
+  remembered like the other display settings.
+
+### Implementation (2026-11-18)
+
+- `core/ColorPalettes.kt` and `ColorPaletteTest` copied from blurred-memory (only the package and a
+  provenance note changed). `ui/ColorScheme.kt`: Standard + the four palettes, `color(c, n)`.
+- Settings widget as PoCoView's Display widget: "Display" heading (titleSmall), Colour scheme
+  (PoCoView's `SelectField` dropdown), "Line width: 3.0 px" + slider; 12 dp space, "Layout" heading,
+  model chips, Max. iterations, eps; 8 dp space, Reset to defaults (enabled when anything differs).
+- Prefs `colorScheme` (enum name, unknown -> default) and `lineWidth` (clamped to 0.5..8).
+- Tests: `SettingsUiTest` (dropdown by clicks with pixel check of the graph vertices, slider by
+  swipes with more inked canvas pixels, Reset, remembered and corrupt prefs, old "LAYOUT" id, SVG).
+
+### Claude's choices (to confirm)
+
+- Reset to defaults also sets the model back to Model 1 (the chips are in the widget; "everything in
+  the widget").
+- The SVG uses the same line width number as the canvas (the SVG is 1000 x 1000, the canvas in
+  pixels), so the SVG curves look relatively thinner on a big canvas.
+- The colour scheme does not change the triangle/digon fills, the stripes or the highlights.
+- Unlike PoCoView's Display widget, the first subgroup has a heading too ("Display"), as the spec says.
+
 ## 2026-11-18: Create options ordered along the circle, creates in the right-click menu
 
 ### Request (Manfred)

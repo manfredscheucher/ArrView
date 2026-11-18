@@ -17,7 +17,7 @@ class ExportTest {
         val arr = Examples.start.arrangement()
         for (model in DrawModel.entries) {
             val d = ArrangementLayout(arr, model, arr.defaultOuterFace(model)).layout(LayoutSettings())
-            val svg = drawingSvg(d)
+            val svg = drawingSvg(d, ColorScheme.DEFAULT, AppState.DEFAULT_LINE_WIDTH)
             File("build/screenshots").apply { mkdirs() }.resolve("export-${model.name.lowercase()}.svg").writeText(svg)
             val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(svg.byteInputStream())
             val paths = doc.getElementsByTagName("path")

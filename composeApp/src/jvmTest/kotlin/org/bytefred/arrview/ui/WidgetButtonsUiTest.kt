@@ -198,7 +198,7 @@ class WidgetButtonsUiTest {
 
     @Test
     fun layoutWidgetChipsFieldsAndReset() = runComposeUiTest {
-        val s = state(Widget.LAYOUT)
+        val s = state(Widget.SETTINGS)
         setContent { App(s, initialDialog = DialogKind.NONE) }
         onNodeWithText("Reset to defaults").assertIsNotEnabled()
         // the widget's model chips (the toolbar has the same)

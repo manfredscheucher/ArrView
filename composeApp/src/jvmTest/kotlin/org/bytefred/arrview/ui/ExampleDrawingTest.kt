@@ -49,7 +49,7 @@ class ExampleDrawingTest {
     }
 
     private fun checkSvg(d: Drawing, what: String) {
-        val svg = drawingSvg(d)
+        val svg = drawingSvg(d, ColorScheme.DEFAULT, AppState.DEFAULT_LINE_WIDTH)
         assertTrue("NaN" !in svg && "Infinity" !in svg, what)
         val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(svg.byteInputStream())
         val paths = doc.getElementsByTagName("path")

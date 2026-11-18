@@ -354,7 +354,7 @@ class CanvasInteractionUiTest {
         waitForIdle()
         assertNull(s.openMenu)
         // typing in a field
-        onNodeWithText("Layout").performClick()
+        onNodeWithText("Settings").performClick()
         onNodeWithTag("eps").performClick()
         waitForIdle()
         assertTrue(s.textFieldsFocused > 0)

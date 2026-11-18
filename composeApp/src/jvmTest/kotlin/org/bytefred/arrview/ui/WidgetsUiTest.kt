@@ -101,7 +101,7 @@ class WidgetsUiTest {
     fun layoutSettingsAndReset() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        onNodeWithText("Layout").performClick()
+        onNodeWithText("Settings").performClick()
         onNodeWithTag("max-iterations").performTextReplacement("25")
         onNodeWithTag("eps").performTextReplacement("1e-5")
         waitForIdle()

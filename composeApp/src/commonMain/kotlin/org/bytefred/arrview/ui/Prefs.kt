@@ -19,6 +19,8 @@ internal const val STACKED_WEIGHTS_PREF = "stackedWeights"
 internal const val MODEL_PREF = "model"
 internal const val MAX_ITERATIONS_PREF = "maxIterations"
 internal const val EPS_PREF = "eps"
+internal const val COLOR_SCHEME_PREF = "colorScheme"
+internal const val LINE_WIDTH_PREF = "lineWidth"
 
 /** "off" once "Don't show again" was ticked in the Welcome dialog. */
 const val WELCOME_PREF = "welcome"
@@ -37,7 +39,7 @@ internal fun decodeWeights(s: String): Map<Widget?, Float> = buildMap {
     for (part in s.split(',')) {
         val kv = part.split('=')
         if (kv.size != 2) continue
-        val key = if (kv[0] == CANVAS_KEY) null else Widget.entries.firstOrNull { it.name == kv[0] } ?: continue
+        val key = if (kv[0] == CANVAS_KEY) null else widgetById(kv[0]) ?: continue
         val w = kv[1].toFloatOrNull()?.takeIf { it.isFinite() && it > 0f } ?: continue
         put(key, w.coerceIn(MIN_WEIGHT, MAX_WEIGHT))
     }

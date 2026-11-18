@@ -231,15 +231,15 @@ class EditingSessionTest {
     fun widgetsDividersAndLayoutModeAreRemembered() {
         val s = state()
         s.openWidgets.clear()
-        s.openWidgets.addAll(listOf(Widget.LAYOUT, Widget.SEQUENCES))
+        s.openWidgets.addAll(listOf(Widget.SETTINGS, Widget.SEQUENCES))
         s.layoutMode = LayoutMode.PORTRAIT
-        s.wideWeights = mapOf(null to 3f, Widget.LAYOUT to 1.5f)
+        s.wideWeights = mapOf(null to 3f, Widget.SETTINGS to 1.5f)
         s.stackedWeights = mapOf(null to 1f, Widget.SEQUENCES to 0.5f)
         s.saveDisplayPrefs()
         val t = state()
-        assertEquals(listOf(Widget.LAYOUT, Widget.SEQUENCES), t.openWidgets.toList())
+        assertEquals(listOf(Widget.SETTINGS, Widget.SEQUENCES), t.openWidgets.toList())
         assertEquals(LayoutMode.PORTRAIT, t.layoutMode)
-        assertEquals(mapOf(null to 3f, Widget.LAYOUT to 1.5f), t.wideWeights)
+        assertEquals(mapOf(null to 3f, Widget.SETTINGS to 1.5f), t.wideWeights)
         assertEquals(mapOf(null to 1f, Widget.SEQUENCES to 0.5f), t.stackedWeights)
         // all widgets closed is remembered too
         t.openWidgets.clear()
@@ -258,9 +258,9 @@ class EditingSessionTest {
         savePref(EPS_PREF, "NaN")
         val s = state()
         assertEquals(LayoutMode.AUTO, s.layoutMode)
-        assertEquals(listOf(Widget.LAYOUT, Widget.PROPERTIES), s.openWidgets.toList())
+        assertEquals(listOf(Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
         // shares are clamped to 0.01..100, unreadable ones dropped
-        assertEquals(mapOf<Widget?, Float>(Widget.LAYOUT to 100f, Widget.SEQUENCES to 0.01f), s.wideWeights)
+        assertEquals(mapOf<Widget?, Float>(Widget.SETTINGS to 100f, Widget.SEQUENCES to 0.01f), s.wideWeights)
         assertTrue(s.stackedWeights.isEmpty())
         assertEquals(DrawModel.MODEL1, s.preferredModel)
         assertEquals(LayoutSettings(), s.layoutSettings)
