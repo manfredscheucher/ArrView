@@ -67,12 +67,12 @@ class ExamplesDialogUiTest {
                     onNodeWithText("Load").assertIsNotEnabled()
                     // the first member: no previous one
                     field.performTextReplacement("1")
-                    onNodeWithText("<").assertIsNotEnabled()
+                    onNodeWithText("\u2212").assertIsNotEnabled()
                     onNodeWithText("Load").assertIsEnabled()
                     // the last member: no next one; < goes one back
                     field.performTextReplacement("${set.size}")
-                    onNodeWithText(">").assertIsNotEnabled()
-                    onNodeWithText("<").performClick()
+                    onNodeWithText("+").assertIsNotEnabled()
+                    onNodeWithText("\u2212").performClick()
                     waitForIdle()
                     assertEquals("${set.size - 1}", field.text())
                     set.size - 2

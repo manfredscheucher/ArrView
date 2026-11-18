@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -173,13 +170,12 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, onIndex
             style = MaterialTheme.typography.bodySmall,
         )
         if (set.size > 1) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { onIndex(index - 1) }, enabled = index > 0, modifier = Modifier.padding(top = 8.dp)) { Text("<") }
-            ParsedField(
-                state, "#", (index + 1).toString(), { it.toIntOrNull()?.takeIf { i -> i in 1..set.size } },
-                "1 to ${set.size}", Modifier.width(110.dp).testTag("example-index"),
+            CompactNumberField(
+                state, (index + 1).toString(), { it.toIntOrNull()?.takeIf { i -> i in 1..set.size } },
+                "1 to ${set.size}", set.size.toString().length, "example-index",
+                Steppers({ onIndex(index - 1) }, index > 0, { onIndex(index + 1) }, index < set.size - 1),
             ) { i -> onIndex(i?.minus(1)) }
-            OutlinedButton(onClick = { onIndex(index + 1) }, enabled = index < set.size - 1, modifier = Modifier.padding(top = 8.dp)) { Text(">") }
-            Text("of ${set.size}", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.bodyMedium)
+            Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

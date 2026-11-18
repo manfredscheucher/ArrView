@@ -555,17 +555,35 @@ private fun SettingsWidget(state: AppState) {
     Text("Layout", style = MaterialTheme.typography.titleSmall)
     Text(LAYOUT_NOTE, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ModelChips(state) }
-    ParsedField(
-        state, "Max. iterations", settings.maxIterations.toString(), { it.toIntOrNull()?.takeIf { n -> n >= 1 } },
-        "at least 1", Modifier.width(160.dp).testTag("max-iterations"),
-    ) { n -> if (n != null) state.changeLayoutSettings(state.layoutSettings.copy(maxIterations = n)) }
-    ParsedField(
-        state, "eps", epsText(settings.eps), { it.toDoubleOrNull()?.takeIf { e -> e.isFinite() && e > 0.0 } },
-        "a positive number", Modifier.width(160.dp).testTag("eps"),
-    ) { e -> if (e != null) state.changeLayoutSettings(state.layoutSettings.copy(eps = e)) }
+    fun iterations(n: Int) = state.changeLayoutSettings(state.layoutSettings.copy(maxIterations = n))
+    SettingRow("Max. iterations") {
+        CompactNumberField(
+            state, settings.maxIterations.toString(), { it.toIntOrNull()?.takeIf { n -> n >= 1 } }, "at least 1",
+            ITERATION_CHARS, "max-iterations",
+            Steppers({ iterations(settings.maxIterations - 1) }, settings.maxIterations > 1, { iterations(settings.maxIterations + 1) }, true),
+        ) { n -> if (n != null) iterations(n) }
+    }
+    SettingRow("eps") {
+        CompactNumberField(
+            state, epsText(settings.eps), { it.toDoubleOrNull()?.takeIf { e -> e.isFinite() && e > 0.0 } }, "a positive number",
+            MAX_FIELD_LENGTH, "eps",
+        ) { e -> if (e != null) state.changeLayoutSettings(state.layoutSettings.copy(eps = e)) }
+    }
     Spacer(Modifier.height(8.dp))
     OutlinedButton(onClick = state::resetSettings) { Text("Reset to defaults") }
 }
+
+/** A setting: its name on the left, the control on the right (as the colour scheme row). */
+@Composable
+private fun SettingRow(label: String, control: @Composable () -> Unit) {
+    Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(vertical = 2.dp)) {
+        Text(label, Modifier.weight(1f).padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
+        control()
+    }
+}
+
+/** Max. iterations has no upper bound; the field is wide enough for 6 digits (longer text scrolls). */
+private const val ITERATION_CHARS = 6
 
 /** Below the Layout heading of the Settings widget. */
 internal const val LAYOUT_NOTE = "Parameters of the drawing only (iterated Tutte embedding); they do not change the " +
@@ -599,40 +617,6 @@ fun <T> SelectField(
         }
     }
 }
-
-/**
- * A text field for a value: [onText] gets the [parse]d text, null while it is invalid (then
- * [error] shows below). A new [value] from outside (Reset, < >) replaces the text unless the
- * text already means it, so typing `1e-5` is not rewritten on the way.
- */
-@Composable
-fun <T : Any> ParsedField(
-    state: AppState,
-    label: String,
-    value: String,
-    parse: (String) -> T?,
-    error: String,
-    modifier: Modifier = Modifier,
-    onText: (T?) -> Unit,
-) {
-    var text by remember { mutableStateOf(value) }
-    LaunchedEffect(value) { if (parse(text) != parse(value)) text = value }
-    val invalid = parse(text) == null
-    OutlinedTextField(
-        text,
-        onValueChange = { v ->
-            text = v.take(MAX_FIELD_LENGTH)
-            onText(parse(text))
-        },
-        label = { Text(label) },
-        singleLine = true,
-        isError = invalid,
-        supportingText = if (invalid) ({ Text(error) }) else null,
-        modifier = modifier.textFocus(state),
-    )
-}
-
-private const val MAX_FIELD_LENGTH = 12
 
 /** Counts focused text fields in [AppState.textFieldsFocused], so shortcuts do not fire while typing. */
 fun Modifier.textFocus(state: AppState): Modifier = composed {

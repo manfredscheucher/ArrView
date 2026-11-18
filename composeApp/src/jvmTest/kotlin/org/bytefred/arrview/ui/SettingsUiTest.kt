@@ -1,20 +1,25 @@
 package org.bytefred.arrview.ui
 
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.percentOffset
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.percentOffset
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -125,6 +130,45 @@ class SettingsUiTest {
         assertEquals(DrawModel.MODEL1, s.preferredModel)
         assertEquals(LayoutSettings(), s.layoutSettings)
         assertTrue(s.settingsAreDefault)
+    }
+
+    @Test
+    fun compactNumberFields() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        runOnIdle { s.toggleWidget(Widget.SETTINGS) }
+        waitForIdle()
+        // as high as the buttons, no 280 dp minimum width
+        for (tag in listOf("max-iterations", "eps")) {
+            val size = onNodeWithTag(tag).fetchSemanticsNode().size
+            with(density) {
+                assertEquals(ButtonDefaults.MinHeight.roundToPx(), size.height, tag)
+                assertTrue(size.width < 140.dp.roundToPx(), "$tag is ${size.width} px wide")
+            }
+        }
+        // Max. iterations: - is off at 1, + and - step, typing jumps
+        onNodeWithTag("max-iterations").performTextReplacement("1")
+        waitForIdle()
+        assertEquals(1, s.layoutSettings.maxIterations)
+        onNodeWithText("\u2212").assertIsNotEnabled()
+        onNodeWithText("+").performClick()
+        onNodeWithText("+").performClick()
+        waitForIdle()
+        assertEquals(3, s.layoutSettings.maxIterations)
+        assertEquals("3", onNodeWithTag("max-iterations").text())
+        onNodeWithText("\u2212").assertIsEnabled().performClick()
+        waitForIdle()
+        assertEquals(2, s.layoutSettings.maxIterations)
+        // invalid: the hint below, nothing taken over
+        onNodeWithTag("max-iterations").performTextReplacement("0")
+        onNodeWithText("at least 1").assertExists()
+        assertEquals(2, s.layoutSettings.maxIterations)
+        // eps has no buttons
+        onNodeWithTag("eps").performTextReplacement("1e-3")
+        waitForIdle()
+        assertEquals(1e-3, s.layoutSettings.eps)
+        onNodeWithTag("eps").performTextReplacement("-1")
+        onNodeWithText("a positive number").assertExists()
     }
 
     @Test

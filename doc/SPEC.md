@@ -2,6 +2,43 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Compact number fields
+
+### Request (Manfred)
+
+The member selection in the Examples dialog ("< [#] > of M") is not nice, and the integer fields are
+far too big (Material's OutlinedTextField: 280 dp minimum width, 56 dp high). Number inputs compact
+everywhere, as in ktoy; space wasted nowhere.
+
+### Decisions
+
+- Model: ktoy's StepsPerSecInput (`SimulatorScreen.kt`): a BasicTextField with a 1 dp grey rounded
+  border, as high as the buttons next to it (ButtonDefaults.MinHeight), mono style, text vertically
+  centred, "−" / "+" buttons on either side. Copy that approach.
+- One shared composable (CompactNumberField): width fits the longest allowed value (digits of the
+  maximum plus padding), no 280 dp minimum; invalid input gets a red border, the hint ("at least 1",
+  "1 to M") as small text below or beside, without making the field big.
+- Examples: "− [ 17 ] +  of 2131"; buttons step, disabled at the ends; typing jumps; out of range
+  shows "1 to M" and disables Load.
+- Every other number field uses it (Settings: Max. iterations, eps). eps without −/+.
+
+### Implementation (2026-11-18)
+
+- `ui/NumberField.kt`: `CompactNumberField(state, value, parse, error, maxChars, tag, steppers)`,
+  width measured from `maxChars` zeros in the mono style plus 2 x 6 dp padding; the hint in small red
+  text below. `ParsedField` (the Material field) is gone.
+- Settings: "Max. iterations" and "eps" as rows (label left, field right, like the colour scheme
+  row); Max. iterations with −/+ (− off at 1). Tags unchanged (`max-iterations`, `eps`,
+  `example-index`).
+- Tests: `SettingsUiTest.compactNumberFields` (height = button height, width < 140 dp, −/+, typing,
+  limits, hints), the Examples tests click "−" / "+".
+
+### Claude's choices (to confirm)
+
+- Max. iterations has no maximum: the field is wide enough for 6 digits (longer input scrolls in the
+  field); eps for 12 characters (the input limit).
+- The buttons are Material OutlinedButtons with "−" (U+2212) and "+", as ktoy's (not compact) ones.
+
 ## 2026-11-18: Triples ascending, faces oriented
 
 ### Request (Manfred; decided with a reviewer, confirmed by Manfred)
