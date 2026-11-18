@@ -354,42 +354,45 @@ private fun ActionList(
             val (c, m) = entry
             val label = circlesLabel(c) + if (m >= 2) " (x$m)" else ""
             var height by remember { mutableStateOf(0) }
-            Box {
-                Text(
-                    label,
-                    style = style.copy(textDecoration = TextDecoration.Underline),
-                    color = LINK_COLOR,
-                    modifier = Modifier
-                        .testTag("$tag-${c.joinToString("-") { "${it + 1}" }}")
-                        .onSizeChanged { height = it.height }
-                        .pointerInput(c) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    when (awaitPointerEvent().type) {
-                                        PointerEventType.Enter -> {
-                                            state.graphHighlight = c
-                                            state.menuHighlight = Highlight(state.cellsOf(c))
-                                        }
-                                        PointerEventType.Exit -> if (state.graphHighlight == c) {
-                                            state.graphHighlight = null
-                                            if (open == null) state.menuHighlight = null
+            // the comma stays with its entry when the line wraps
+            Row {
+                Box {
+                    Text(
+                        label,
+                        style = style.copy(textDecoration = TextDecoration.Underline),
+                        color = LINK_COLOR,
+                        modifier = Modifier
+                            .testTag("$tag-${c.joinToString("-") { "${it + 1}" }}")
+                            .onSizeChanged { height = it.height }
+                            .pointerInput(c) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        when (awaitPointerEvent().type) {
+                                            PointerEventType.Enter -> {
+                                                state.graphHighlight = c
+                                                state.menuHighlight = Highlight(state.cellsOf(c))
+                                            }
+                                            PointerEventType.Exit -> if (state.graphHighlight == c) {
+                                                state.graphHighlight = null
+                                                if (open == null) state.menuHighlight = null
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        // a tap, not clickable: the entry must not take the keyboard focus (it may vanish with
-                        // the click, and the shortcuts such as Ctrl+Z need the focus in the app)
-                        .pointerInput(c) { detectTapGestures { if (act(c)) open = c } }
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .semantics {
-                            role = Role.Button
-                            onClick { if (act(c)) open = c; true }
-                        },
-                )
-                if (open == c) menu(c, Offset(0f, height.toFloat())) { open = null }
+                            // a tap, not clickable: the entry must not take the keyboard focus (it may vanish with
+                            // the click, and the shortcuts such as Ctrl+Z need the focus in the app)
+                            .pointerInput(c) { detectTapGestures { if (act(c)) open = c } }
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .semantics {
+                                role = Role.Button
+                                onClick { if (act(c)) open = c; true }
+                            },
+                    )
+                    if (open == c) menu(c, Offset(0f, height.toFloat())) { open = null }
+                }
+                if (k < entries.size - 1) Text(", ", style = style)
             }
-            if (k < entries.size - 1) Text(", ", style = style)
         }
     }
 }
