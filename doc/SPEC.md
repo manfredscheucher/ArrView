@@ -67,8 +67,8 @@ are implemented there) and offer the scheme as a dropdown; the colours are compu
   docs/11-color-palettes.md), with count = n and index = circle index. Also port its unit tests
   (ColorPaletteTest) where they apply.
 - Dropdown entries: Standard (ArrView's current fixed colours), rainbow, rainbow2, rainbow3-2,
-  rainbow3-k. Default rainbow2 (Manfred).
-- Line width: slider 0.5 to 8, default 3 (Manfred), for the curves on the canvas and in the SVG export.
+  rainbow3-k. Default rainbow2 (Manfred); changed to Standard (Manfred, 2026-11-18).
+- Line width: slider 0.5 to 8, default 3 (Manfred; changed to 4 on 2026-11-18), for the curves on the canvas and in the SVG export.
 - Placement (Manfred: "Layout is really settings, layout is a subgroup"; decided with a reviewer): the
   Layout widget becomes "Settings", in the same toolbar slot. It has two subgroups with headings in
   PoCoView's style (copy it exactly):

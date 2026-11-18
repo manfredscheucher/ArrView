@@ -77,9 +77,9 @@ class SettingsUiTest {
         onNodeWithText("Colour scheme").assertExists()
         onNodeWithText("Layout").assertExists()
         assertTrue(s.settingsAreDefault)
-        // the default rainbow2 colours the graph's vertices
-        assertEquals(ColorScheme.RAINBOW2, s.colorScheme)
-        for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW2.color(c, n)), "vertex $c: $color")
+        // the default Standard colours the graph's vertices
+        assertEquals(ColorScheme.STANDARD, s.colorScheme)
+        for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.STANDARD.color(c, n)), "vertex $c: $color")
         // the dropdown: rainbow3-k
         onNodeWithTag("color-scheme").performClick()
         waitForIdle()
@@ -88,7 +88,7 @@ class SettingsUiTest {
         waitForIdle()
         assertEquals(ColorScheme.RAINBOW3_K, s.colorScheme)
         for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW3_K.color(c, n)), "vertex $c: $color")
-        assertNotEquals(ColorScheme.RAINBOW2.color(1, n), ColorScheme.RAINBOW3_K.color(1, n))
+        assertNotEquals(ColorScheme.STANDARD.color(1, n), ColorScheme.RAINBOW3_K.color(1, n))
         // the canvas curves too: the middle of a long piece of every circle, drawn 8 px wide
         runOnIdle { s.lineWidth = 8f }
         waitForIdle()

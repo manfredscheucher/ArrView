@@ -20,7 +20,7 @@ enum class ColorScheme(val label: String, private val palette: ColorPalette?) {
         palette?.let { Color(it.color(n, c).toInt()) } ?: STANDARD_COLORS[c % STANDARD_COLORS.size]
 
     companion object {
-        val DEFAULT = RAINBOW2
+        val DEFAULT = STANDARD
     }
 }
 

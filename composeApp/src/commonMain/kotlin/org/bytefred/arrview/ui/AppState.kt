@@ -622,7 +622,7 @@ class AppState(
 
         private const val MAX_UNDO = 500
 
-        const val DEFAULT_LINE_WIDTH = 3f
+        const val DEFAULT_LINE_WIDTH = 4f
         val LINE_WIDTH_RANGE = 0.5f..8f
 
         /** Drawings kept for undo / redo and switching back and forth. */
