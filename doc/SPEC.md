@@ -76,6 +76,12 @@ hypergraph). A triple with several triangle cells is drawn twice as strong. Clic
 - Status after a create: "Created a digon of i and j".
 - The right-click face menu is unchanged (no create entries there; see open questions).
 
+### Extra requests (Manfred, 2026-11-18)
+
+- Web header subtitle "Arrangement viewer" instead of "Arrangements of pseudocircles".
+- Toolbar status separator "  ·  " as in PoCoView instead of "   |   " (replaces the ASCII-only
+  rule of phase 3a for this character; checked to render on the web).
+
 ### Open questions
 
 - Should the right-click face menu also list the digon creates of the face?

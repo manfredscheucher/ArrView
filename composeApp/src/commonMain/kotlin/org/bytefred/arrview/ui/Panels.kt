@@ -82,8 +82,8 @@ private fun FlowRowScope.ToolbarStatus(state: AppState) {
     )
 }
 
-/** Between the parts of the toolbar status (plain ASCII, no font fallback on the web). */
-const val STATUS_SEPARATOR = "   |   "
+/** Between the parts of the toolbar status, as in PoCoView (the middle dot renders on the web too). */
+const val STATUS_SEPARATOR = "  ·  "
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

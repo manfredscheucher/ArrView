@@ -205,7 +205,7 @@ fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Un
         Text(
             buildAnnotatedString {
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("ArrView") }
-                if (isWeb) append("  Arrangements of pseudocircles")
+                if (isWeb) append("  Arrangement viewer")
             },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
