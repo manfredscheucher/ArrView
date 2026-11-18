@@ -2,6 +2,25 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Create options ordered along the circle, creates in the right-click menu
+
+### Request (Manfred)
+
+"It would be cool to order the cells along the circle when there are several possibilities for a
+digon create; and a right-click on a cell should offer the digon creates too: show the options of that
+cell, i.e. which pairs are possible, and if ambiguous for a pair (there can be several within the cell)
+list them."
+
+### Decisions
+
+- Where several cells are listed for a create of i,j (intersection graph menu), they are ordered
+  along circle i (the smaller index), in the direction of its sequence, starting at its first edge.
+  Options inside one cell are ordered the same way (by the position of the pushed edge of i along
+  circle i, then of j along circle j). Claude's reading, to confirm.
+- Right-click face menu: besides its current items, the face's digon creates: one entry per pair,
+  a pair with several options in the cell gets a submenu with the starred descriptions (same labels,
+  hover highlight and submenu mechanics as the left-click menu).
+
 ## 2026-11-18: Outer face clickable, submenus for ambiguous creates
 
 ### Request (Manfred)
