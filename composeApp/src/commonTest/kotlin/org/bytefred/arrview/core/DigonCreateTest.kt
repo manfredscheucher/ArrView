@@ -202,6 +202,9 @@ class DigonCreateTest {
             val pairs = (0 until arr.n).flatMap { i -> (i + 1 until arr.n).map { j -> i to j } }
             // the striped / clickable pairs of the intersection graph
             assertEquals(pairs.filter { (i, j) -> a.pairActionCount(i, j) > 0 }, a.actionPairs)
+            // (xm) = the number of ways = what draws a double stripe; no pair has both kinds
+            for ((p, m) in a.createPairs + a.collapsePairs) assertEquals(a.pairActionCount(p[0], p[1]), m)
+            assertEquals(a.actionPairs.size, (a.createPairs + a.collapsePairs).size)
             assertEquals(pairs.filter { (i, j) -> a.createsOf(i, j).isNotEmpty() }.map { (i, j) -> listOf(i, j) to a.createsOf(i, j).size }, a.createPairs)
             assertEquals(pairs.filter { (i, j) -> a.collapsesOf(i, j).isNotEmpty() }.map { (i, j) -> listOf(i, j) to 1 }, a.collapsePairs)
             // the triangles of the hypergraph, triples sorted numerically

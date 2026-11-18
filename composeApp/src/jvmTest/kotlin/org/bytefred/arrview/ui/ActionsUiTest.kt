@@ -573,7 +573,7 @@ class ActionsUiTest {
         awaitFitted(s, view)
         assertEquals("possible digon creates (0): none", onNodeWithTag("possible-creates").text())
         val flips = onNodeWithTag("possible-flips").text()!!
-        assertTrue(Regex("""possible triangle flips \(4\): (\d \d \d \(x2\)(, )?){4}""").matches(flips), flips)
+        assertTrue(Regex("""possible triangle flips \(4\): \d \d \d \(x2\)(, \d \d \d \(x2\)){3}""").matches(flips), flips)
     }
 
     @Test

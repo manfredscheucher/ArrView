@@ -123,8 +123,8 @@ private val WIDGETS_TEXT = listOf(
         "A dashed edge: the two circles do not cross but can create a digon. A yellow stripe marks every pair " +
         "that can create or collapse a digon, twice as strong if there are several ways; click it to do it " +
         "(a menu lists the faces if there are several, a face with several ways opens a submenu). Below the " +
-        "graph: the possible digon creates and collapses, e.g. possible digon creates (3): 1 3 (x2), 2 4, 2 5, " +
-        "where (x2) marks a pair with 2 ways.",
+        "graph: the possible digon creates and collapses, e.g. possible digon creates (3): 1 3 (x2), 2 4, 2 5. " +
+        "(x2) marks a pair with 2 ways.",
     "Triangle hypergraph: the same vertices, and a transparent triangle for every triple of circles that " +
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +

@@ -41,6 +41,11 @@ with a reviewer and confirmed by Manfred.
 
 - The lines use the same text style as the count line (bodyMedium), below the graph canvas.
 
+### Open questions
+
+- "(xm) ... the same set as the menus": for the hypergraph, a click where several triangles overlap
+  also opens a menu for triples with one cell. "(xm)" follows "drawn double strength" (m >= 2 cells).
+
 ## 2026-11-18: Colour scheme and line width, Settings widget
 
 ### Request (Manfred)
