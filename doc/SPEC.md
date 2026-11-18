@@ -2,6 +2,25 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Outer face clickable, submenus for ambiguous creates
+
+### Request (Manfred)
+
+The outer face must be clickable on the canvas too (flip, collapse, create, with the "!" on hover):
+"!" whenever an action is possible in the hovered cell, to suggest to the user that something can be
+done. If a circle occurs several times on a cell, a digon create of a pair in that cell is ambiguous
+(possibly on both sides, e.g. 1 and 5 in "1 2 2 1 3 3 1 4 5 6 6 5 7 7 5 8 8 5 9"); the user picks
+which edges to merge.
+
+### Decisions (Manfred's answers, 2026-11-18)
+
+- Several options: a menu with submenus (pair -> its options on the canvas; pair -> cell -> its
+  options in the intersection graph). Going back from the menu to the canvas to pick edges was
+  rejected ("silly"). The two edges to push are marked with a star instead of brackets, e.g.
+  "1* 2 2 1 3 3 1 4 5* 6 6 5 7 7 5 8 8 5 9". Hovering an entry highlights the cell (and its two edges).
+- Outer face "!": in the corner (top left, top right, bottom left, bottom right) where there is room;
+  arrangements are rounded, so the corners have more room than the middle.
+
 ## 2026-11-18: Digon create, actions in the graph views, triangle hypergraph
 
 ### Request (Manfred)
