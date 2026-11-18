@@ -78,7 +78,8 @@ circularizability paper: https://www3.math.tu-berlin.de/diskremath/pseudocircles
   is not called digon-free since it contains all5_digon_13.
 - In a menu of several triples, a triple with one triangle is one entry labelled with the
   (ascending) triple; its click flips that triangle.
-- The −/+ buttons have 8 dp horizontal padding (ktoy's compact buttons) instead of Material's 24 dp.
+- The −/+ buttons have 8 dp horizontal padding (ktoy's compact buttons) instead of Material's 24 dp
+  and a minimum width of 40 dp (square) instead of 58 dp.
 - Descriptions: "The Krupp: 3 great circles.", "The NonKrupp: ...", "The 3-Chain: ..." (name first);
   "all triangles Krupp, number 2" (from the file name) and "p3/n^2 tends to 2/3" dropped.
 - Group titles: "Great pseudocircles" as on the website (the Properties widget still says "pseudo
