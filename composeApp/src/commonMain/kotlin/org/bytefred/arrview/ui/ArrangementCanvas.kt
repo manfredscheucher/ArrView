@@ -132,10 +132,11 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
     val textMeasurer = rememberTextMeasurer()
     val drawing = state.drawing
 
-    // fit on request and once the canvas has a size and a drawing; a later resize keeps the zoom
-    val ready = view.size.width > 0 && view.size.height > 0 && drawing != null
+    // fit on request once the canvas has a size and the drawing of the current arrangement (not the
+    // previous one while the new layout is computed); a later resize keeps the zoom
+    val ready = view.size.width > 0 && view.size.height > 0 && state.currentDrawing != null
     LaunchedEffect(state.fitRequest, ready) {
-        val d = st.drawing
+        val d = st.currentDrawing
         if (ready && d != null && view.fittedRequest != st.fitRequest) {
             view.fit(d.bounds)
             view.fittedRequest = st.fitRequest

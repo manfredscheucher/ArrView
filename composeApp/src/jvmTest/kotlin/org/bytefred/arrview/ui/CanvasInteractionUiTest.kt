@@ -266,6 +266,29 @@ class CanvasInteractionUiTest {
     }
 
     @Test
+    fun loadFitsTheNewDrawingNotThePreviousOne() = runComposeUiTest {
+        val pool = Executors.newSingleThreadExecutor { r -> Thread(r).apply { isDaemon = true } }
+        val held = ConcurrentLinkedQueue<Runnable>()
+        val hold = AtomicBoolean(false)
+        val layout = Executor { r -> if (hold.get()) held.add(r) else pool.execute(r) }.asCoroutineDispatcher()
+        val s = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default), layout)
+        val view = ViewTransform()
+        show(s, view)
+        val pappus = Examples.byName("n9-great-nonr-pappus")!!.arrangement(0)
+        hold.set(true)
+        runOnIdle { s.load("pappus", pappus) }
+        waitForIdle()
+        hold.set(false)
+        while (held.isNotEmpty()) pool.execute(held.poll())
+        waitUntil(timeoutMillis = 10_000) { s.currentDrawing?.arrangement == pappus }
+        waitForIdle()
+        val expected = ViewTransform().apply { size = view.size; fit(s.currentDrawing!!.bounds) }
+        assertEquals(expected.scale, view.scale, 1e-9)
+        assertEquals(expected.ox, view.ox, 1e-6)
+        assertEquals(expected.oy, view.oy, 1e-6)
+    }
+
+    @Test
     fun undoRedoShortcuts() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
