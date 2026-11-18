@@ -408,6 +408,7 @@ private fun SettingsWidget(state: AppState) {
 
     Spacer(Modifier.height(12.dp))
     Text("Layout", style = MaterialTheme.typography.titleSmall)
+    Text(LAYOUT_NOTE, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ModelChips(state) }
     ParsedField(
         state, "Max. iterations", settings.maxIterations.toString(), { it.toIntOrNull()?.takeIf { n -> n >= 1 } },
@@ -420,6 +421,11 @@ private fun SettingsWidget(state: AppState) {
     Spacer(Modifier.height(8.dp))
     OutlinedButton(onClick = state::resetSettings) { Text("Reset to defaults") }
 }
+
+/** Below the Layout heading of the Settings widget. */
+internal const val LAYOUT_NOTE = "Parameters of the drawing only (iterated Tutte embedding); they do not change the " +
+    "arrangement. Model 1 draws the crossings as in Felsner-Scheucher, Triangles and Drawings; Model 2 the " +
+    "primal-dual graph as in Felsner-Scheucher, On Circularizability (see About)."
 
 /** [v] with one decimal, the same on the JVM and the web (where 3.0 prints as "3"). */
 internal fun oneDecimal(v: Float): String {

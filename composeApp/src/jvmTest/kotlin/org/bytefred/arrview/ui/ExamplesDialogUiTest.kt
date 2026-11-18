@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import kotlin.time.Duration.Companion.minutes
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
@@ -39,7 +40,8 @@ class ExamplesDialogUiTest {
     private fun ComposeUiTest.click(text: String) = onNodeWithText(text).performScrollTo().performClick()
 
     @Test
-    fun aMemberOfEverySetLoadsByClicks() = runComposeUiTest {
+    // loads all sets (16 s on an idle machine); the default 1 min limit is too tight under load
+    fun aMemberOfEverySetLoadsByClicks() = runComposeUiTest(testTimeout = 5.minutes) {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         for (group in ExampleGroup.entries) {

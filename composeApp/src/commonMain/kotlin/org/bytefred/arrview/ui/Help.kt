@@ -133,7 +133,10 @@ private val WIDGETS_TEXT = listOf(
     "Settings: Display and Layout. Display: the colour scheme of the circles (default " +
         "${ColorScheme.DEFAULT.label}; Standard is a fixed list of 12 colours, the rainbow schemes are computed " +
         "from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +
-        "scheme colours the curves, labels, SVG and the vertices of the graph views. Layout: Model 1 / Model 2, " +
+        "scheme colours the curves, labels, SVG and the vertices of the graph views. Layout: the parameters of " +
+        "the drawing only (iterated Tutte embedding), they do not change the arrangement. Model 1 draws the " +
+        "crossings as in Felsner and Scheucher, Triangles and Drawings; Model 2 the primal-dual graph (crossings, " +
+        "edges and faces as vertices) as in Felsner and Scheucher, On Circularizability. Model 1 / Model 2, " +
         "Max. iterations (default ${LayoutSettings().maxIterations}) and eps (default " +
         "${epsText(LayoutSettings().eps)}). The drawing stops after max. iterations, or earlier when the " +
         "weights change by less than eps. Reset to defaults resets everything in the widget.",

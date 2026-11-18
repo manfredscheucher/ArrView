@@ -43,7 +43,9 @@ https://manfredscheucher.github.io/ArrView/
   strong for two or more). Click a triangle to flip it. Below it: "possible triangle flips (k): ...".
 - Settings: Display (colour scheme: Standard, rainbow, rainbow2 (default), rainbow3-2, rainbow3-k;
   line width 0.5 to 8, default 3) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
-  defaults for all.
+  defaults for all. Layout holds only the parameters of the drawing (iterated Tutte embedding; model 1 as in
+  Felsner-Scheucher, Triangles and Drawings, model 2 the primal-dual graph as in Felsner-Scheucher, On
+  Circularizability); they do not change the arrangement.
 
 ## Formats
 

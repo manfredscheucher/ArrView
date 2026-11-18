@@ -2,6 +2,13 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Note on the Layout settings
+
+Manfred: say explicitly that the Layout group holds the parameters of the iterated Tutte drawing, i.e.
+visualisation only, and refer to the papers (triangles and drawings; circularizability for model 2 with
+the primal-dual graphs). Done as a small note under the Layout heading of the Settings widget and in
+Help and USER_GUIDE.
+
 ## 2026-11-18: Lists of possible actions below the graphs
 
 ### Request (Manfred)

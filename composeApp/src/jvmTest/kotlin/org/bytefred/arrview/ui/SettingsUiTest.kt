@@ -70,6 +70,8 @@ class SettingsUiTest {
         }
         awaitDrawing(s)
         waitForIdle()
+        // the Layout group says that it only changes the drawing
+        onNodeWithText(LAYOUT_NOTE).assertExists()
         val n = s.arrangement.n
         onNodeWithText("Display").assertExists()
         onNodeWithText("Colour scheme").assertExists()
