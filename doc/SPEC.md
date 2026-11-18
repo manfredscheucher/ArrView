@@ -2,6 +2,20 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Welcome text says what pseudocircles are
+
+Manfred: the Welcome dialog and the first Help paragraph briefly explain arrangements of
+pseudocircles (same style as PoCoView's welcome). Final wording (Manfred's last version):
+"ArrView is a viewer for arrangements of pseudocircles: closed curves where every two curves meet at
+most twice and cross at each meeting point. The curves need not be circles (hence "pseudo"); only the
+combinatorics counts. Change an arrangement by flips (click a triangle or a digon) and explore and
+visualise its combinatorial properties." Feedback box and buttons stay.
+
+Implementation: `WELCOME_TEXT` is the Welcome text. Help General starts with its first two sentences
+(`PSEUDOCIRCLES_INTRO`), then "ArrView shows connected arrangements (together the curves are
+connected)." and the colours; the click sentences follow in the next Help paragraph as before
+(Claude's choice).
+
 ## 2026-11-18: Examples dialog: info area, singletons, website structure
 
 ### Request (Manfred)

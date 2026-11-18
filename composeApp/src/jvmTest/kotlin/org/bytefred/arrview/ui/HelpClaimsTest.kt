@@ -78,6 +78,15 @@ class HelpClaimsTest {
     @Test
     fun faceColours() {
         assertSays(HelpPage.GENERAL, "Triangles are filled light orange, digons light blue.")
+        assertTrue(helpText(HelpPage.GENERAL).first().startsWith("$PSEUDOCIRCLES_INTRO ArrView shows connected arrangements"))
+        assertEquals(
+            "ArrView is a viewer for arrangements of pseudocircles: closed curves where every two curves meet at most " +
+                "twice and cross at each meeting point. The curves need not be circles (hence \"pseudo\"); only the " +
+                "combinatorics counts. Change an arrangement by flips (click a triangle or a digon) and explore and " +
+                "visualise its combinatorial properties.",
+            WELCOME_TEXT,
+        )
+        assertTrue(WELCOME_TEXT.all { it.code in 32..126 }, "ASCII only")
         // orange: red > green > blue; blue: blue on top; both light
         assertTrue(TRIANGLE_FILL.red > TRIANGLE_FILL.green && TRIANGLE_FILL.green > TRIANGLE_FILL.blue)
         assertTrue(DIGON_FILL.blue > DIGON_FILL.red && DIGON_FILL.blue > DIGON_FILL.green)

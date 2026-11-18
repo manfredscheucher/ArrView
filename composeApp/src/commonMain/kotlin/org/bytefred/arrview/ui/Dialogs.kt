@@ -227,7 +227,7 @@ private fun WelcomeDialog(close: () -> Unit, showExamples: () -> Unit) {
         text = {
             Column {
                 Text(
-                    "Explore arrangements of pseudocircles: click a triangle to flip it, a digon to collapse it.",
+                    WELCOME_TEXT,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(Modifier.height(10.dp))

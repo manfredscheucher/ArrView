@@ -73,9 +73,18 @@ private fun KeyLine(key: String, action: String) {
 /** [eps] as typed and shown: `1e-8`, not `1.0E-8` (the JVM's toString). */
 fun epsText(eps: Double): String = eps.toString().replace("E", "e").replace(".0e", "e")
 
+/** What arrangements of pseudocircles are (Welcome dialog and the first Help paragraph). */
+internal const val PSEUDOCIRCLES_INTRO = "ArrView is a viewer for arrangements of pseudocircles: closed curves where every " +
+    "two curves meet at most twice and cross at each meeting point. The curves need not be circles (hence " +
+    "\"pseudo\"); only the combinatorics counts."
+
+/** The Welcome dialog's text (Manfred's wording). */
+internal const val WELCOME_TEXT = "$PSEUDOCIRCLES_INTRO Change an arrangement by flips (click a triangle or a " +
+    "digon) and explore and visualise its combinatorial properties."
+
 private val GENERAL_TEXT = listOf(
-    "ArrView shows arrangements of pseudocircles: closed curves on the sphere, every two of them cross " +
-        "twice or not at all, and together they are connected. Triangles are filled light orange, digons light blue.",
+    "$PSEUDOCIRCLES_INTRO ArrView shows connected arrangements (together the curves are connected). " +
+        "Triangles are filled light orange, digons light blue.",
     "Click a triangle to flip it. Click a digon to collapse it, so that its two circles no longer cross; " +
         "this is refused if the arrangement would fall apart. Click a face where two circles that do not " +
         "cross both have a side to create a digon: one is pushed across the other, they cross twice. If there " +
