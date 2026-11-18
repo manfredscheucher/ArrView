@@ -133,7 +133,7 @@ class HelpClaimsTest {
         // yellow: red and green high, blue low; transparent so overlaps add up
         for (c in listOf(STRIPE_COLOR, HIGHLIGHT_FILL)) assertTrue(c.red > 0.9f && c.green > 0.8f && c.blue < 0.2f && c.alpha < 1f, "$c is yellow")
         assertTrue(HYPEREDGE_FILL.alpha < 0.5f)
-        // the example of the user guide is a real menu entry: the chain 1-2-3 (1 and 3 do not cross)
+        // the example of the user guide is a real starred option: the chain 1-2-3 (1 and 3 do not cross)
         val chain = Arrangement.parse("{1: [2, -2], 2: [1, -1, 3, -3], 3: [2, -2]}")
         val entries = chain.digonCreates().map { op -> chain.cellDescription(op.face, setOf(op.dartI, op.dartJ)) }
         val example = "1* 2 3* 2"

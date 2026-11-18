@@ -244,6 +244,24 @@ class ActionsUiTest {
     }
 
     @Test
+    fun aClickOutsideTheMenuOnlyClosesIt() = runComposeUiTest {
+        // a bounded cell with a menu, and an outer face that would act on a click
+        val (arr, f) = findFace(outer = false) { a, f ->
+            a.createsIn(f).size >= 2 && a.arrangement.let { arr -> a.hasAction(arr.defaultOuterFace(DrawModel.MODEL2)) }
+        }
+        val s = state()
+        val view = ViewTransform()
+        show(s, view, arr)
+        onNodeWithTag("canvas").performMouseInput { click(view.at(s.currentDrawing!!, f)) }
+        waitForIdle()
+        onNodeWithTag("action-menu").assertExists()
+        onNodeWithTag("canvas").performMouseInput { click(Offset(6f, 6f)) }
+        waitForIdle()
+        onNodeWithTag("action-menu").assertDoesNotExist()
+        assertEquals(arr, s.arrangement)
+    }
+
+    @Test
     fun outerTriangleFlipsWithTheMarkInACorner() = runComposeUiTest {
         // the Krupp: every face is a triangle, the outer one too
         val krupp = Arrangement.krupp()
@@ -286,7 +304,7 @@ class ActionsUiTest {
         assertEquals(arr.digonCreate(op1), s.arrangement)
         undoGivesBack(s, arr)
         // several: the menu, entries marked "(outer face)"
-        val (arr2, outer2) = findFace(outer = true) { a, f -> a.createsIn(f).size >= 2 }
+        val (arr2, outer2) = findFace(outer = true) { a, f -> a.pairsIn(f).size >= 2 && a.pairsIn(f).values.any { it.size >= 2 } }
         runOnIdle { s.load("test2", arr2) }
         awaitFitted(s, view)
         assertEquals(outer2, s.outerFace)
@@ -295,13 +313,12 @@ class ActionsUiTest {
         onNodeWithTag("action-menu").assertExists()
         // open the submenu of a pair with several options, if the menu has pairs
         val pairs = s.actions.pairsIn(outer2)
-        val ops = pairs.values.firstOrNull { it.size >= 2 } ?: pairs.values.first()
-        if (pairs.size >= 2 && ops.size >= 2) hoverEntry(s, circlesLabel(listOf(ops[0].i, ops[0].j)), Highlight(setOf(outer2)))
-        val (op, label) = if (ops.size >= 2) s.uniqueOption(ops) else ops.single() to circlesLabel(listOf(ops[0].i, ops[0].j))
-        if (ops.size >= 2) {
-            assertTrue(label.endsWith("(outer face)"), label)
-            hoverEntry(s, label, Highlight(setOf(outer2), setOf(op.dartI, op.dartJ)))
-        }
+        val ops = pairs.values.first { it.size >= 2 }
+        hoverEntry(s, circlesLabel(listOf(ops[0].i, ops[0].j)), Highlight(setOf(outer2)))
+        onNodeWithTag("action-submenu").assertExists()
+        val (op, label) = s.uniqueOption(ops)
+        assertTrue(label.endsWith("(outer face)"), label)
+        hoverEntry(s, label, Highlight(setOf(outer2), setOf(op.dartI, op.dartJ)))
         menuItem(label).performClick()
         waitForIdle()
         assertEquals(arr2.digonCreate(op), s.arrangement)

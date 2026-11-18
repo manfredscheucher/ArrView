@@ -79,7 +79,8 @@ private val GENERAL_TEXT = listOf(
     "Click a triangle to flip it. Click a digon to collapse it, so that its two circles no longer cross; " +
         "this is refused if the arrangement would fall apart. Click a face where two circles that do not " +
         "cross both have a side to create a digon: one is pushed across the other, they cross twice. If there " +
-        "are several ways, a menu lists the pairs of circles, and a pair with several ways opens a submenu: " +
+        "are several ways, a menu lists the pairs of circles (or directly the ways of the only pair), and a " +
+        "pair with several ways opens a submenu: " +
         "the face with a star after the two sides that are pushed together. The outer face works the same. " +
         "A \"!\" appears in the face under the mouse when a click does something there (for the outer face " +
         "in a corner of the canvas). Undo and Redo are in the Edit menu.",

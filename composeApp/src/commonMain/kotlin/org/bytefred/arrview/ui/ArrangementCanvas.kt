@@ -284,6 +284,8 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 FaceMenu(state, f) { faceMenu = null }
             }
         }
+        // a menu of a previous arrangement is dropped
+        LaunchedEffect(state.arrangement) { if (createMenu?.first != state.arrangement) createMenu = null }
         createMenu?.takeIf { it.first == state.arrangement }?.let { (_, f, at) ->
             val entries = remember(state.arrangement, f) { state.createEntries(f) }
             if (entries.isNotEmpty()) ActionMenu(state, at, state.createHeading(f), entries) { createMenu = null }

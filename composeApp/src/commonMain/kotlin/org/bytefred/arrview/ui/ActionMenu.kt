@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LocalContentColor
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.DigonCreate
@@ -146,10 +148,11 @@ fun ActionMenu(state: AppState, at: Offset, heading: String, nodes: List<MenuNod
 /** An invisible copy of [g]'s submenu, a bit wider than the real one: it only takes its room. */
 @Composable
 private fun SubmenuPlaceholder(g: MenuNode) {
-    Column(Modifier.alpha(0f).padding(end = 8.dp)) {
+    Column(Modifier.alpha(0f).clearAndSetSemantics {}.padding(end = 8.dp)) {
         MenuHeading(g.label)
         for (c in g.children) {
-            Box(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp), contentAlignment = Alignment.CenterStart) {
+            // as a menu entry: at least 48 dp high, at most 280 dp wide (longer labels wrap)
+            Box(Modifier.heightIn(min = 48.dp).widthIn(max = 280.dp).padding(horizontal = 12.dp), contentAlignment = Alignment.CenterStart) {
                 Text(c.label + " (99)", style = MaterialTheme.typography.labelLarge)
             }
         }

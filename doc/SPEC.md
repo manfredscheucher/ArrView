@@ -48,7 +48,14 @@ which edges to merge.
   pointing at it highlights its sides). Graph: a cell with several options shows its plain
   description (no stars); a cell with one option shows that option's starred description.
   Hypergraph: triple "1 3 5"; pointing at it highlights all its triangle cells.
-- The canvas heading names the pair when there is only one ("Create a digon of 1 3").
+- The canvas heading names the pair when there is only one ("Create a digon of 1 3"). The submenu
+  column repeats the group entry as its heading. Entries of the outer face carry " (outer face)"
+  everywhere (canvas too). Collapse entries in the graph menu are never grouped (a pair has at most
+  one collapsible digon anyway).
+- Escape: the menu takes the keyboard focus and closes on Escape itself (besides the popup's own
+  dismissal); a click outside closes it without acting on the canvas.
+- A click in empty space (the outer face) that moves less than 4 px is a click, so it acts on the
+  outer face; dragging pans as before.
 - Highlight of the two sides: orange `#FFB300`, 10 px wide under the curves. The highlight stays
   until the pointer is on another entry or the menu closes.
 - Not tested by clicks: a canvas cell with one pair and several options (options directly). No such
@@ -296,7 +303,8 @@ that is implemented".
 - Colours: 12 distinct circle colours (cycled for n > 12); triangles light orange, digons light
   blue, other faces unfilled; the outer face is never filled.
 - Interaction: left click on a bounded triangle flips it, on a digon collapses it, other faces do
-  nothing; a click into the outer face does nothing (empty space is for panning). Right-click (or
+  nothing; a click into the outer face does nothing (empty space is for panning; superseded on
+  2026-11-18: the outer face acts like the other cells). Right-click (or
   Ctrl+click on the Mac) on any face, the outer one included, opens its menu: "Flip triangle",
   "Collapse digon", "Make outer face" (not for the current outer face, not for digons in model 1).
 - Outer face after a change: the face drawn outside before the change stays outside if it still
