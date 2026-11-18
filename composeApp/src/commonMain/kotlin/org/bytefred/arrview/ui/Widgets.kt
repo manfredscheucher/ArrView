@@ -297,7 +297,7 @@ private fun TriangleHypergraphWidget(state: AppState) {
     val triples = actions.triples
     val measurer = rememberTextMeasurer()
     var menu by remember(arr) { mutableStateOf<Pair<List<List<Int>>, Offset>?>(null) }
-    Text("${arr.triangleCount} triangles on ${triples.size} triples", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("triangle-hypergraph-count"))
+    Text(plural(arr.triangleCount, "triangle") + " on " + plural(triples.size, "triple"), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("triangle-hypergraph-count"))
     Box {
         Canvas(
             Modifier.size(GRAPH_SIZE).testTag("triangle-hypergraph").pointerInput(actions) {
@@ -333,6 +333,8 @@ private fun TriangleHypergraphWidget(state: AppState) {
         }
     }
 }
+
+private fun plural(k: Int, word: String) = if (k == 1) "1 $word" else "$k ${word}s"
 
 /** Whether [p] is inside the triangle [a] [b] [c] (either orientation, boundary included). */
 internal fun inTriangle(p: Offset, a: Offset, b: Offset, c: Offset): Boolean {

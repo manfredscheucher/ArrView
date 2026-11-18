@@ -121,7 +121,7 @@ class ActionsUiTest {
         menuItem(label).performClick()
         waitForIdle()
         assertNull(s.menuHighlight)
-        assertEquals(arr.digonCreate(options.last()), s.arrangement)
+        assertEquals(arr.digonCreate(options.sortedWith(compareBy({ it.i }, { it.j })).last()), s.arrangement)
         undoGivesBack(s, arr)
     }
 

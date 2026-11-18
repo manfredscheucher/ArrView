@@ -79,9 +79,9 @@ fun AppState.createCellLabel(op: DigonCreate): String = cellLabel(op.face, setOf
 /** The circles of a pair or triple, 1-based, separated by spaces. */
 fun circlesLabel(circles: List<Int>): String = circles.joinToString(" ") { "${it + 1}" }
 
-/** The canvas menu of face [f] with several digon creates: "i j: cell with the two sides in brackets". */
+/** The canvas menu of face [f] with several digon creates, by pair: "i j: cell with the two sides in brackets". */
 fun AppState.createEntries(f: Int): List<MenuAction> =
-    actions.createsIn(f).map { op -> MenuAction("${circlesLabel(listOf(op.i, op.j))}: ${createCellLabel(op)}", f) { createDigon(op) } }
+    actions.createsIn(f).sortedWith(compareBy({ it.i }, { it.j })).map { op -> MenuAction("${circlesLabel(listOf(op.i, op.j))}: ${createCellLabel(op)}", f) { createDigon(op) } }
 
 /** The heading of the intersection graph menu of pair [i] < [j]. */
 fun AppState.pairHeading(i: Int, j: Int): String =
