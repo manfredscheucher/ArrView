@@ -2,6 +2,39 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Digon create, actions in the graph views, triangle hypergraph
+
+### Request (Manfred)
+
+"What is missing is the digon-create flip (digon collapse works already)." In the intersection graph,
+draw the edge of a pair that could create a digon dashed. Put a wide yellow stripe behind the edge of
+every pair i,j that can do a digon create or a digon collapse, and make it clickable so that a click
+performs the flip. Add a view "Triangle hypergraph": the n vertices on a circle as in the
+intersection graph, but instead of edges draw the triangle cells i,j,k of the arrangement (a 3-uniform
+hypergraph). A triple with several triangle cells is drawn twice as strong. Clicking a triangle flips it.
+
+### Decisions (Manfred's answers, 2026-11-18)
+
+- Digon create: two circles i,j that do not cross and both have an edge on a common cell; pushing
+  one across the other gives two new crossings and a new digon. Inverse of digon collapse.
+- Canvas: hovering a cell where an action is possible shows a "!" in the cell. A triangle flips and
+  a digon collapses on click as before. A cell with exactly one digon create flips on click; a cell
+  with several create options opens a menu to choose which pair to merge.
+- Intersection graph: dashed edge for a non-crossing pair that can create a digon (non-crossing
+  pairs that cannot stay undrawn). Wide yellow stripe behind every pair that can create or collapse.
+  Ambiguous pairs (several cells to create through, or several digons to collapse) get a stripe twice
+  as strong. Click on a pair: unique -> the flip happens; ambiguous -> a menu to choose the cell.
+  No "!" in the graph views.
+- Triangle hypergraph: own widget/menu item named "Triangle hypergraph"; vertices as in the
+  intersection graph; one triangle per triple that bounds a triangle cell; a triple with two or more
+  triangle cells is drawn twice as strong (no further scaling). Triangles are filled transparent, so overlaps add up
+  and many triangles are visible as a darker area (the whole n-gon may be covered). A click collects all triangles under
+  the pointer: a single triple with a single cell flips directly, otherwise a menu lists every hit
+  triple with its cells.
+- Cells in menus are described by the circles of their boundary edges in cyclic order, always
+  separated by spaces, e.g. "1 2 1 3 1 3 1 4 1 4 1 5 1 5". Hovering a menu entry highlights that cell in the
+  canvas.
+
 ## 2026-11-17: Broad tests
 
 ### Request (Manfred)
