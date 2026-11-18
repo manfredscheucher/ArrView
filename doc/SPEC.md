@@ -2,6 +2,33 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-18: Rainbow schemes in OKLCH
+
+### Request (Manfred)
+
+All rainbow variants contain a yellow that is bad on white; compute them in OKLCH (he chose it from
+rendered previews, rows B, C, D of `scripts/probe/colour_schemes_preview.py`).
+
+### Decisions
+
+- rainbow, rainbow2, rainbow3-2, rainbow3-k keep their structure (hue sweep, falling lightness for
+  rainbow2, k bands for rainbow3), computed in OKLCH instead of HSL: chroma C = 0.16, hue =
+  i/n*360 + 25 degrees, lightness L between Lmin = 0.42 and Lmax = 0.72; rainbow fixed L = 0.60;
+  rainbow2 from Lmax down to Lmin; rainbow3 the same band formula with Lmin/Lmax. sRGB clamped to
+  [0, 1] after the conversion.
+- Exact reference: `scripts/probe/colour_schemes_preview.py` (`oklch`, `rainbow_ok`, `rainbow2_ok`,
+  `rainbow3k_ok`; rainbow3-2 = the rainbow3 band formula with k = 2).
+- ArrView deviates from blurred-memory's formulas on purpose (Manfred, 2026-11-18); blurred-memory
+  is unchanged.
+
+### Implementation (2026-11-18)
+
+- `core/ColorPalettes.kt` replaced: `ColorPalette.lightness(n, i)` (band formula of blurred-memory
+  kept) and `oklchToArgb` (the script's matrices; gamma, then clamp; channels `round(x * 255)` with
+  round half to even like Python's `round`). `ColorPaletteTest`: colours of all four schemes at six
+  (n, i) equal the script's output, plus opacity, never black, neighbours differ, lightness
+  structure (rainbow fixed, rainbow2 falling, rainbow3-2 bands alternating).
+
 ## 2026-11-18: Note on the Layout settings
 
 Manfred: say explicitly that the Layout group holds the parameters of the iterated Tutte drawing, i.e.
