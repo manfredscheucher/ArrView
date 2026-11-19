@@ -94,9 +94,10 @@ fun App(
                         Box(m.focusRequester(focus).focusable()) {
                             // the canvas is composed inside BoxWithConstraints (subcomposition),
                             // so request the initial focus from here, once it is attached
-                            // (again after a widget was opened or closed: keeps the shortcuts working);
+                            // (again after a widget was opened or closed, and after a load or a set
+                            // step, e.g. by the toolbar's < >: keeps the shortcuts working);
                             // not while a menu is open: the menu bar holds the focus for Escape
-                            LaunchedEffect(state.openWidgets.toList()) {
+                            LaunchedEffect(state.openWidgets.toList(), state.fitRequest) {
                                 if (state.textFieldsFocused == 0 && state.openMenu == null) focus.requestFocus()
                             }
                             ArrangementCanvas(state, view, onInteract = { focus.requestFocus() })

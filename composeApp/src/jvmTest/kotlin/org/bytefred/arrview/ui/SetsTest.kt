@@ -189,6 +189,12 @@ class SetsTest {
         waitForIdle()
         assertEquals(0, s.setIndex)
         onNodeWithTag("set-previous").assertIsNotEnabled()
+        // after the toolbar button the keys still work
+        onNodeWithTag("set-next").performClick()
+        waitForIdle()
+        onNodeWithTag("canvas").performKeyInput { pressKey(Key.PageDown) }
+        waitForIdle()
+        assertEquals(2, s.setIndex)
     }
 
     @Test
