@@ -156,7 +156,7 @@ private val VISUALIZATION_REFERENCES = PAPERS.take(2) +
 private val WIDGETS_TEXT = listOf(
     "Widgets are columns next to the canvas (below it on a narrow window). The toolbar and the View menu " +
         "show and hide them. By default at most ${AppState.DEFAULT_MAX_WIDGETS} are open (Settings widget, Max. widgets); " +
-        "opening another one closes the one opened first. The open widgets, the divider positions and the " +
+        "opening another one closes the one you clicked least recently. The open widgets, the divider positions and the " +
         "settings are remembered for the next start.",
     "Properties: n, the numbers of crossings and faces, the p-vector (pk faces with k sides, p2 digons " +
         "and p3 triangles), the pairs of circles that do not cross, the classes and how many triples of " +

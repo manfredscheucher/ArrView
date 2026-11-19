@@ -272,11 +272,17 @@ class WidgetButtonsUiTest {
         onNodeWithText("Encoding").performClick()
         onNodeWithText("Triangles").performClick()
         waitForIdle()
-        // the third closes the oldest
+        // the third closes the least recently clicked (PoCoView's)
         assertEquals(listOf(Widget.ENCODING, Widget.TRIANGLES), s.openWidgets.toList())
+        // a click into Encoding makes Triangles the least recently clicked
+        onNodeWithTag("editor-SEQUENCES").performClick()
         onNodeWithText("Settings").performClick()
         waitForIdle()
-        assertEquals(listOf(Widget.TRIANGLES, Widget.SETTINGS), s.openWidgets.toList())
+        assertEquals(listOf(Widget.ENCODING, Widget.SETTINGS), s.openWidgets.toList())
+        // now Encoding was clicked longer ago than Settings was opened
+        onNodeWithText("Triangles").performClick()
+        waitForIdle()
+        assertEquals(listOf(Widget.SETTINGS, Widget.TRIANGLES), s.openWidgets.toList())
         // Max. widgets in Settings
         onNodeWithText("Max. widgets: 2").assertExists()
         onNodeWithTag("max-widgets-plus").performClick()
@@ -284,17 +290,15 @@ class WidgetButtonsUiTest {
         assertEquals(3, s.maxColumns)
         onNodeWithText("Properties").performClick()
         waitForIdle()
-        assertEquals(listOf(Widget.TRIANGLES, Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
-        // lowering it closes the oldest
+        assertEquals(listOf(Widget.SETTINGS, Widget.TRIANGLES, Widget.PROPERTIES), s.openWidgets.toList())
+        // lowering it closes the least recently clicked: Triangles (Settings was clicked for +)
         onNodeWithTag("max-widgets-minus").performClick()
         waitForIdle()
         assertEquals(listOf(Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
+        // the press on - makes Settings the most recently clicked: Properties closes
         onNodeWithTag("max-widgets-minus").performClick()
         waitForIdle()
         assertEquals(1, s.maxColumns)
-        assertEquals(listOf(Widget.PROPERTIES), s.openWidgets.toList())
-        onNodeWithText("Settings").performClick()
-        waitForIdle()
         assertEquals(listOf(Widget.SETTINGS), s.openWidgets.toList())
         onNodeWithTag("max-widgets-minus").assertIsNotEnabled()
         runOnIdle { s.changeMaxColumns(4); s.saveDisplayPrefs() }

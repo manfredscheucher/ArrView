@@ -274,15 +274,28 @@ class AppState(
     /** Open widget columns, in opening order. */
     val openWidgets = mutableStateListOf(Widget.PROPERTIES)
 
-    /** At most this many widgets are open; opening one more closes the oldest (PoCoView's Max. widgets). */
+    /** At most this many widget columns are open; opening one more closes the least recently clicked (PoCoView's). */
     var maxColumns by mutableIntStateOf(DEFAULT_MAX_WIDGETS)
         private set
+
+    private val lastClicked = mutableMapOf<Widget, Long>()
+    private var clickCounter = 0L
+
+    init {
+        for (w in openWidgets) touchWidget(w)
+    }
+
+    /** A click into a widget column (or opening it): it becomes the most recently used one. */
+    fun touchWidget(w: Widget) {
+        lastClicked[w] = ++clickCounter
+    }
 
     fun toggleWidget(w: Widget) {
         if (w in openWidgets) {
             openWidgets.remove(w)
         } else {
             openWidgets.add(w)
+            touchWidget(w)
             closeExtraWidgets()
         }
     }
@@ -293,7 +306,7 @@ class AppState(
     }
 
     private fun closeExtraWidgets() {
-        while (openWidgets.size > maxColumns) openWidgets.removeFirst()
+        while (openWidgets.size > maxColumns) openWidgets.remove(openWidgets.minBy { lastClicked[it] ?: 0L })
     }
 
     /** The status message (see [showInfo] and [showNote]). */
@@ -378,6 +391,7 @@ class AppState(
             val open = stored.split(',').mapNotNull(::widgetById).distinct()
             openWidgets.clear()
             openWidgets.addAll(open)
+            for (w in open) touchWidget(w)
         }
         loadPref(WIDE_WEIGHTS_PREF)?.let { wideWeights = decodeWeights(it) }
         loadPref(STACKED_WEIGHTS_PREF)?.let { stackedWeights = decodeWeights(it) }

@@ -36,6 +36,9 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
 /** Landscape (side panel) needs at least this width in AUTO layout mode. */
@@ -106,7 +109,7 @@ fun App(
                         }
                     }
                     val column = @Composable { w: Widget, m: Modifier ->
-                        Column(m) {
+                        Column(m.touches(state, w)) {
                             WidgetHeader(state, w)
                             ScrollColumn(Modifier.weight(1f), scrolls.getValue(w)) {
                                 WidgetContent(state, w)
@@ -146,6 +149,16 @@ fun App(
 
 /** Opens a dialog from inside the app (the Settings widget's (i) opens the Help page Visualization). */
 val LocalOpenDialog = staticCompositionLocalOf<(DialogKind) -> Unit> { {} }
+
+/** Any press inside a widget column makes it the most recently clicked one (not consumed; PoCoView's). */
+private fun Modifier.touches(state: AppState, w: Widget) = pointerInput(w) {
+    awaitPointerEventScope {
+        while (true) {
+            val e = awaitPointerEvent(PointerEventPass.Initial)
+            if (e.type == PointerEventType.Press) state.touchWidget(w)
+        }
+    }
+}
 
 /** Escape closes the open menu (the menu bar takes the focus while one is open). */
 private fun closeMenuOnEscape(e: KeyEvent, state: AppState): Boolean {
