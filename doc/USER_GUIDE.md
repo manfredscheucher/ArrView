@@ -39,7 +39,8 @@ https://manfredscheucher.github.io/ArrView/
 
 ## Widgets
 
-- At most 2 widgets are open by default (Settings, Max. widgets); opening another closes the oldest.
+- At most 2 widgets are open by default (Settings, Max. widgets); opening another closes the one
+  clicked least recently.
 - Properties: n, crossings, faces, p-vector (p3 and p2 on top), non-intersecting pairs, Krupp and
   NonKrupp triples, classes.
 - Encoding: the intersection sequences (one line per circle), model 1 and model 2 sparse6, each

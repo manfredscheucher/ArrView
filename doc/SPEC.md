@@ -45,10 +45,10 @@ arrangements; a note instead of a crash when the browser has no WebGL.
 7. Settings: the Layout note is an (i) after the heading (`LAYOUT_INFO`: two sentences and the
    papers). eps is no longer in the GUI and no longer stored (stays in `LayoutSettings` with its
    default). Max. iterations stays. No "Implementation" dropdown.
-8. At most 2 widgets are open by default; opening one more closes the one opened first
-   (`AppState.maxColumns`, PoCoView's setting; PoCoView closes the least recently clicked one, ArrView
-   the oldest, as asked). Settings, group "Widgets": "Max. widgets: 2" with - / +
-   (1 .. number of widgets), PoCoView's wording; lowering it closes the oldest; stored as
+8. At most 2 widgets are open by default; opening one more closes the least recently clicked one
+   (a press anywhere in a widget column or opening it counts), ported from PoCoView
+   (`AppState.maxColumns`, `touchWidget`). Settings, group "Widgets": "Max. widgets: 2" with - / +
+   (1 .. number of widgets), PoCoView's wording; lowering it closes the least recently clicked; stored as
    `maxWidgets`; Reset sets 2.
 9. GUI texts: the Layout note and the Encoding explanations went into (i) popovers (`InfoButton`);
    Help General's model paragraph became two sentences pointing to Help > Visualization; Help >
