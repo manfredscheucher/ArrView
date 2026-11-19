@@ -92,7 +92,7 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
             // two levels: the groups by purpose, then their sets; an open group starts with what it is
             for (group in ExampleGroup.entries) {
                 val sets = Examples.inGroup(group)
-                TreeHeader("${group.title} (${sets.size})", 0, group.name in open) { toggle(group.name) }
+                TreeHeader(group.title, 0, group.name in open) { toggle(group.name) }
                 HorizontalDivider()
                 if (group.name !in open) continue
                 GroupIntro(group)
@@ -190,7 +190,7 @@ private fun TreeLeaf(name: String, depth: Int, selected: Boolean, onSelect: () -
 
 /**
  * The info of the selected set, as PoCoView's: description, n and the number of arrangements (for a
- * list the member number, typed or with − and +), the website page and the paper it comes from, or
+ * list the member number, typed or with − and +), its website page and paper where they differ from the group's, or
  * where else its data is from. [onIndex] gets the 0-based member, or null while the typed number is
  * invalid.
  */
@@ -213,9 +213,9 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
             ) { i -> onIndex(i?.minus(1)) }
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
-        if (set.hasColours) Text("The crossings are shown in their colours.", style = MaterialTheme.typography.bodySmall)
-        set.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
-        set.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        // links only where they differ from the group's (shown above the sets)
+        set.page?.takeIf { it != set.group.page }?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        set.paper?.takeIf { it != set.group.paper }?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
         Text(
             set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
             style = MaterialTheme.typography.labelSmall,

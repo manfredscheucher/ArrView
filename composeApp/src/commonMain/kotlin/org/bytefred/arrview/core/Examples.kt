@@ -19,15 +19,15 @@ enum class WebPage(val title: String, show: String) {
 /** The papers the examples come from (DOIs as on the website, arXiv where there is no DOI there). */
 enum class Paper(val title: String, val url: String) {
     TRIANGLES(
-        "Felsner, Scheucher: Arrangements of Pseudocircles: Triangles and Drawings",
+        "Triangles and Drawings (Felsner, Scheucher)",
         "https://doi.org/10.1007/s00454-020-00173-4",
     ),
     CIRCULARIZABILITY(
-        "Felsner, Scheucher: Arrangements of Pseudocircles: On Circularizability",
+        "On Circularizability (Felsner, Scheucher)",
         "https://doi.org/10.1007/s00454-019-00077-y",
     ),
     COLORING(
-        "Chiu, Felsner, Scheucher, Schröder, Steiner, Vogtenhuber: Coloring circle arrangements: New 4-chromatic planar graphs",
+        "Coloring circle arrangements (Chiu et al.)",
         "https://arxiv.org/abs/2205.08181",
     ),
 }
@@ -55,7 +55,7 @@ enum class ExampleGroup(val title: String, val description: String, val page: We
     ),
     FUREDI_PALASTI(
         "Füredi–Palásti construction",
-        "Circle arrangements whose share of triangles tends to 2/3 of n².",
+        "Circle arrangements with about 2n²/3 triangles.",
         WebPage.TRIANGLES, Paper.TRIANGLES,
     ),
     NON_CIRCULARIZABLE(
@@ -71,7 +71,7 @@ enum class ExampleGroup(val title: String, val description: String, val page: We
     ),
     DIGON_GRAPHS(
         "Digongraphs",
-        "Intersecting arrangements with all types of digongraphs (the circles, joined where they form a digon).",
+        "Intersecting arrangements with every type of digongraph (circles as vertices, digons as edges).",
         WebPage.DIGON_GRAPHS, null,
     ),
     THREE(
@@ -217,7 +217,7 @@ object Examples {
             name = "n$n-${if (kind == "df") "digonfree" else "intersecting"}-$k-triangles",
             group = group,
             n = n.toInt(),
-            label = "n = $n: $k triangles" + if (kind == "df") "" else ", with digons",
+            label = "n = $n, $k triangles" + if (kind == "df") "" else ", with digons",
             description = "$which $what arrangements of $n pseudocircles with $count.",
             source = "$source/$stem.${if (ext == "mod1s6") "txt" else ext}",
             path = "$folder/$stem.$ext",
@@ -280,7 +280,7 @@ object Examples {
         for (n in 6..42 step 6) {
             add(
                 file(
-                    "n$n-great-fueredi-palasti", ExampleGroup.FUREDI_PALASTI, n, "n = $n: ${2 * n * (n - 3) / 3} triangles",
+                    "n$n-great-fueredi-palasti", ExampleGroup.FUREDI_PALASTI, n, "n = $n, ${2 * n * (n - 3) / 3} triangles",
                     "The Füredi–Palásti arrangement of $n circles.",
                     "$FUREDI_PALASTI/fueredi_palasti_$n.enc", "fueredipalasti/fueredi_palasti_$n.enc",
                 ),
@@ -308,7 +308,7 @@ object Examples {
         }
         add(
             noMoreCircles(
-                "n6-digonfree-nonr-8-triangles", 6, "n = 6 digon-free, no. 1 (8 triangles)",
+                "n6-digonfree-nonr-8-triangles", 6, "n = 6 digon-free intersecting, no. 1",
                 "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, the only one with 8 triangles.",
                 "intersecting/digonfree/n6_nonr_number1_8triangles.mod2s6",
             ),
@@ -316,7 +316,7 @@ object Examples {
         for (k in 2..3) {
             add(
                 noMoreCircles(
-                    "n6-digonfree-nonr-$k", 6, "n = 6 digon-free, no. $k",
+                    "n6-digonfree-nonr-$k", 6, "n = 6 digon-free intersecting, no. $k",
                     "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles.",
                     "intersecting/digonfree/n6_nonr_number$k.mod2s6",
                 ),
@@ -333,16 +333,16 @@ object Examples {
         for (k in 2..3) {
             add(
                 noMoreCircles(
-                    "n6-intersecting-nonr-sym6-$k", 6, "n = 6, sym6_$k",
+                    "n6-intersecting-nonr-sym6-$k", 6, "n = 6 intersecting, additional no. ${k - 1}",
                     "A non-circularizable intersecting arrangement of 6 pseudocircles.",
                     "intersecting/additional/n6_sym6_$k.mod2s6",
                 ),
             )
         }
-        for (sym in listOf("4_1", "4_2", "8_1", "8_2", "24")) {
+        for ((k, sym) in listOf("4_1", "4_2", "8_1", "8_2", "24").withIndex()) {
             add(
                 noMoreCircles(
-                    "n6-connected-nonr-sym${sym.replace('_', '-')}", 6, "n = 6 connected, sym$sym",
+                    "n6-connected-nonr-sym${sym.replace('_', '-')}", 6, "n = 6 digon-free connected, additional no. ${k + 1}",
                     "A non-circularizable digon-free connected arrangement of 6 pseudocircles.",
                     "connected/additional/n6_connected_digonfree_sym$sym.mod2s6",
                 ),
@@ -350,7 +350,7 @@ object Examples {
         }
         add(
             file(
-                "n6-intersecting-nonr-all-triangles-krupp", nonr, 6, "n = 6, all triangles Krupp",
+                "n6-intersecting-nonr-all-triangles-krupp", nonr, 6, "n = 6, every triangle a Krupp",
                 "A non-circularizable intersecting arrangement of 6 pseudocircles; the circles of every triangle form a Krupp.",
                 "computations/results/n6_nonr_all_triangles_krupp_number2.enc",
                 "named/n6_nonr_all_triangles_krupp_number2.enc", page = null,
@@ -407,7 +407,7 @@ object Examples {
         )
         add(
             file(
-                "n7-connected-koester", ExampleGroup.COLORINGS, 7, "Koester's arrangement",
+                "n7-connected-koester", ExampleGroup.COLORINGS, 7, "n = 7, Koester",
                 "Koester's arrangement of 7 circles: all pairs but one cross, and its crossings need 4 colours.",
                 "computations/biconnected_results/n8_koester.enc", "colorings/n8_koester.seq", page = null,
             ),
@@ -419,7 +419,7 @@ object Examples {
         for (n in 4..7) {
             add(
                 digongraphs(
-                    "n$n-intersecting-digongraphs", n, "n = $n: all types",
+                    "n$n-intersecting-digongraphs", n, "n = $n, all types",
                     "Intersecting arrangements of $n pseudocircles, one for every type of digongraph.",
                     "n${n}_all_types_of_digongraphs",
                 ),
@@ -427,14 +427,14 @@ object Examples {
         }
         add(
             digongraphs(
-                "n7-intersecting-trianglefree-digongraphs", 7, "n = 7: all triangle-free types",
+                "n7-intersecting-trianglefree-digongraphs", 7, "n = 7, all triangle-free types",
                 "Intersecting arrangements of 7 pseudocircles, one for every type of triangle-free digongraph.",
                 "n7_all_types_of_trianglefree_digongraphs",
             ),
         )
         add(
             digongraphs(
-                "n8-intersecting-nonplanar-digongraph", 8, "n = 8: triangle-free, non-planar",
+                "n8-intersecting-nonplanar-digongraph", 8, "n = 8, triangle-free non-planar",
                 "Intersecting arrangements of 8 pseudocircles with a triangle-free non-planar digongraph.",
                 "n8_digongraph_trianglefree_nonplanar",
             ),

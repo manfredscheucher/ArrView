@@ -20,6 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.Paper
+import org.bytefred.arrview.core.WebPage
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,7 +48,7 @@ class ExamplesDialogUiTest {
 
     private fun ComposeUiTest.click(text: String) = onNodeWithText(text).performScrollTo().performClick()
 
-    private fun header(group: ExampleGroup) = "${group.title} (${Examples.inGroup(group).size})"
+    private fun header(group: ExampleGroup) = group.title
 
     @Test
     // loads all sets (16 s on an idle machine); the default 1 min limit is too tight under load
@@ -145,13 +146,12 @@ class ExamplesDialogUiTest {
             click(header(group))
             onNodeWithText(group.description).assertExists()
             group.page?.let { onNodeWithText("Website: ${it.title}").assertExists() }
-            // the sets repeat the links in their info area
-            group.paper?.let { onAllNodesWithText("Paper: ${it.title}").assertCountEquals(1) }
+            group.paper?.let { onNodeWithText("Paper: ${it.title}").assertExists() }
             for (set in Examples.inGroup(group)) onNodeWithText(leafLabel(set)).assertExists()
             click(header(group))
             onNodeWithText(group.description).assertDoesNotExist()
         }
-        // a single arrangement: the note "1 arrangement", no number selection, the website page and the paper
+        // a single arrangement: the note "1 arrangement", no number selection, where its data is from
         click(header(ExampleGroup.NON_CIRCULARIZABLE))
         val nonr = Examples.byName("n5-intersecting-nonr-1")!!
         click(nonr.label)
@@ -172,14 +172,15 @@ class ExamplesDialogUiTest {
         click("Intersecting, n = 4 (8)")
         onNodeWithText("n = 4, 8 arrangements").assertExists()
         onNodeWithTag("example-index").assertExists()
-        // a coloured one says so; Koester's arrangement is with them
+        // a coloured one; Koester's arrangement is with them
         click(header(ExampleGroup.COLORINGS))
         click("n = 6, no. 2")
-        onNodeWithText("The crossings are shown in their colours.").assertExists()
-        onAllNodesWithText("Paper: ${Paper.COLORING.title}").assertCountEquals(2)
-        click("Koester's arrangement")
+        // the links of the group are not repeated
+        onAllNodesWithText("Paper: ${Paper.COLORING.title}").assertCountEquals(1)
+        onAllNodesWithText("Website: ${WebPage.COLORINGS.title}").assertCountEquals(1)
+        click("n = 7, Koester")
         onNodeWithText("n = 7, 1 arrangement").assertExists()
-        onNodeWithText("The crossings are shown in their colours.").assertDoesNotExist()
+        onNodeWithText("Data: computations/biconnected_results/n8_koester.enc").assertExists()
     }
 
     @Test

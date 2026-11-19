@@ -168,7 +168,7 @@ class ExamplesTest {
         for (g in ExampleGroup.entries) {
             val labels = Examples.inGroup(g).map { it.label }
             assertEquals(labels.size, labels.toSet().size, g.name)
-            for (l in labels) assertTrue(l.length <= 40, l)
+            for (l in labels) assertTrue(l.length <= 45, l)
         }
         for (s in Examples.sets) assertTrue(s.description.endsWith(".") && s.description.length <= 130, s.name)
     }
