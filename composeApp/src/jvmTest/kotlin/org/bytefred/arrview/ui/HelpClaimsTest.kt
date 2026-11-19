@@ -146,7 +146,7 @@ class HelpClaimsTest {
 
     @Test
     fun settingsWidget() {
-        assertSays(HelpPage.WIDGETS, "colour scheme of the circles (default Standard;")
+        assertSays(HelpPage.WIDGETS, "colour scheme of the circles (Standard (default), rainbow, rainbow2;")
         assertEquals("Standard", ColorScheme.DEFAULT.label)
         assertSays(HelpPage.WIDGETS, "line width (default 4 px, also in Export SVG)")
         assertSays(HelpPage.WIDGETS, "Reset to defaults resets everything in the widget.")

@@ -1,21 +1,19 @@
 package org.bytefred.arrview.core
 
 import kotlin.math.PI
-import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 /**
- * The rainbow colour schemes of ArrView, computed in OKLCH (Manfred, 2026-11-18). The structure
- * comes from blurred-memory's `ColorPalettes.kt` (hue sweep, falling lightness, k lightness bands),
- * but the colours are OKLCH with chroma [CHROMA], hue `index / count * 360 + 25` degrees and
+ * The rainbow colour schemes of ArrView, computed in OKLCH (Manfred, 2026-11-18; rainbow3-2 and
+ * rainbow3-k removed 2026-11-19). The structure comes from blurred-memory's `ColorPalettes.kt` (hue
+ * sweep, falling lightness), but the colours are OKLCH with chroma [CHROMA], hue `index / count * 360 + 25` degrees and
  * lightness in [LMIN]..[LMAX], so that no yellow is too light on white. ArrView deviates from
  * blurred-memory on purpose here. Reference: `scripts/probe/colour_schemes_preview.py`
- * (`oklch`, `rainbow_ok`, `rainbow2_ok`, `rainbow3k_ok`).
+ * (`oklch`, `rainbow_ok`, `rainbow2_ok`).
  *
  * Every scheme takes count (here n) and index (here the circle), and gives 0xAARRGGBB.
  */
@@ -25,12 +23,6 @@ enum class ColorPalette {
 
     /** rainbow2: hue by index, lightness falling from [LMAX] to [LMIN] across the range. */
     RAINBOW2,
-
-    /** rainbow3-2: hue by index, lightness in 2 interleaved bands. */
-    RAINBOW3_2,
-
-    /** rainbow3-k: hue by index, lightness in k = ceil(sqrt(count)) interleaved bands. */
-    RAINBOW3_K,
     ;
 
     /** The OKLCH lightness for [index] of [count]. */
@@ -40,8 +32,6 @@ enum class ColorPalette {
         return when (this) {
             RAINBOW -> L_RAINBOW
             RAINBOW2 -> LMAX - (LMAX - LMIN) * (if (n <= 1) 0.0 else i.toDouble() / (n - 1))
-            RAINBOW3_2 -> bandLightness(n, i, 2)
-            RAINBOW3_K -> bandLightness(n, i, ceil(sqrt(n.toDouble())).toInt())
         }
     }
 
@@ -63,21 +53,6 @@ enum class ColorPalette {
 
 /** Full-wheel hue by index: 0 for index 0, sweeping 360 degrees as index -> count. */
 private fun hueFor(count: Int, index: Int): Double = if (count <= 1) 0.0 else index.toDouble() / count * 360.0
-
-/**
- * rainbow3 over [k] lightness bands (blurred-memory's band formula): N = ceil(count / k) * k,
- * m = N / k colours per band, band g = index mod k, position p = index div k,
- * L = LMIN + (LMAX - LMIN) * (g + p / (m - 1)) / k.
- */
-private fun bandLightness(count: Int, index: Int, k: Int): Double {
-    val kk = k.coerceAtLeast(1)
-    val n = ceil(count.toDouble() / kk).toInt() * kk
-    val m = (n / kk).coerceAtLeast(1)
-    val g = index % kk
-    val p = index / kk
-    val within = if (m <= 1) 0.0 else p.toDouble() / (m - 1)
-    return ColorPalette.LMIN + (ColorPalette.LMAX - ColorPalette.LMIN) * (g + within) / kk
-}
 
 /** OKLCH (hue in degrees) -> sRGB, clamped to [0, 1] after the conversion, as 0xAARRGGBB. */
 internal fun oklchToArgb(lightness: Double, chroma: Double, hue: Double): Long {

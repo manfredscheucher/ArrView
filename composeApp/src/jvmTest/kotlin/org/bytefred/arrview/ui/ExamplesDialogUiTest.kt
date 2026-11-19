@@ -82,7 +82,10 @@ class ExamplesDialogUiTest {
                 }
                 onNodeWithText("Load").performClick()
                 waitForIdle()
-                assertEquals(set.memberName(index), s.name)
+                // the whole set, at the chosen member
+                assertEquals(set.name, s.name)
+                assertEquals(set.size, s.arrangementSet.size)
+                assertEquals(index, s.setIndex)
                 assertEquals(set.arrangement(index), s.arrangement)
                 assertFalse(s.unsavedChanges, set.name)
                 onNodeWithTag("big-dialog").assertDoesNotExist()

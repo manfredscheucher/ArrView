@@ -69,7 +69,8 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
     fun load() {
         val set = ex.selected ?: return
         val i = ex.indexOf(set)
-        state.leave { state.load(set.memberName(i), set.arrangement(i)); close() }
+        // the whole set, shown at member i (< > steps through it)
+        state.leave { state.loadSet(set.name, ArrangementSet(set.size, set::arrangement), i); close() }
     }
     BigDialog(
         "Examples",

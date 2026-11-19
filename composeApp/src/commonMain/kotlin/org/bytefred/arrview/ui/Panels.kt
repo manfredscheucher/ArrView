@@ -44,6 +44,12 @@ fun ToolBar(state: AppState) {
             selected = w in state.openWidgets, onClick = { state.toggleWidget(w) },
             label = { Text(w.label) },
         )
+        // the members of a loaded file or example set (PoCoView's)
+        if (state.arrangementSet.size > 1) {
+            TextButton(onClick = { state.showSet(state.setIndex - 1) }, enabled = state.setIndex > 0, modifier = Modifier.testTag("set-previous")) { Text("<") }
+            Text("${state.setIndex + 1} / ${state.arrangementSet.size}", Modifier.align(Alignment.CenterVertically).testTag("set-position"))
+            TextButton(onClick = { state.showSet(state.setIndex + 1) }, enabled = state.setIndex < state.arrangementSet.size - 1, modifier = Modifier.testTag("set-next")) { Text(">") }
+        }
         ToolbarStatus(state)
     }
 }

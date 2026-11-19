@@ -17,16 +17,18 @@ https://manfredscheucher.github.io/ArrView/
   outside).
 - Several ways to create a digon of i and j are listed along circle i (the smaller number), in the
   order of its sequence, then along circle j.
-- Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu.
-- Model 1 draws digons as touching points (intersecting arrangements of at least 3 circles), Model 2
-  draws them as regions (every arrangement).
+- Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu (also for Make outer face).
+- Model 1 draws a digon's two circles touching along a short piece (intersecting arrangements of at
+  least 3 circles), Model 2 draws digons as regions (every arrangement). Each circle is a B-spline as in
+  Felsner-Scheucher's programs; by default the face with the most symmetries is outside.
 
 ## Menus
 
 - Arrangement: Examples..., Import..., Export..., Open file..., Save file..., Export SVG.
 - Examples: "Sets" (groups as on the pseudocircles website) and "Singletons". The selected entry
   shows its description, n, the number of arrangements (a list: choose the member with "-" / "+" or
-  type its number), the website page and the paper it comes from.
+  type its number), the website page and the paper it comes from. Loading a member of a set opens the
+  whole set: "< i / n >" in the toolbar (or PageUp / PageDown, "," / ".") steps through it.
 - Edit: Undo, Redo. View: zoom, model, widgets, layout. Help: General, Widgets, Formats,
   Keyboard shortcuts, About.
 - Replacing or closing a changed arrangement asks "Save changes?" (Save JSON, Save text, Discard,
@@ -48,8 +50,8 @@ https://manfredscheucher.github.io/ArrView/
   click an entry to flip. Pointing at an entry highlights it in the graph and its faces.
   Triples are written ascending ("Flip a triangle of 1 2 3"); the menu entries are the faces in their
   own order around (e.g. 1 3 2).
-- Settings: Display (colour scheme: Standard (default), rainbow, rainbow2, rainbow3-2, rainbow3-k;
-  line width 0.5 to 8, default 4) and Layout (model, max. iterations (5), eps (1e-8)); one Reset to
+- Settings: Display (colour scheme: Standard (default), rainbow, rainbow2;
+  line width 0.5 to 8, default 4) and Layout (model, max. iterations (50), eps (1e-8)); one Reset to
   defaults for all. Layout holds only the parameters of the drawing (iterated Tutte embedding; model 1 as in
   Felsner-Scheucher, Triangles and Drawings, model 2 the primal-dual graph as in Felsner-Scheucher, On
   Circularizability); they do not change the arrangement.
@@ -62,6 +64,8 @@ https://manfredscheucher.github.io/ArrView/
   with a leaf at every face vertex.
 - Files: JSON `{"name": ..., "sequences": [[...], ...]}` or the sequences as text. Import and Open
   file detect the format.
+- Several arrangements (one sparse6 string per line, several sequences one after the other, or a JSON
+  list of the objects) are loaded as a set, like an example set; Save file writes all of them.
 
 ## Keyboard shortcuts
 
@@ -70,5 +74,6 @@ https://manfredscheucher.github.io/ArrView/
 - Ctrl+Shift+Z or Ctrl+Y: redo
 - + / -: zoom in / out
 - Home or 0: fit
+- PageUp or , / PageDown or .: previous / next arrangement of a file or example set
 
 On a Mac, Cmd works like Ctrl.

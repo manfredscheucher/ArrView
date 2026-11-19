@@ -54,6 +54,21 @@ fun arrangementFile(name: String, arr: Arrangement, format: FileFormat): String 
     FileFormat.TXT -> sequencesText(arr) + "\n"
 }
 
+/**
+ * File content of several arrangements (a set, PoCoView's multi-set files): JSON, a list of the
+ * one-arrangement objects named `<name> #i`; text, the sequences one after the other, separated by
+ * an empty line. One arrangement: [arrangementFile].
+ */
+fun arrangementsFile(name: String, arrs: List<Arrangement>, format: FileFormat): String {
+    if (arrs.size == 1) return arrangementFile(name, arrs[0], format)
+    return when (format) {
+        FileFormat.JSON -> arrs.withIndex().joinToString(",\n", "[\n", "]\n") { (i, arr) ->
+            arrangementFile("$name #${i + 1}", arr, format).trimEnd()
+        }
+        FileFormat.TXT -> arrs.joinToString("\n") { arrangementFile(name, it, format) }
+    }
+}
+
 /** An arrangement read from text, with the name a JSON file gives it. */
 class NamedArrangement(val arrangement: Arrangement, val name: String?)
 
@@ -81,8 +96,59 @@ fun readArrangement(text: String): NamedArrangement {
     }
 }
 
-private fun readJson(text: String): NamedArrangement {
-    val root = parseJson(text) as? Map<*, *> ?: throw InvalidArrangementException("JSON: expected an object")
+/**
+ * Reads all arrangements of a text (a set, PoCoView's multi-set files): a JSON list of objects, the
+ * sequences of several arrangements one after the other, or one sparse6 string per line; anything
+ * else as [readArrangement]. One arrangement gives a list of one.
+ * @throws InvalidArrangementException with the reason (and the number of the failing one) if one is not valid
+ */
+fun readArrangements(text: String): List<NamedArrangement> {
+    val trimmed = text.trim()
+    // a JSON list of objects
+    if (trimmed.startsWith("[") && trimmed.drop(1).trimStart().startsWith("{")) {
+        val root = parseJson(trimmed) as? List<*> ?: throw InvalidArrangementException("JSON: expected a list of objects")
+        if (root.isEmpty()) throw InvalidArrangementException("JSON: the list is empty")
+        return root.mapIndexed { i, item -> numbered(i, root.size) { readJson(item as? Map<*, *> ?: throw InvalidArrangementException("JSON: expected an object")) } }
+    }
+    // the sequences of several arrangements: top level { ... } blocks
+    if (trimmed.startsWith("{") && !trimmed.drop(1).trimStart().startsWith("\"")) {
+        val blocks = braceBlocks(trimmed)
+        if (blocks.size > 1) return blocks.mapIndexed { i, b -> numbered(i, blocks.size) { NamedArrangement(Arrangement.parse(b), null) } }
+    }
+    if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+        val lines = trimmed.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (lines.size > 1) return lines.mapIndexed { i, line -> numbered(i, lines.size) { readArrangement(line) } }
+    }
+    return listOf(readArrangement(text))
+}
+
+/** [read] with "arrangement i of m: " before its error. */
+private fun numbered(i: Int, m: Int, read: () -> NamedArrangement): NamedArrangement =
+    try {
+        read()
+    } catch (e: InvalidArrangementException) {
+        throw InvalidArrangementException("arrangement ${i + 1} of $m: ${e.message}")
+    }
+
+/** The top-level `{ ... }` blocks of [text] (text between them must be blank). */
+private fun braceBlocks(text: String): List<String> {
+    val blocks = ArrayList<String>()
+    var depth = 0
+    var start = -1
+    for ((i, ch) in text.withIndex()) {
+        when {
+            ch == '{' -> { if (depth == 0) start = i; depth++ }
+            ch == '}' -> { depth--; if (depth == 0) blocks += text.substring(start, i + 1) }
+            depth == 0 && !ch.isWhitespace() -> return listOf(text)
+        }
+    }
+    return if (depth == 0) blocks else listOf(text)
+}
+
+private fun readJson(text: String): NamedArrangement =
+    readJson(parseJson(text) as? Map<*, *> ?: throw InvalidArrangementException("JSON: expected an object"))
+
+private fun readJson(root: Map<*, *>): NamedArrangement {
     val name = root["name"]?.let { it as? String ?: throw InvalidArrangementException("JSON: \"name\" must be a string") }
     val sequences = root["sequences"] as? List<*>
         ?: throw InvalidArrangementException("JSON: expected \"sequences\": [[...], ...], one list per circle")

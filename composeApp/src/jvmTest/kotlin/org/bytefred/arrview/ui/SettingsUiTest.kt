@@ -85,15 +85,16 @@ class SettingsUiTest {
         // the default Standard colours the graph's vertices
         assertEquals(ColorScheme.STANDARD, s.colorScheme)
         for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.STANDARD.color(c, n)), "vertex $c: $color")
-        // the dropdown: rainbow3-k
+        // the dropdown: Standard, rainbow, rainbow2 (Manfred, 2026-11-19); rainbow2
+        assertEquals(listOf("Standard", "rainbow", "rainbow2"), ColorScheme.entries.map { it.label })
         onNodeWithTag("color-scheme").performClick()
         waitForIdle()
         for (scheme in ColorScheme.entries) menuItem(scheme.label).assertExists()
-        menuItem("rainbow3-k").performClick()
+        menuItem("rainbow2").performClick()
         waitForIdle()
-        assertEquals(ColorScheme.RAINBOW3_K, s.colorScheme)
-        for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW3_K.color(c, n)), "vertex $c: $color")
-        assertNotEquals(ColorScheme.STANDARD.color(1, n), ColorScheme.RAINBOW3_K.color(1, n))
+        assertEquals(ColorScheme.RAINBOW2, s.colorScheme)
+        for ((c, color) in vertexColors(n).withIndex()) assertTrue(close(color, ColorScheme.RAINBOW2.color(c, n)), "vertex $c: $color")
+        assertNotEquals(ColorScheme.STANDARD.color(1, n), ColorScheme.RAINBOW2.color(1, n))
         // the canvas curves too: the middle of a long piece of every circle, drawn 8 px wide
         runOnIdle { s.lineWidth = 8f }
         waitForIdle()
@@ -104,7 +105,7 @@ class SettingsUiTest {
         for ((c, pieces) in d.circles.withIndex()) {
             // points along the curve (where no other curve crosses over it) have its colour
             val points = pieces.flatMap { piece -> listOf(0.3, 0.5, 0.7).map { view.toScreen(piece.at(it)) } }
-            val hits = points.count { close(pixel(it), ColorScheme.RAINBOW3_K.color(c, n)) }
+            val hits = points.count { close(pixel(it), ColorScheme.RAINBOW2.color(c, n)) }
             assertTrue(hits >= points.size / 2, "curve $c: $hits of ${points.size} points in its colour")
         }
         runOnIdle { s.lineWidth = AppState.DEFAULT_LINE_WIDTH }
@@ -174,11 +175,11 @@ class SettingsUiTest {
     @Test
     fun schemeAndLineWidthAreRemembered() {
         val s = state()
-        s.colorScheme = ColorScheme.RAINBOW3_2
+        s.colorScheme = ColorScheme.RAINBOW
         s.lineWidth = 5.5f
         s.saveDisplayPrefs()
         val t = state()
-        assertEquals(ColorScheme.RAINBOW3_2, t.colorScheme)
+        assertEquals(ColorScheme.RAINBOW, t.colorScheme)
         assertEquals(5.5f, t.lineWidth)
         // corrupt or out of range values: default or clamped
         savePref(COLOR_SCHEME_PREF, "PURPLE")
@@ -188,6 +189,11 @@ class SettingsUiTest {
         assertEquals(8f, u.lineWidth)
         savePref(LINE_WIDTH_PREF, "NaN")
         assertEquals(AppState.DEFAULT_LINE_WIDTH, state().lineWidth)
+        // the removed schemes rainbow3-2 and rainbow3-k: the default
+        for (removed in listOf("RAINBOW3_2", "RAINBOW3_K")) {
+            savePref(COLOR_SCHEME_PREF, removed)
+            assertEquals(ColorScheme.DEFAULT, state().colorScheme, removed)
+        }
     }
 
     @Test
@@ -200,8 +206,8 @@ class SettingsUiTest {
     fun svgUsesTheSchemeAndTheLineWidth() {
         val arr = Examples.byName("n9-great-nonr-pappus")!!.arrangement(0)
         val d = ArrangementLayout(arr, DrawModel.MODEL2, arr.defaultOuterFace(DrawModel.MODEL2)).layout(LayoutSettings())
-        val svg = drawingSvg(d, ColorScheme.RAINBOW3_K, 4.5f)
-        for (c in 0 until arr.n) assertTrue("stroke=\"${ColorScheme.RAINBOW3_K.color(c, arr.n).toHex()}\" stroke-width=\"4.5\"" in svg, "circle $c")
+        val svg = drawingSvg(d, ColorScheme.RAINBOW2, 4.5f)
+        for (c in 0 until arr.n) assertTrue("stroke=\"${ColorScheme.RAINBOW2.color(c, arr.n).toHex()}\" stroke-width=\"4.5\"" in svg, "circle $c")
     }
 
     @Test

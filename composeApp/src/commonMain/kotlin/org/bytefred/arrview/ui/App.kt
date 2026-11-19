@@ -159,6 +159,8 @@ private fun handleKey(e: KeyEvent, state: AppState, view: ViewTransform): Boolea
         e.key == Key.Plus || e.key == Key.Equals || e.key == Key.NumPadAdd -> view.zoomCenter(ZOOM_STEP)
         e.key == Key.Minus || e.key == Key.NumPadSubtract -> view.zoomCenter(1 / ZOOM_STEP)
         e.key == Key.MoveHome || e.key == Key.Zero -> state.requestFit()
+        e.key == Key.PageUp || e.key == Key.Comma -> state.showSet(state.setIndex - 1)
+        e.key == Key.PageDown || e.key == Key.Period -> state.showSet(state.setIndex + 1)
         else -> return false
     }
     return true

@@ -5,14 +5,12 @@ import org.bytefred.arrview.core.ColorPalette
 
 /**
  * The colours of the circles (Settings widget): Standard, ArrView's fixed list, or one of the
- * rainbow schemes in OKLCH, computed from n ([ColorPalette.color] with count = n, index = circle).
+ * rainbow schemes rainbow and rainbow2 in OKLCH (Manfred, 2026-11-19: only these three), computed from n ([ColorPalette.color] with count = n, index = circle).
  */
 enum class ColorScheme(val label: String, private val palette: ColorPalette?) {
     STANDARD("Standard", null),
     RAINBOW("rainbow", ColorPalette.RAINBOW),
     RAINBOW2("rainbow2", ColorPalette.RAINBOW2),
-    RAINBOW3_2("rainbow3-2", ColorPalette.RAINBOW3_2),
-    RAINBOW3_K("rainbow3-k", ColorPalette.RAINBOW3_K),
     ;
 
     /** The colour of circle [c] of [n]. */

@@ -30,7 +30,7 @@ import org.bytefred.arrview.core.IteratedTutte
 import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.NamedArrangement
 import org.bytefred.arrview.core.TextFormat
-import org.bytefred.arrview.core.arrangementFile
+import org.bytefred.arrview.core.arrangementsFile
 import org.bytefred.arrview.core.canBeOuter
 import org.bytefred.arrview.core.defaultOuterFace
 import org.bytefred.arrview.core.digonCollapse
@@ -38,7 +38,7 @@ import org.bytefred.arrview.core.digonCreate
 import org.bytefred.arrview.core.faceKey
 import org.bytefred.arrview.core.faceWithKey
 import org.bytefred.arrview.core.hasModel1
-import org.bytefred.arrview.core.readArrangement
+import org.bytefred.arrview.core.readArrangements
 import org.bytefred.arrview.core.triangleFlip
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.TimeMark
@@ -65,8 +65,32 @@ enum class LayoutMode { AUTO, PORTRAIT, LANDSCAPE }
  */
 class StatusMessage(val text: String, val transient: Boolean)
 
-/** One step of the undo history: the arrangement, its name and the chosen outer face. */
-private class HistoryEntry(val arrangement: Arrangement, val name: String, val loaded: Arrangement, val outerKey: String?)
+/**
+ * The arrangements of a loaded file or example set (PoCoView's sets), decoded when
+ * first shown (an example set has up to 2131 members).
+ */
+class ArrangementSet(val size: Int, private val member: (Int) -> Arrangement) {
+    private val decoded = HashMap<Int, Arrangement>()
+
+    operator fun get(i: Int): Arrangement = decoded.getOrPut(i) { member(i) }
+
+    companion object {
+        fun of(arrangements: List<Arrangement>) = ArrangementSet(arrangements.size) { arrangements[it] }
+    }
+}
+
+/**
+ * One step of the undo history: the arrangement, its name, the chosen outer face, and the set it
+ * belongs to with the shown member and the edits of the other members.
+ */
+private class HistoryEntry(
+    val arrangement: Arrangement,
+    val name: String,
+    val outerKey: String?,
+    val set: ArrangementSet,
+    val setIndex: Int,
+    val edits: Map<Int, Arrangement>,
+)
 
 /** What a drawing is computed from; equal keys give equal drawings (the layout cache). */
 private data class LayoutKey(val arrangement: Arrangement, val model: DrawModel, val outerKey: String?, val settings: LayoutSettings)
@@ -83,18 +107,38 @@ class AppState(
     var arrangement by mutableStateOf(Examples.start.arrangement())
         private set
 
-    /** Name of the loaded arrangement (an example name or a file name). */
+    /** Name of the loaded arrangement or set (an example name or a file name). */
     var name by mutableStateOf(Examples.start.name)
         private set
 
+    /** All arrangements of the loaded file or example set (PoCoView's sets); [arrangement] is member [setIndex], maybe edited. */
+    var arrangementSet by mutableStateOf(ArrangementSet.of(listOf(arrangement)))
+        private set
+
+    var setIndex by mutableIntStateOf(0)
+        private set
+
+    /** Edited members of the set other than the shown one (kept while another one is shown, as in PoCoView). */
+    private var edits by mutableStateOf<Map<Int, Arrangement>>(emptyMap())
+
+    /** Members as last saved where they differ from the loaded ones; anything else is an unsaved change. */
+    private var savedEdits by mutableStateOf<Map<Int, Arrangement>>(emptyMap())
+
     /** The arrangement as loaded; anything else is shown as modified. */
-    private var loaded = arrangement
+    private val loaded: Arrangement get() = arrangementSet[setIndex]
 
-    /** The arrangement at the last load or save; anything else is an unsaved change. */
-    private var saved by mutableStateOf(arrangement)
+    /** The name for the toolbar status, with "set i/n" when the file or example set holds several (PoCoView's). */
+    val title: String
+        get() {
+            val base = if (arrangementSet.size > 1) "$name · set ${setIndex + 1}/${arrangementSet.size}" else name
+            return if (arrangement == loaded) base else "$base (modified)"
+        }
 
-    /** The name for the toolbar status. */
-    val title: String get() = if (arrangement == loaded) name else "$name (modified)"
+    /** Member [i] of the set with its edits. */
+    private fun member(i: Int): Arrangement = if (i == setIndex) arrangement else edits[i] ?: arrangementSet[i]
+
+    /** Member [i] as last saved. */
+    private fun savedMember(i: Int): Arrangement = savedEdits[i] ?: arrangementSet[i]
 
     /** The model chosen in the menu; model 1 falls back to model 2 where it does not exist. */
     var preferredModel by mutableStateOf(DrawModel.MODEL1)
@@ -325,9 +369,13 @@ class AppState(
         relayout()
     }
 
-    /** Draws face [f] (of the current arrangement) as the outer face. */
+    /** Draws face [f] (of the current arrangement) as the outer face (undoable). */
     fun makeOuterFace(f: Int) {
-        if (!arrangement.canBeOuter(f, model)) return
+        if (!arrangement.canBeOuter(f, model) || f == outerFace) return
+        undoStack.addLast(snapshot())
+        if (undoStack.size > MAX_UNDO) undoStack.removeFirst()
+        redoStack.clear()
+        updateUndoFlags()
         outerKey = arrangement.faceKey(f)
         relayout()
     }
@@ -372,13 +420,15 @@ class AppState(
 
     // ---- editing -----------------------------------------------------------------------
 
-    private fun snapshot() = HistoryEntry(arrangement, name, loaded, outerKey)
+    private fun snapshot() = HistoryEntry(arrangement, name, outerKey, arrangementSet, setIndex, edits)
 
     private fun restore(e: HistoryEntry) {
         arrangement = e.arrangement
         name = e.name
-        loaded = e.loaded
         outerKey = e.outerKey
+        arrangementSet = e.set
+        setIndex = e.setIndex
+        edits = e.edits
         hoverFace = null
         menuHighlight = null
         graphHighlight = null
@@ -423,36 +473,79 @@ class AppState(
     }
 
     /** Shows [arr] under [name] (undoable), with the default outer face and a fitted view. */
-    fun load(name: String, arr: Arrangement) {
+    fun load(name: String, arr: Arrangement) = loadSet(name, ArrangementSet.of(listOf(arr)))
+
+    /**
+     * Loads all arrangements of a file or an example set (undoable) and shows member [start]; the
+     * others are a click (or PageUp / PageDown) away, as PoCoView's sets.
+     */
+    fun loadSet(name: String, arrangements: ArrangementSet, start: Int = 0) {
+        require(start in 0 until arrangements.size) { "no member ${start + 1} in ${arrangements.size}" }
         undoStack.addLast(snapshot())
         redoStack.clear()
         updateUndoFlags()
-        restore(HistoryEntry(arr, name, arr, null))
-        saved = arr
+        restore(HistoryEntry(arrangements[start], name, null, arrangements, start, emptyMap()))
+        savedEdits = emptyMap()
         drafts.clear()
         status = null
         requestFit()
     }
 
-    /** Opens a file: JSON, intersection sequences or a sparse6 line; errors go to the error dialog. */
+    /**
+     * Shows member [index] of the set (PoCoView's showSet): the shown member's edits are kept, and
+     * the undo history, which belongs to one member, is cleared. An unapplied widget edit would be
+     * lost: "Save changes?" asks first.
+     */
+    fun showSet(index: Int) {
+        if (index !in 0 until arrangementSet.size || index == setIndex) return
+        if (unappliedDraft) pendingLeave = { switchToSet(index) } else switchToSet(index)
+    }
+
+    private fun switchToSet(index: Int) {
+        val next = member(index)
+        edits = storedEdits()
+        setIndex = index
+        arrangement = next
+        outerKey = null
+        hoverFace = null
+        menuHighlight = null
+        graphHighlight = null
+        drafts.clear()
+        undoStack.clear()
+        redoStack.clear()
+        updateUndoFlags()
+        status = null
+        relayout()
+        requestFit()
+    }
+
+    /** [edits] with the shown member's. */
+    private fun storedEdits(): Map<Int, Arrangement> =
+        if (arrangement == arrangementSet[setIndex]) edits - setIndex else edits + (setIndex to arrangement)
+
+    /** Opens a file: JSON, intersection sequences or sparse6 lines, every arrangement of it; errors go to the error dialog. */
     fun open(fileName: String, bytes: ByteArray) {
         try {
-            val read = readArrangement(bytes.decodeToString())
-            load(read.name ?: fileName.substringBeforeLast('.'), read.arrangement)
-            showInfo("Opened $fileName")
+            val read = readArrangements(bytes.decodeToString())
+            loadSet(read.singleOrNull()?.name ?: fileName.substringBeforeLast('.'), ArrangementSet.of(read.map { it.arrangement }))
+            showInfo("Opened $fileName" + if (read.size > 1) ": ${read.size} arrangements" else "")
         } catch (e: InvalidArrangementException) {
             error = "Cannot open $fileName: ${e.message}"
         }
     }
 
-    /** The arrangement in pasted [text] (Import, format detected), or null after setting [error]. */
-    fun parseImport(text: String): NamedArrangement? =
+    /** The arrangements in pasted [text] (Import, format detected), or null after setting [error]. */
+    fun parseImport(text: String): List<NamedArrangement>? =
         try {
-            readArrangement(text)
+            readArrangements(text)
         } catch (e: InvalidArrangementException) {
             error = "Cannot import the text: ${e.message}"
             null
         }
+
+    /** Loads what [parseImport] read (undoable). */
+    fun loadImport(read: List<NamedArrangement>) =
+        loadSet(read.singleOrNull()?.name ?: "imported", ArrangementSet.of(read.map { it.arrangement }))
 
     /** The file name for saving, without extension. */
     val fileName: String get() = name.replace(Regex("[^A-Za-z0-9._#-]+"), "_")
@@ -462,8 +555,9 @@ class AppState(
 
     // ---- unsaved changes ---------------------------------------------------------------
 
-    /** The arrangement differs from the last load or save. */
-    val arrangementUnsaved: Boolean get() = arrangement != saved
+    /** A member of the set differs from the last load or save (PoCoView's sets). */
+    val arrangementUnsaved: Boolean
+        get() = (edits.keys + savedEdits.keys + setIndex).any { member(it) != savedMember(it) }
 
     /**
      * A Sequences or Encoding widget holds an edit that differs from the current arrangement's
@@ -498,13 +592,14 @@ class AppState(
         pendingLeave = null
     }
 
-    /** The arrangement being written by the file save in progress ([beginSave] .. [fileSaved]). */
-    private var saving: Arrangement? = null
+    /** The members being written by the file save in progress ([beginSave] .. [fileSaved]). */
+    private var saving: List<Arrangement>? = null
 
-    /** The file content to save as [format]; [fileSaved] reports how the save ended. */
+    /** The file content to save as [format], every member of the set; [fileSaved] reports how the save ended. */
     fun beginSave(format: FileFormat): ByteArray {
-        saving = arrangement
-        return arrangementFile(name, arrangement, format).encodeToByteArray()
+        val all = (0 until arrangementSet.size).map(::member)
+        saving = all
+        return arrangementsFile(name, all, format).encodeToByteArray()
     }
 
     /**
@@ -519,7 +614,7 @@ class AppState(
             cancelLeave()
             return
         }
-        if (done != null) saved = done
+        if (done != null) savedEdits = done.withIndex().filter { (i, arr) -> arr != arrangementSet[i] }.associate { it.index to it.value }
         showInfo("Saved $fileName")
         if (!unsavedChanges) discardAndLeave()
     }

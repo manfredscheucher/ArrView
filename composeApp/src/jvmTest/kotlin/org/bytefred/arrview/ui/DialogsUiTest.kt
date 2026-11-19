@@ -71,7 +71,8 @@ class DialogsUiTest {
         onNodeWithText("Load").performClick()
         waitForIdle()
         val set = Examples.byName("n4-intersecting-all")!!
-        assertEquals("n4-intersecting-all #5", s.name)
+        assertEquals("n4-intersecting-all", s.name)
+        assertEquals("n4-intersecting-all · set 5/8", s.title)
         assertEquals(set.arrangement(4), s.arrangement)
         // the dialog is as it was left
         onNodeWithTag("menu-Arrangement").performClick()

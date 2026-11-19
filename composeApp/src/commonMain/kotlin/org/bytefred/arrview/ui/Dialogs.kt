@@ -169,7 +169,7 @@ private fun ImportDialog(state: AppState, close: () -> Unit) {
         buttons = {
             TextButton(onClick = close) { Text("Cancel") }
             TextButton(onClick = {
-                state.parseImport(text)?.let { read -> state.leave { state.load(read.name ?: "imported", read.arrangement); close() } }
+                state.parseImport(text)?.let { read -> state.leave { state.loadImport(read); close() } }
             }) { Text("Import") }
         },
     ) {

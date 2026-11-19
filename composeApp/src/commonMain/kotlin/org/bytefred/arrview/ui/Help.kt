@@ -92,7 +92,7 @@ private val GENERAL_TEXT = listOf(
         "pair with several ways opens a submenu: " +
         "the face with a star after the two sides that are pushed together. The outer face works the same. " +
         "A \"!\" appears in the face under the mouse when a click does something there (for the outer face " +
-        "in a corner of the canvas). Undo and Redo are in the Edit menu.",
+        "in a corner of the canvas). Undo and Redo are in the Edit menu (also for Make outer face).",
     "In menus a face is written as the circles of its sides in order around it, for example 1 2 1 3. " +
         "Pointing at a menu entry highlights its face in yellow (the outer face: its boundary, and the entry " +
         "says (outer face)), the two sides of a digon create in orange.",
@@ -103,13 +103,16 @@ private val GENERAL_TEXT = listOf(
     "Where there are several ways to create a digon of circles i and j, they are listed along circle i " +
         "(the smaller number), in the order of its sequence, then along circle j.",
     "Model 1 and Model 2 (toolbar, View menu, Settings widget) are two ways to draw. Model 1 draws the " +
-        "crossings only, a digon is a point where its two circles touch (blue dot). It needs an " +
+        "crossings only, a digon's two circles touch along a short piece (blue dot). It needs an " +
         "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
         "works for every arrangement. The drawing is an iterated Tutte embedding as in the paper by " +
-        "Felsner and Scheucher (see About).",
+        "Felsner and Scheucher (see About), each circle a B-spline, as in their programs; by default the " +
+        "face with the most symmetries is drawn outside.",
     "In the Arrangement menu, Examples... has the bundled arrangements: Sets (by group, as on the " +
         "pseudocircles website) and Singletons. A selected one shows its description, n, how many " +
-        "arrangements it has and where it comes from (a page of the website, a paper). Import... reads pasted text and " +
+        "arrangements it has and where it comes from (a page of the website, a paper). Loading a member of a " +
+        "set opens the whole set: < and > in the toolbar (or PageUp / PageDown) step through it. " +
+        "Import... reads pasted text and " +
         "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG " +
         "saves the picture.",
     "If the arrangement has changed since it was loaded or saved, ArrView asks whether to save it before " +
@@ -146,9 +149,9 @@ private val WIDGETS_TEXT = listOf(
         "order around, e.g. 1 3 2. Below it: the possible " +
         "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it " +
         "(several triangles: a menu); pointing at one highlights the triple and its faces.",
-    "Settings: Display and Layout. Display: the colour scheme of the circles (default " +
-        "${ColorScheme.DEFAULT.label}; Standard is a fixed list of 12 colours, the rainbow schemes are computed " +
-        "from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +
+    "Settings: Display and Layout. Display: the colour scheme of the circles (" +
+        ColorScheme.entries.joinToString(", ") { if (it == ColorScheme.DEFAULT) "${it.label} (default)" else it.label } +
+        "; Standard is a fixed list of 12 colours, rainbow and rainbow2 are computed from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +
         "scheme colours the curves, labels, SVG and the vertices of the graph views. Layout: the parameters of " +
         "the drawing only (iterated Tutte embedding), they do not change the arrangement. Model 1 draws the " +
         "crossings as in Felsner and Scheucher, Triangles and Drawings; Model 2 the primal-dual graph (crossings, " +
@@ -170,7 +173,10 @@ private val FORMATS_TEXT = listOf(
     "Both are the formats of the pseudocircles website (see About). ArrView may number the vertices " +
         "differently, so its strings describe the same arrangements but need not be equal to the website's.",
     "Save file writes JSON {\"name\": ..., \"sequences\": [[...], ...]} (list i for circle i) or the " +
-        "sequences as text. Open file and Import read both and a sparse6 line; model 1 is tried first.",
+        "sequences as text. Open file and Import read both and sparse6 lines; model 1 is tried first.",
+    "A file or text with several arrangements (one sparse6 string per line, several sequences one after " +
+        "the other, or a JSON list of the objects) is loaded as a set, like an example set: < and > in the " +
+        "toolbar (or PageUp / PageDown) step through it, and Save file writes all of them.",
 )
 
 /** The keyboard shortcuts page: key and action (doc/USER_GUIDE.md has the same list). */
@@ -180,6 +186,7 @@ private val SHORTCUTS = listOf(
     "Ctrl+Shift+Z or Ctrl+Y" to "redo",
     "+ / -" to "zoom in / out",
     "Home or 0" to "fit",
+    "PageUp or , / PageDown or ." to "previous / next arrangement of a file or example set",
     "Mouse" to "click a triangle to flip it, a digon to collapse it, a face to create a digon, right-click a face " +
         "(long press on touch screens) for its menu, drag to pan, wheel or pinch to zoom",
 )
