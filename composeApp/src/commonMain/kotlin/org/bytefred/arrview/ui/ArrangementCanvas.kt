@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.Cubic
 import org.bytefred.arrview.core.Drawing
+import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.Point
 import org.bytefred.arrview.core.arcOfDart
 import org.bytefred.arrview.core.canBeOuter
@@ -260,6 +261,8 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 val current = drawing.arrangement == state.arrangement
                 val hover = state.hoverFace.takeIf { current }
                 drawArrangement(drawing, view, hover, state.menuHighlight.takeIf { current }, state.colorScheme, state.lineWidth)
+                // a bundled example with coloured crossings (the triangle-saturated ones) shows them
+                Examples.crossingColours(drawing.arrangement)?.let { drawCrossingColours(drawing, view, it) }
                 // "!" in the hovered cell when a click does something there; for the outer face in a corner
                 if (hover != null && state.actions.hasAction(hover)) {
                     if (hover == drawing.outerFace) {
@@ -371,6 +374,21 @@ internal val HIGHLIGHT_SIDE = Color(0xFFFFB300)
 
 /** A face highlighted from a menu entry: yellow, stronger than the hover. */
 internal val HIGHLIGHT_FILL = Color(0x88FFD600)
+
+/** The colours of the crossing classes 0, 1, 2: red, green, blue as in the website's drawings. */
+internal val CROSSING_COLOURS = listOf(Color(0xFFE53935), Color(0xFF43A047), Color(0xFF1E88E5))
+
+/** A filled disc with a dark rim at every crossing, in the colour of its class ([Examples.crossingColours]). */
+private fun DrawScope.drawCrossingColours(d: Drawing, view: ViewTransform, classes: IntArray) {
+    val arr = d.arrangement
+    for (k in 0 until arr.size) {
+        if (arr.partners[k] < k) continue
+        val at = d.arcs.getOrNull(k)?.firstOrNull()?.p0 ?: continue
+        val s = view.toScreen(at)
+        drawCircle(Color.Black, 6.5f, s)
+        drawCircle(CROSSING_COLOURS[classes[k]], 5f, s)
+    }
+}
 
 private fun DrawScope.drawArrangement(d: Drawing, view: ViewTransform, hover: Int?, highlight: Highlight?, scheme: ColorScheme, lineWidth: Float) {
     val faces = d.arrangement.faces
