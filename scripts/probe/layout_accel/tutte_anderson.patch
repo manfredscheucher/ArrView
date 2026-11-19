@@ -1,0 +1,172 @@
+diff --git a/composeApp/src/commonMain/kotlin/org/bytefred/arrview/core/Tutte.kt b/composeApp/src/commonMain/kotlin/org/bytefred/arrview/core/Tutte.kt
+index 3ea6a10..fafc20b 100644
+--- a/composeApp/src/commonMain/kotlin/org/bytefred/arrview/core/Tutte.kt
++++ b/composeApp/src/commonMain/kotlin/org/bytefred/arrview/core/Tutte.kt
+@@ -3,15 +3,27 @@ package org.bytefred.arrview.core
+ import kotlin.math.PI
+ import kotlin.math.abs
+ import kotlin.math.cos
++import kotlin.math.exp
++import kotlin.math.ln
+ import kotlin.math.sin
+ import kotlin.math.sqrt
+ 
++/** How the iterated Tutte embedding finds its weights (see [IteratedTutte]). */
++enum class LayoutImplementation(val label: String) {
++    /** The sage iteration, step by step. */
++    CLASSIC("classic"),
++
++    /** Anderson acceleration on the weight vector: the same picture in fewer embeddings. */
++    OPTIMIZED("optimized"),
++}
++
+ /** Settings of the iterated Tutte embedding. */
+ data class LayoutSettings(
+     /** At most this many Tutte embeddings are computed (Manfred: 50; the sage programs: 100). */
+     val maxIterations: Int = 50,
+     /** The iteration stops when the normalized weight vector changes by less than this. */
+     val eps: Double = 1e-8,
++    val implementation: LayoutImplementation = LayoutImplementation.OPTIMIZED,
+ )
+ 
+ /**
+@@ -55,9 +67,21 @@ class TutteProblem(
+  *
+  * One [step] computes one embedding, so a caller can stop in between (cancellation).
+  */
+-class IteratedTutte(private val problem: TutteProblem, private val settings: LayoutSettings) {
++class IteratedTutte(
++    private val problem: TutteProblem,
++    private val settings: LayoutSettings,
++    // PROBE knobs (removed after the measurements)
++    internal val probeFaceIteration: ((Int) -> Int)? = null,
++    internal val probeDistTerm: Boolean = true,
++    internal val probeLogSpace: Boolean = true,
++    internal val probeMemory: Int = 5,
++) {
+     private val v = problem.vertexCount
+     private val edges = problem.edges
++    private val accelerated = settings.implementation == LayoutImplementation.OPTIMIZED
++
++    // Anderson history: (log w, log F(w)) of the last embeddings
++    private val history = ArrayDeque<Pair<DoubleArray, DoubleArray>>()
+ 
+     /** `x` at `2i`, `y` at `2i + 1`; the last finished embedding. */
+     val positions = DoubleArray(2 * v)
+@@ -106,12 +130,12 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
+         if (done) return true
+         val j = iteration + 1
+         if (j > 1) {
+-            val next = nextWeights(j)
++            val next = nextWeights(faceIteration(j))
+             if (weightChange(weights, next) < settings.eps) {
+                 done = true
+                 return true
+             }
+-            weights = next
++            weights = if (accelerated) anderson(next) else next
+         }
+         iteration = j
+         if (!solve()) done = true
+@@ -125,6 +149,9 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
+         return positions
+     }
+ 
++    /** The iteration count that enters the face term of embedding [j]. */
++    private fun faceIteration(j: Int): Int = probeFaceIteration?.invoke(j) ?: j
++
+     /** The weights of iteration [j] from the previous weights and the current embedding. */
+     private fun nextWeights(j: Int): DoubleArray {
+         val areas = DoubleArray(problem.faces.size) { f -> convexHullArea(problem.faces[f]) }
+@@ -134,7 +161,7 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
+             val dx = positions[2 * a] - positions[2 * b]
+             val dy = positions[2 * a + 1] - positions[2 * b + 1]
+             // sage: mypoly(dist2(u, v)) with mypoly(x) = x^2 and dist2 the squared length
+-            val dist2 = dx * dx + dy * dy
++            val dist2 = if (probeDistTerm) dx * dx + dy * dy else 0.0
+             var sum = weights[e] + SMOOTHING * (dist2 * dist2 - weights[e])
+             for (f in edgeFaces[e]) sum += problem.areaFactor * fourth(j * areas[f])
+             sum
+@@ -142,6 +169,72 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
+         return w
+     }
+ 
++    /**
++     * Anderson acceleration (type II, Walker and Ni) of the weight iteration `w <- F(w)`, where
++     * `F` is the classic weight update [nextWeights] of the embedding of `w`. The last
++     * [probeMemory] pairs `(w, F(w))` give a secant model of the residual `F(w) - w`, and the
++     * combination of the `F(w)` with the smallest modelled residual is the next weight vector.
++     * In the logarithms of the weights, so that every weight counts by its relative change and
++     * stays positive. [next] is `F(w)` of the current [weights]; returns the next weights.
++     */
++    private fun anderson(next: DoubleArray): DoubleArray {
++        if (next.any { it <= 0.0 || !it.isFinite() } || weights.any { it <= 0.0 }) {
++            history.clear()
++            return next
++        }
++        val u = if (probeLogSpace) DoubleArray(next.size) { ln(weights[it]) } else weights.copyOf()
++        val g = if (probeLogSpace) DoubleArray(next.size) { ln(next[it]) } else next.copyOf()
++        history.addLast(u to g)
++        while (history.size > probeMemory + 1) history.removeFirst()
++        val m = history.size - 1
++        if (m == 0) return next
++        val n = next.size
++        fun residual(k: Int) = DoubleArray(n) { history[k].second[it] - history[k].first[it] }
++        val r = residual(m)
++        val dr = Array(m) { k -> residual(k + 1).also { d -> val p = residual(k); for (i in 0 until n) d[i] -= p[i] } }
++        val dg = Array(m) { k -> DoubleArray(n) { history[k + 1].second[it] - history[k].second[it] } }
++        // least squares min |r - dr gamma| by the normal equations (m is tiny), lightly regularized
++        val gram = Array(m) { a -> DoubleArray(m) { b -> dot(dr[a], dr[b]) } }
++        val rhs = DoubleArray(m) { dot(dr[it], r) }
++        val ridge = REGULARIZATION * (0 until m).maxOf { gram[it][it] }
++        for (a in 0 until m) gram[a][a] += ridge
++        val gamma = solveSmall(gram, rhs) ?: run { history.clear(); return next }
++        val result = DoubleArray(n) { i ->
++            var s = g[i]
++            for (k in 0 until m) s -= gamma[k] * dg[k][i]
++            if (probeLogSpace) exp(s) else s
++        }
++        if (result.any { it <= 0.0 || !it.isFinite() }) {
++            history.clear()
++            return next
++        }
++        return result
++    }
++
++    /** Solves the small dense system `a x = b` (Gaussian elimination, partial pivoting); null if singular. */
++    private fun solveSmall(a: Array<DoubleArray>, b: DoubleArray): DoubleArray? {
++        val m = b.size
++        for (col in 0 until m) {
++            val piv = (col until m).maxBy { abs(a[it][col]) }
++            if (a[piv][col] == 0.0 || !a[piv][col].isFinite()) return null
++            a[col] = a[piv].also { a[piv] = a[col] }
++            b[col] = b[piv].also { b[piv] = b[col] }
++            for (row in col + 1 until m) {
++                val f = a[row][col] / a[col][col]
++                if (f == 0.0) continue
++                for (c in col until m) a[row][c] -= f * a[col][c]
++                b[row] -= f * b[col]
++            }
++        }
++        val x = DoubleArray(m)
++        for (row in m - 1 downTo 0) {
++            var s = b[row]
++            for (c in row + 1 until m) s -= a[row][c] * x[c]
++            x[row] = s / a[row][row]
++        }
++        return if (x.all { it.isFinite() }) x else null
++    }
++
+     /** Area of the convex hull of the vertices of [cycle] (0 if they are collinear, where scipy raises and sage skips the face). */
+     private fun convexHullArea(cycle: IntArray): Double =
+         convexHullArea(cycle.map { Point(positions[2 * it], positions[2 * it + 1]) })
+@@ -231,6 +324,9 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
+         /** How fast a weight follows `|uv|^4` (sage's `eps = 0.1`). */
+         const val SMOOTHING = 0.1
+ 
++        /** Ridge added to the Anderson least squares, relative to its largest diagonal entry. */
++        const val REGULARIZATION = 1e-12
++
+         fun fourth(x: Double) = x * x * x * x
+     }
+ 

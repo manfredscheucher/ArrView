@@ -2,6 +2,56 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-19: Layout implementation: classic / optimized
+
+### Request (Manfred)
+
+Find the right weights faster than the classic weight update: an extrapolation / acceleration
+scheme on the weight history, so fewer iterations are needed; "classic" and "optimized" as a
+dropdown. Condition (coordinator): the optimized picture must agree with classic (100 iterations,
+eps 1e-10) within 1e-3 of the drawing radius on the bundled examples and a sample of n = 3..5.
+
+### Result: not shipped, classic stays
+
+Tried Anderson acceleration (memory 3, 5, 8; on the weights and on their logarithms) with the
+face factor `j` as in sage, frozen at 50 or 100, and the "limit" map (area term only). Probe:
+`scripts/probe/layout_accel/` (`tutte_anderson.patch` on `core/Tutte.kt`, then `run.sh`;
+`run.sh limit` for the long runs). 210 cases (all bundled sets first/last member, every 6th
+member of the n = 3..5 sweep sets, both models). Largest deviation from classic 100 / 1e-10:
+
+| run | mean iterations | worst deviation (of the radius) |
+|---|---|---|
+| classic, 50 it, eps 1e-8 (the default) | 35.9 | 1.6e-1 |
+| Anderson, true `j` | 40.4 | 1.05 |
+| Anderson, `j` = 100 | 24.8 | 2.2e-1 |
+| Anderson, `j` = 50 | 24.1 | 2.6e-1 |
+| Anderson, `j` = 100, memory 3 | 21.8 | 2.3e-1 |
+| Anderson, `j` = 100, not in logs | 24.4 | 4.3e-1 |
+| Anderson, area term only (the limit) | 22.6 | 6.8e-1 |
+
+No scheme meets 1e-3; neither does the classic default itself. Reason: with the face term
+`(j A)^4` the classic iteration is not a fixed-point iteration whose result is reached early. It
+drifts towards a limit `L` (`j -> infinity`: the weights point along the area term) and the error
+shrinks only like `1/j^4`. Classic with eps 0, deviation from 1000 iterations:
+
+| case | 50 it | 100 it | 200 it | 400 it | classic 100 / 1e-10 stops at |
+|---|---|---|---|---|---|
+| start example, model 1 | 1.2e-5 | 6.8e-7 | 3.9e-8 | 2.3e-9 | 80 |
+| start example, model 2 | 1.2e-2 | 8.1e-4 | 4.4e-5 | 2.5e-6 | 100 |
+| Pappus, model 2 | 4.9e-2 | 7.1e-3 | 4.4e-4 | 2.5e-5 | 100 |
+| n5-intersecting-all #1, model 2 | 4.2e-3 | 2.5e-4 | 1.4e-5 | 8.4e-7 | 94 |
+| n5-connected-all #1, model 1 | 6.8e-7 | 3.6e-8 | 2.0e-9 | 1.2e-10 | 51 |
+
+So the classic picture is "the trajectory where it stopped", and that point depends on the
+iteration count and eps. An accelerated scheme can land on `L` (Anderson on the limit map reaches
+`L` to 1e-8 in 39 to 88 embeddings in 4 of the 5 cases above, vs. hundreds for classic), but not
+on an arbitrary point of the slow trajectory; on Pappus it went to a different picture (1.3).
+
+**Question for Manfred:** which picture is "right": the classic one at 50 / 100 iterations
+(then there is nothing to accelerate without changing the picture), or the limit `L` (then
+"optimized" = a fast solver for `L`, with its own checks, giving pictures that differ visibly from
+the current 50-iteration default in model 2)? Nothing changed in the app; no dropdown added.
+
 ## 2026-11-19: Curves and layout ported literally, 50 iterations, sets
 
 ### Request (Manfred)
