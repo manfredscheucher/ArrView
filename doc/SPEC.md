@@ -114,7 +114,8 @@ visibly (one pair each in 320 drawings) and 1976 below a pixel; all others touch
 - Claude's choices (to confirm): the file formats for several arrangements (JSON: a list of the
   one-arrangement objects named `<name> #i`; text: the sequences separated by an empty line); a
   load stays undoable (ArrView's) and restores the previous set; members are decoded only when
-  shown (n6-digonfree-all has 2131).
+  shown (n6-digonfree-all has 2131); after a load or a set step the canvas takes the keyboard focus
+  again (the web check showed PageUp doing nothing after a click on `>`).
 
 ## 2026-11-18: Long press opens the face menu
 
