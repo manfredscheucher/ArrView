@@ -52,11 +52,11 @@ n = 3, 4, 5 and every single flip the app offers, valid by Linhart-Ortner and dr
 
 ### Remaining deviations (with reason)
 
-- Model 1 with digons: draw7.sage refuses them (`assert(2 not in deg)`, line 275). ArrView runs
-  the rest of its code anyway: `G` is the multigraph with the digon's two edges, `G2` the simple
-  graph (a digon is one edge), as draw7's comment "G might be a multigraph, G2 is simple graph"
-  suggests. The two curves of a digon then share a straight piece (the span `v1, xr, xl, v2` is the
-  same for both). **Question for Manfred**, see the sweep below.
+- Model 1 with digons, as draw7.sage draws them (Manfred: "touchings sind dort"; the py2 original
+  `program/draw7.sage` has no `assert(2 not in deg)`, only the py3 copy has it): `G` is the
+  multigraph with the digon's two edges, `G2` the simple graph (a digon is one edge), and both
+  circles' B-splines run through the digon's two crossings, so they share a straight piece (the
+  span `v1, xr, xl, v2` is the same for both). Checked against the original, see below.
 - eps: one setting, default 1e-8 (draw3.sage). draw7.sage stops at 1e-10. **Question for Manfred:**
   per-model defaults (1e-10 model 1, 1e-8 model 2)?
 - Max. iterations 50 (Manfred; sage: 100).
@@ -92,11 +92,37 @@ visibly (one pair each in 320 drawings) and 1976 below a pixel; all others touch
   curve that comes in at the sharper angle cuts the corner less and crosses the other one before
   joining the shared piece (e.g. n5-intersecting-all #181, circles 1 and 3 at the corners of the
   outer square; screenshots in `composeApp/build/sweep/screenshots/` from `SweepScreenshotTest`).
-  The original cannot show the same, since draw7.sage refuses digons. **Manfred decides** how
-  model 1 should draw digons; until then the sweep lists these and fails only on other defects.
+  The original draws exactly the same (next section); the sweep lists these and fails only on
+  other defects.
 - jvmTest runs a representative part (all n = 3, 4, every 20th of n = 5, with all flips; about
   25 s). The full sweep is excluded from `jvmTest`: `./gradlew :composeApp:jvmTest -PfullSweep
   --tests '*DrawingFullSweepTest'`, report in `composeApp/build/sweep/full.txt`.
+
+### Model 1 digons checked against the original draw7.sage
+
+`scripts/probe/draw7_orig/` holds `program_py3/draw7.sage`, `basics.py` and `ipestyle.txt` with two
+changes: the `assert(2 not in deg)` commented out (not in the py2 original), and
+`Graph(dual_edges, multiedges=True)` in `compute_planar_dual_graph` (Sage 10.9 silently drops a
+repeated edge, so the digon's second edge got lost and `compute_pseudocircles` failed; the Sage of
+these scripts kept it, otherwise they could not have drawn digons). Run with Sage 10.9 on five
+n5-intersecting-all members (#181, #6 and #48 with a visible crossing near a touching, #2 below a
+pixel, #1 clean):
+
+```
+cd scripts/probe/draw7_orig
+sage draw7.sage cases/n5_181.enc          # writes cases/n5_181.enc_1_1tutte7.ipe
+./gradlew :composeApp:jvmTest -Pdraw7Dump --tests '*Draw7ComparisonDump'   # ArrView: cases/*.arrview.txt
+python3 compare.py cases/n5_181 cases/n5_6 cases/n5_48 cases/n5_2 cases/n5_1
+python3 render.py cases/n5_181 [-1.2 -1.07 0.12]   # side-by-side SVG (optional zoom)
+```
+
+ArrView with sage's settings (100 iterations, eps 1e-10) and the same outer face writes the same
+control points: largest deviation 1e-10 to 9e-10 of the drawing's radius, after aligning by a
+rotation / reflection of the outer polygon (sage's face lists start elsewhere; for #2 sage took
+another of the equally symmetric faces). So the crossings near the touchings, e.g. #181's circles
+at the corners of the outer square, are in the original output too; the side-by-side renderings
+show both identical. Nothing in ArrView changed (only `ArrangementLayout.controlPoints`, which
+`curves` uses, is public now for the dump).
 
 ### Settings, undo, sets
 

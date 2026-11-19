@@ -229,9 +229,9 @@ class Drawing(
  * `program_py3/draw7.sage` (model 1) and `model2_program/draw3.sage` (model 2).
  *
  * Model 1 embeds the primal graph `G2` (crossings; sage's `G2 = Graph(G)` without multiple edges,
- * so the two arcs of a digon are one edge) and draws the curves of the multigraph `G`. draw7.sage
- * itself refuses arrangements with digons (`assert(2 not in deg)`); ArrView runs the same code on
- * them, so the two curves of a digon share a piece (they touch). Model 2 embeds the
+ * so the two arcs of a digon are one edge) and draws the curves of the multigraph `G`, so the two
+ * curves of a digon share a piece (they touch), as in `program/draw7.sage` (the py3 copy has an
+ * `assert(2 not in deg)` that the original does not have). Model 2 embeds the
  * vertex-edge-face graph without the outer face's vertex, as draw3.sage does; the curves run along
  * the crossing and arc vertices.
  *
@@ -323,7 +323,10 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
     fun layout(settings: LayoutSettings): Drawing = drawing(IteratedTutte(problem, settings).run())
 
     /** The B-spline of every circle for the [problem]'s vertex [positions] (`x` at `2i`, `y` at `2i + 1`), as Bezier pieces. */
-    fun curves(positions: DoubleArray): List<List<Cubic>> {
+    fun curves(positions: DoubleArray): List<List<Cubic>> = controlPoints(positions).map(::closedUniformBSpline)
+
+    /** The B-spline control points of every circle (what `graph_2_ipe` writes): `xl, v1, xr` per vertex `v1` in circle order. */
+    fun controlPoints(positions: DoubleArray): List<List<Point>> {
         fun at(v: Int) = Point(positions[2 * v], positions[2 * v + 1])
         val distances = HashMap<Int, MutableList<Double>>()
         for (seq in sequences) {
@@ -350,7 +353,7 @@ class ArrangementLayout(val arrangement: Arrangement, val model: DrawModel, val 
                 ctrl += x1
                 ctrl += x1 + (x2 - x1) * lmbd2
             }
-            closedUniformBSpline(ctrl)
+            ctrl
         }
     }
 

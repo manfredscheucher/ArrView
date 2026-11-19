@@ -293,4 +293,6 @@ tasks.withType<Test>().configureEach {
     systemProperty("arrview.prefs", "memory")
     // the full drawing sweep takes minutes: only with -PfullSweep
     if (!project.hasProperty("fullSweep")) filter.excludeTestsMatching("*.DrawingFullSweepTest")
+    // writes the control points for scripts/probe/draw7_orig: only with -Pdraw7Dump
+    if (!project.hasProperty("draw7Dump")) filter.excludeTestsMatching("*.Draw7ComparisonDump")
 }

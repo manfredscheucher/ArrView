@@ -41,8 +41,8 @@ object DrawingSweep {
 
     /**
      * Model 1 digons whose two curves cross visibly near the ends of their shared piece instead of
-     * touching: a result of the literal port (draw7.sage itself refuses digons), reported to Manfred
-     * (doc/SPEC.md, 2026-11-19); listed, not failed.
+     * touching. The original draw7.sage draws them the same way (control points equal, checked by
+     * running it: scripts/probe/draw7_orig, doc/SPEC.md 2026-11-19); listed, not failed.
      */
     fun isModel1DigonCrossing(problem: String) = ", Model 1: curves " in problem && problem.endsWith("expected a touching")
 
