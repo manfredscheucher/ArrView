@@ -39,9 +39,9 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 | `Examples.kt` | catalogue of the bundled examples (data: `composeApp/examples/`) | |
 | `Formats.kt` | text forms (sequences, model 1 / 2 sparse6), file formats (JSON, text), reading with format detection | |
 | `Json.kt` | small strict JSON reader | PoCoView `core/Json.kt` |
-| `Tutte.kt` | iterated weighted Tutte embedding (`IteratedTutte`, one embedding per `step()`) | `program_py3/draw7.sage`, `model2_program/draw3.sage` |
-| `Layout.kt` | model 1 / model 2 graphs, outer face keys, curves, face boundaries, hit test (`Drawing`) | |
-| `Symmetry.kt` | automorphisms of the map, default outer face | draw7.sage's maximal symmetry |
+| `Tutte.kt` | iterated weighted Tutte embedding (`IteratedTutte`, one embedding per `step()`), literal port | `program_py3/draw7.sage`, `model2_program/draw3.sage` |
+| `Layout.kt` | model 1 / model 2 graphs, the B-spline curves (`graph_2_ipe`), face boundaries, hit test (`Drawing`) | draw7.sage / draw3.sage |
+| `Symmetry.kt` | automorphisms of the map, default outer face (most symmetries) | draw7.sage / draw3.sage |
 
 ### UI
 
@@ -114,7 +114,7 @@ user guide against the code.
 |---|---|
 | Core combinatorics | `ArrangementTest`, `OperationsTest`, `LinhartOrtnerTest` (every rejection reason), `SymmetryTest`, `FormatsTest`, `FilesTest`, `DataFilesTest` |
 | Examples | `ExamplesTest` (sizes, valid, distinct, class), `ExampleCatalogTest` (every member through sequences, JSON, text, model 1 / 2 sparse6; group claims: Krupp triples, digon-free, min / max triangles, Füredi–Palásti, named ones) |
-| Drawing | `LayoutTest` (every example with n <= 5, both models), `ExampleDrawingTest` (n >= 6, long lists sampled, both models, SVG) |
+| Drawing | `LayoutTest` (every example with n <= 5, both models; control points, weights, B-spline as in sage), `TutteSolveTest`, `SymmetryTest`, `ExampleDrawingTest` (n >= 6, long lists sampled, both models, SVG), `DrawingSweepTest` (flips of n <= 5, geometry checked by `CurveCheck`) |
 | Flips, collapses, undo | `DigonCreateTest`, `ActionsUiTest` (digon create, graph view clicks, "!"), `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
 | Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |
 | Menus | `MenusAndDialogsUiTest` (every item clicked), `MenuBarTest` |
@@ -129,6 +129,19 @@ user guide against the code.
 Not covered: the system file dialogs (Open file, Save JSON / text, Export SVG), which a test cannot
 drive, and the macOS Quit handler in `main.kt`. `jsTest` is not part of `scripts/test.sh`: the
 data-heavy common tests take longer than mocha's 2 s per test in the browser.
+
+### Drawing sweep
+
+`DrawingSweepTest` (in `jvmTest`) checks a representative part; the whole sweep (every
+intersecting and connected arrangement with n <= 5 and all its flips, about 4.5 min) is excluded
+from `jvmTest`:
+
+```
+./gradlew :composeApp:jvmTest -PfullSweep --tests '*DrawingFullSweepTest'
+```
+
+The report is `composeApp/build/sweep/full.txt`. `SweepScreenshotTest` writes screenshots and
+zoomed SVGs of known cases to `composeApp/build/sweep/screenshots/`.
 
 ### Web check
 

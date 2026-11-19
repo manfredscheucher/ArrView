@@ -2,6 +2,120 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-19: Curves and layout ported literally, 50 iterations, sets
+
+### Request (Manfred)
+
+The curves were buggy and self-intersecting (the Krupp, n3-intersecting-all #1 with a triangle
+flipped: in model 1 the blue curve was a figure 8), and the curve construction was not his
+original code. Port the original B-splines and the layout literally from
+`program_py3/draw7.sage` (model 1) and `model2_program/draw3.sage` (model 2), no own schemes, no own
+safeguards that change the result; in model 2 the start example's outer cell was "a 4-gon and
+weirdly rotated". Max. iterations default 50. Colour schemes only Standard, rainbow and rainbow2.
+Undo covers "Make outer face". Navigation through files and example sets with several
+arrangements as in PoCoView. A big test: every intersecting and connected arrangement with
+n = 3, 4, 5 and every single flip the app offers, valid by Linhart-Ortner and drawn cleanly.
+
+### What deviated before, what is ported now
+
+- Curves: before, one cubic Bezier piece per arc through the crossings with ArrView's own tangent
+  rule. Now the B-spline of `graph_2_ipe` (draw7.sage 54-81, draw3.sage 71-100): per circle a closed
+  uniform cubic B-spline (Ipe's `u`), control points `xl, v1, xr` per vertex `v1` of the circle,
+  `xl = v1 + l0 (v0 - v1)`, `l0 = sqrt(min(distances[v1]) / |v0 - v1|^2) / 3` (`xr` with `v2`),
+  `distances[v]` the squared lengths of all circle edges at `v`. Vertex sequences as
+  `compute_pseudocircles`: model 1 the crossings of the circle, model 2 crossings and arc vertices
+  alternately. Converted exactly to Bezier pieces (`(P0 + 4P1 + P2) / 6, (2P1 + P2) / 3, (P1 + 2P2) / 3,
+  (P1 + 4P2 + P3) / 6`), so canvas, SVG, hit tests, labels and face fills use the same curve.
+  Faces are bounded by the curve pieces between the geometric crossings (found near each crossing
+  vertex); labels sit on the middle of a longer such piece.
+- Weights: before `0.1 (|uv|^2 - w)` and the polygon area of the bounded faces only, plus guards
+  for tiny weights. Now as sage: `w + 0.1 (dist2^2 - w)` (`mypoly(dist2)`, `mypoly(x) = x^2`), plus
+  `(it * A(f))^4` (model 2: times 0.001) for both faces of the edge, `A` the convex hull area
+  (scipy's `ConvexHull(...).volume`), the outer face included. The stop vector runs over the edges
+  of `G` (model 1: a digon's double edge counts twice). Guards removed.
+- Outer face: before "a largest face, symmetry breaks ties". Now draw7.sage 304-327 / draw3.sage
+  172-191: the face with the most automorphisms (model 1: of `G2` with pendant edges at the face,
+  model 2: of the vertex-edge-face graph without the face vertex). Counted as map automorphisms;
+  `SymmetryTest` checks them against a plain graph automorphism count (all n <= 4, every 25th of
+  n = 5, the start example, n = 2).
+- The start example in model 2: its triangles have 3 symmetries, its quadrangles 1, so draw3.sage
+  draws a triangle outside. Before, ArrView drew a quadrangle outside: in model 2 its polygon has 8
+  corners (crossings and arc vertices alternate), `a0 = pi/8 + pi/2`, so the four crossings sit
+  22.5 degrees off the axes, the tilted square Manfred saw. draw3.sage would draw a 4-gon outer face
+  the same way.
+- Unchanged, as in the sage code: outer polygon `a0 = pi/l + pi/2`, `ai = a0 + 2 pi i / l` on the
+  unit circle; first iteration with weights `1e-6`; the stop test before the embedding.
+- Solver: the warm-started conjugate gradients stay (sage: `M.pseudoinverse() * b`).
+  `TutteSolveTest` compares them with Gaussian elimination on sage's matrix after every iteration
+  (up to Pappus, model 2, 290 vertices): equal to 1e-9 of the drawing size. For that the CG
+  tolerance went from 1e-10 to 1e-13.
+
+### Remaining deviations (with reason)
+
+- Model 1 with digons: draw7.sage refuses them (`assert(2 not in deg)`, line 275). ArrView runs
+  the rest of its code anyway: `G` is the multigraph with the digon's two edges, `G2` the simple
+  graph (a digon is one edge), as draw7's comment "G might be a multigraph, G2 is simple graph"
+  suggests. The two curves of a digon then share a straight piece (the span `v1, xr, xl, v2` is the
+  same for both). **Question for Manfred**, see the sweep below.
+- eps: one setting, default 1e-8 (draw3.sage). draw7.sage stops at 1e-10. **Question for Manfred:**
+  per-model defaults (1e-10 model 1, 1e-8 model 2)?
+- Max. iterations 50 (Manfred; sage: 100).
+- Ties of the symmetry: sage takes the first face in its own face order (draw3: vertex names
+  sorted as strings), which cannot be reproduced; ArrView takes the first in its face order.
+  Likewise the corner where the outer polygon starts and its direction (sage's face lists) only
+  rotate the drawing by a multiple of `2 pi / l` or mirror it; ArrView keeps the arrangement's
+  orientation.
+- Graph automorphisms are counted as map automorphisms, equal for 3-connected graphs (Whitney);
+  checked against a plain count on the cases above, not proven for all.
+- A solve with a non-finite result stops the iteration (keeps the last positions); sage has no
+  such check (it would draw NaN). Only a crash guard.
+- Face fills: draw7.sage fills triangles as straight triangles of the crossings; ArrView fills
+  triangles and digons along the curves (Manfred: the same curve everywhere).
+
+### The sweep (`DrawingSweepTest`, `DrawingFullSweepTest`)
+
+Every intersecting and connected arrangement with n = 3, 4, 5 and every triangle flip, digon
+collapse and digon create the app offers; each result valid by Linhart-Ortner, and every drawing
+(model 1 where it exists, model 2) checked by `CurveCheck`: finite, no curve crosses itself, two
+curves cross twice if the circles cross, else not at all; a model 1 digon pair touches. The checker
+flattens the Bezier pieces (64 points each), counts proper segment crossings (rounding noise of
+collinear segments ignored) and treats places closer than 1e-5 of the drawing as contact zones
+(crossing if the curve changes sides of the other one there, else touching); `CurveCheckTest`
+tests it on constructed curves. Result of the full sweep (4.5 min): 17772
+arrangements, 23858 drawings, no defect except model 1 digons: of 17529 model 1 digons, 320 cross
+visibly (in 294 drawings) and 1976 below a pixel; all others touch. All results valid.
+
+- Model 2: no defects. Model 1 without digons: no defects. Krupp and its flips, the start example
+  and the bundled n = 6 examples: clean (no visible defect).
+- Model 1 digons: most touch cleanly. Some cross twice so close to the shared piece that it is
+  below a pixel (contact zones of 1e-3 of the drawing see a touching). Some cross visibly: the
+  curve that comes in at the sharper angle cuts the corner less and crosses the other one before
+  joining the shared piece (e.g. n5-intersecting-all #181, circles 1 and 3 at the corners of the
+  outer square; screenshots in `composeApp/build/sweep/screenshots/` from `SweepScreenshotTest`).
+  The original cannot show the same, since draw7.sage refuses digons. **Manfred decides** how
+  model 1 should draw digons; until then the sweep lists these and fails only on other defects.
+- jvmTest runs a representative part (all n = 3, 4, every 20th of n = 5, with all flips; about
+  25 s). The full sweep is excluded from `jvmTest`: `./gradlew :composeApp:jvmTest -PfullSweep
+  --tests '*DrawingFullSweepTest'`, report in `composeApp/build/sweep/full.txt`.
+
+### Settings, undo, sets
+
+- `LayoutSettings.maxIterations` 50; Help and the user guide take it from the code / say 50.
+- Colour schemes Standard, rainbow, rainbow2 (rainbow3-2, rainbow3-k removed); a stored removed
+  scheme falls back to the default (unknown enum name).
+- "Make outer face" is an undo step (not if the face already is outside).
+- Sets (PoCoView's `sets`, `setIndex`, `showSet`): opening or importing text with several
+  arrangements (sparse6 lines, several sequences one after the other, a JSON list of the objects)
+  keeps all of them; loading an example member opens the whole set at that member. Toolbar
+  `< i / n >`, PageUp / PageDown and `,` / `.`; title `name · set i/n`. As in PoCoView: a member's
+  edits stay while another is shown, switching clears the undo history (it belongs to one member),
+  an unapplied widget edit asks "Save changes?" before a switch, unsaved means some member differs
+  from its loaded or saved version, and Save writes every member.
+- Claude's choices (to confirm): the file formats for several arrangements (JSON: a list of the
+  one-arrangement objects named `<name> #i`; text: the sequences separated by an empty line); a
+  load stays undoable (ArrView's) and restores the previous set; members are decoded only when
+  shown (n6-digonfree-all has 2131).
+
 ## 2026-11-18: Long press opens the face menu
 
 Manfred: "On the phone a long press is like a right-click, so make the browser do that too." A touch
