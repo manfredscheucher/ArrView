@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
@@ -168,10 +169,10 @@ class SetsTest {
         // the Examples dialog loads the whole set at the chosen member
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
-        onNodeWithText("Sets").performClick()
-        onNodeWithText("Intersecting (4)").performClick()
-        onNodeWithText("n4-intersecting-all").performClick()
-        onNodeWithText("+").performClick()
+        onNodeWithText("Database").performClick()
+        onNodeWithText("Intersecting, n = 4 (8)").performScrollTo().performClick()
+        // below the database's other sets: scrolled into view first
+        onNodeWithText("+").performScrollTo().performClick()
         onNodeWithText("+").performClick()
         onNodeWithText("Load").performClick()
         waitForIdle()

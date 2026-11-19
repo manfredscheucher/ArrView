@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +43,7 @@ class DialogsUiTest {
         onNodeWithText("Interesting arrangements, ideas or general feedback?").assertIsDisplayed()
         onNodeWithText("Don't show again").performClick()
         onNodeWithText("Examples").performClick()
-        onNodeWithText("Sets").assertIsDisplayed()
+        onNodeWithText("Database").assertIsDisplayed()
         assertEquals("off", loadPref(WELCOME_PREF))
     }
 
@@ -53,10 +54,10 @@ class DialogsUiTest {
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
         onNodeWithText("Load").assertIsNotEnabled()
-        onNodeWithText("Sets").performClick()
-        onNodeWithText("Intersecting (4)").performClick()
-        onNodeWithText("n4-intersecting-all").performClick()
-        onNodeWithText("n = 4, 8 arrangements").assertIsDisplayed()
+        onNodeWithText("Database").performClick()
+        onNodeWithText("Intersecting, n = 4 (8)").performScrollTo().performClick()
+        onNodeWithText("n = 4, 8 arrangements").performScrollTo().assertIsDisplayed()
+        onNodeWithText("of 8").performScrollTo()
         onNodeWithTag("example-index").performTextReplacement("5")
         onNodeWithText("+").performClick()
         waitForIdle()
@@ -87,8 +88,8 @@ class DialogsUiTest {
         runOnIdle { s.flipSomeTriangle() }
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
-        onNodeWithText("Singletons", substring = true).performClick()
-        onNodeWithText("n3-great-krupp").performClick()
+        onNodeWithText("Krupp, NonKrupp, 3-Chain").performScrollTo().performClick()
+        onNodeWithText("Krupp").performScrollTo().performClick()
         onNodeWithText("Load").performClick()
         onNodeWithText("Save changes?").assertIsDisplayed()
         onNodeWithText("Save JSON").assertIsDisplayed()
