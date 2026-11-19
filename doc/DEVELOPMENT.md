@@ -56,14 +56,16 @@ an entry of `Widget` plus a branch in `WidgetContent`.
 ## Example data
 
 The examples are compiled into the app: `composeApp/examples/` holds the data files (one sparse6
-string per line; `.mod2s6` is model 2, `.enc`/`.mod1s6` model 1), the Gradle task
+string per line; `.mod2s6` is model 2, `.enc`/`.mod1s6` model 1, `.seq` intersection sequences,
+`.colours` the colour class of every crossing in the shape of the sequences), the Gradle task
 `generateExamples` embeds all of them into `GeneratedExamples.kt`, and `core/Examples.kt` names
 and groups them. `ExamplesTest` fails if a file is not in the catalogue or vice versa.
 
 To refresh the files, run `python3 scripts/import_examples.py` (reads
-`~/github/research/pca/pseudocircles/`, `--research` for another place). It copies the files
-verbatim, except the colour dictionaries of the old sage code (`*.txt`, the dual graph with
-edges coloured by circle), which it converts to model 1 sparse6 (`.mod1s6`).
+`~/github/research/pca/pseudocircles/`, `--research` for another place; Koester's file needs
+`sage`). It copies the files verbatim, except the colour dictionaries of the old sage code (`*.txt`,
+the dual graph with edges coloured by circle), which it converts to model 1 sparse6 (`.mod1s6`), and
+the two conversions to intersection sequences (`.seq`, one arrangement per line) below.
 
 Provenance (paths below `~/github/research/pca/pseudocircles/`; the website mirror there is
 identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
@@ -80,6 +82,10 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `named/n5_nonr_number*.mod2s6` | `website/arrangements/nomorecircles/connected/` |
 | `named/n6_nonr_number{1,2,3}*.mod2s6` | `website/arrangements/nomorecircles/intersecting/digonfree/` |
 | `named/n6_nonr_all_triangles_krupp_number2.enc`, `named/n6_nonr_edelsbrunnerramos.enc`, `named/n9_nonr_pappus.enc` | `computations/results/` |
+| `named/n6_sym6_{2,3}.mod2s6`, `named/n6_connected_digonfree_sym*.mod2s6` | `website/arrangements/nomorecircles/{intersecting,connected}/additional/` |
+| `digongraphs/*.enc` | `website/arrangements/digongraphs/data/` (model 1, although the page says primal-dual graphs) |
+| `colorings/*.seq`, `colorings/*.colours` | `website/arrangements/colorings/triangle_sat/*.enc_1_1tutte7.ipe` (sequences and crossing colours read from the drawings; `ExampleColoursDataTest` checks them against the `.enc` files, copied to `jvmTest/resources/data/colorings/`) |
+| `colorings/n8_koester.seq` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the file name) |
 
 Krupp, NonKrupp and 3-Chain are typed in as sequences in `Examples.kt`.
 

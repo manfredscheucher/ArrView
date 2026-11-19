@@ -2,6 +2,65 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-19: Examples by purpose
+
+### Request (Manfred, via the coordinator)
+
+Reorganise the Examples by purpose, following the menu of the pseudocircles website: database,
+minimum / maximum number of triangles, Füredi–Palásti, non-circularizable (`?show=nomorecircles`),
+triangle-saturated arrangements and colourings (`?show=colorings`), Koester's arrangement
+(`computations/biconnected_results/n8_koester.enc`, paper arXiv:2205.08181 Fig. 8b) and any other
+group with data. Every group gets one or two sentences and links (website page, paper); every
+example a short label understandable before expanding and a description after. Show the vertex
+colouring of the triangle-saturated arrangements if the data exists, do not invent colourings.
+
+### Decisions
+
+- One level of groups, each with its sets as leaves (the old "Sets" / "Singletons" nodes are gone).
+  An open group starts with its description and links; the selected set keeps its info area
+  (description, n, count, member chooser, links, data path) as before.
+- Groups, in the order of the website's menu: Database (17: connected n = 3..5, intersecting
+  2..5, digon-free 3..6, great 3..8), Minimum number of triangles (12), Maximum number of triangles
+  (7), Füredi–Palásti construction (7), Non-circularizable arrangements (17), Triangle-saturated
+  arrangements and colorings (7), Digongraphs (6), and last "Krupp, NonKrupp, 3-Chain" (3, typed
+  in; linked to the website's information page, which uses the Krupp as its example).
+- New data: the website's additional non-circularizable n = 6 arrangements (`n6_sym6_2`, `n6_sym6_3`
+  and the five `n6_connected_digonfree_sym*`; `n6_edelsbrunner_nonr` stays out, it is isomorphic to
+  the bundled Edelsbrunner–Ramos file), the six digongraph files, the six triangle-saturated
+  arrangements and Koester's. All-triangles-Krupp and Pappus (from the computations, not on the
+  website) moved into Non-circularizable, without a website link.
+- Colourings: the website's drawings (`*.enc_1_1tutte7.ipe`, draw7 with coloured crossing marks,
+  classes red / green / blue) are the only colouring data. `scripts/import_examples.py` reads the
+  curves and marks and writes the sequences (`.seq`) and the class of every crossing entry
+  (`.colours`); a test checks each against the website's `.enc` (isomorphic), that the colouring
+  is proper, the same at both entries of a crossing, and that every crossing is on a triangle.
+  The canvas draws a filled disc at every crossing in its colour when the shown arrangement is
+  exactly a stored coloured example (after an edit, no discs). No toggle.
+- Koester's arrangement: no colouring data on disk (`n8_koester.enc.chi4+.txt` is empty; it needs 4
+  colours anyway). The file is the sparse6 of the crossing graph (40 vertices, 4-regular), neither
+  model 1 nor model 2; `scripts/crossing_graph_sequences.sage` converts it. It has 7 circles (one
+  pair does not cross), as the paper says; the file name says n8. It goes into the colourings group.
+- Paper of the colourings group: arXiv:2205.08181, title as on arXiv ("Coloring circle
+  arrangements: New 4-chromatic planar graphs"). The website names it "New 4-Vertex-Critical Planar
+  Graphs" and links arXiv:1712.02149 (the circularizability paper) by mistake.
+- Digongraphs: the page's paper link is "arxiv.org/abs/todo", so the group links only the page. The
+  files are model 1 (dual graphs) although the page says primal-dual graphs.
+- Not bundled: connected n = 6 and intersecting n = 6 (too large), biconnected n = 5 and the circle /
+  ellipse representations (coordinates, which ArrView does not use).
+
+### Interpretations (to confirm)
+
+- "Names as on the website": group titles and terms as on the website (e.g. "colorings",
+  "Digongraphs"); labels readable instead of file names, the file is under "Data:".
+- Labels, after a fresh reviewer compared with ksat-chess and ktoy ("too little vs too much"):
+  group headers without counts (they counted sets, the leaves count arrangements); leaves
+  "n = N, ..." with commas ("n = 7, 10 triangles", "n = 5, no. 2", "n = 7, Koester"), the class
+  first in the database ("Intersecting, n = 5 (278)"), the count of a list in parentheses. The
+  website's `sym*` files are "additional no. k" as in the page's section titles (Claude does not
+  know what "sym6" means exactly). Paper links short: "Triangles and Drawings (Felsner, Scheucher)".
+- The selected set shows its website / paper links only where they differ from its group's (the
+  group intro shows them once, right above); no extra "crossings coloured" line (the group says it).
+
 ## 2026-11-19: Layout implementation: classic / optimized
 
 ### Request (Manfred)
