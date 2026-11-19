@@ -379,6 +379,10 @@ class ActionsUiTest {
         val view = ViewTransform()
         val start = Examples.start.arrangement()
         show(s, view, start, DrawModel.MODEL1)
+        // a quadrangle outside (the default, the most symmetric face, is a triangle)
+        val quad = start.faces.indices.first { start.faces[it].size == 4 }
+        runOnIdle { s.makeOuterFace(quad) }
+        waitUntil(timeoutMillis = 10_000) { s.outerFace == quad }
         val d = s.currentDrawing!!
         fun markAt(f: Int): Boolean {
             // the first event of a mouse coming in is an Enter, the hover follows the moves

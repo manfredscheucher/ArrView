@@ -8,17 +8,19 @@ import kotlin.math.sqrt
 
 /** Settings of the iterated Tutte embedding. */
 data class LayoutSettings(
-    /** At most this many Tutte embeddings are computed. */
-    val maxIterations: Int = 5,
+    /** At most this many Tutte embeddings are computed (Manfred: 50; the sage programs: 100). */
+    val maxIterations: Int = 50,
     /** The iteration stops when the normalized weight vector changes by less than this. */
     val eps: Double = 1e-8,
 )
 
 /**
- * A plane graph to embed: simple [edges] (`edges[2i]`, `edges[2i + 1]`), the bounded faces as
- * vertex cycles (their areas drive the weights) and the [outer] face cycle, which is pinned on a
- * regular polygon. [areaFactor] scales the area term of the weights (draw7.sage: 1, the model 2
- * program draw3.sage: 0.001).
+ * A plane graph to embed: simple [edges] (`edges[2i]`, `edges[2i + 1]`), all faces as vertex
+ * cycles, the outer one included (sage's `G2.faces()`; their areas drive the weights), and the
+ * [outer] face cycle, which is pinned on a regular polygon. [areaFactor] scales the area term of
+ * the weights (draw7.sage: 1, the model 2 program draw3.sage: 0.001). [multiplicity] says how often
+ * an edge is listed in the weight-change vector: draw7.sage builds it over the edges of the
+ * multigraph `G`, where a digon is a double edge (model 1).
  */
 class TutteProblem(
     val vertexCount: Int,
@@ -26,6 +28,7 @@ class TutteProblem(
     val faces: List<IntArray>,
     val outer: IntArray,
     val areaFactor: Double,
+    val multiplicity: IntArray = IntArray(edges.size / 2) { 1 },
 ) {
     val edgeCount: Int get() = edges.size / 2
 }
@@ -36,14 +39,19 @@ class TutteProblem(
  * `program_py3/draw7.sage` (model 1) and `model2_program/draw3.sage` (model 2). The outer face is
  * a regular polygon on the unit circle. Iteration 1 is the plain Tutte embedding (all weights
  * equal, `1e-6`); iteration `j > 1` sets the weight of edge `uv` to
- * `w + 0.1 (|uv|^2 - w) + areaFactor * sum over the faces f of uv of (j A(f))^4`
- * from its previous weight `w` and the previous embedding. It stops when the normalized weight
- * vector changes by less than [LayoutSettings.eps] or after [LayoutSettings.maxIterations]
+ * `w + 0.1 (|uv|^4 - w) + areaFactor * sum over the two faces f of uv of (j A(f))^4`
+ * from its previous weight `w` and the previous embedding, where `A(f)` is the area of the convex
+ * hull of the face's vertices (scipy's `ConvexHull(...).volume`; the outer face counts too). It
+ * stops when the normalized weight vector changes by less than [LayoutSettings.eps] (before
+ * that embedding is computed, as the sage `break`) or after [LayoutSettings.maxIterations]
  * embeddings.
  *
  * This is the sage code, not the paper's formula `p(A(f1)) + p(A(f2)) + q(|uv| / j)` with
  * `p(x) = x^4`, `q(x) = x^2 / 10`: taken literally (outer polygon on the unit circle), that one
  * collapses faces to zero area (see doc/SPEC.md).
+ *
+ * The linear system (sage: `M.pseudoinverse() * b`) is solved with conjugate gradients, warm-started
+ * from the previous embedding; `TutteSolveTest` checks that it gives the direct solution.
  *
  * One [step] computes one embedding, so a caller can stop in between (cancellation).
  */
@@ -63,6 +71,9 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
 
     private val fixed = BooleanArray(v)
     private var weights = DoubleArray(problem.edgeCount) { INITIAL_WEIGHT }
+
+    /** The weights of the last embedding (tests). */
+    internal val currentWeights: DoubleArray get() = weights
 
     // the faces of every edge, as indices into problem.faces
     private val edgeFaces: List<IntArray>
@@ -116,28 +127,24 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
 
     /** The weights of iteration [j] from the previous weights and the current embedding. */
     private fun nextWeights(j: Int): DoubleArray {
-        val areas = DoubleArray(problem.faces.size) { f -> abs(signedArea(problem.faces[f])) }
+        val areas = DoubleArray(problem.faces.size) { f -> convexHullArea(problem.faces[f]) }
         val w = DoubleArray(problem.edgeCount) { e ->
             val a = edges[2 * e]
             val b = edges[2 * e + 1]
             val dx = positions[2 * a] - positions[2 * b]
             val dy = positions[2 * a + 1] - positions[2 * b + 1]
-            var sum = weights[e] + SMOOTHING * (dx * dx + dy * dy - weights[e])
+            // sage: mypoly(dist2(u, v)) with mypoly(x) = x^2 and dist2 the squared length
+            val dist2 = dx * dx + dy * dy
+            var sum = weights[e] + SMOOTHING * (dist2 * dist2 - weights[e])
             for (f in edgeFaces[e]) sum += problem.areaFactor * fourth(j * areas[f])
             sum
         }
-        return guarded(w)
+        return w
     }
 
-    private fun signedArea(cycle: IntArray): Double {
-        var s = 0.0
-        for (i in cycle.indices) {
-            val a = cycle[i]
-            val b = cycle[(i + 1) % cycle.size]
-            s += positions[2 * a] * positions[2 * b + 1] - positions[2 * b] * positions[2 * a + 1]
-        }
-        return s / 2
-    }
+    /** Area of the convex hull of the vertices of [cycle] (0 if they are collinear, where scipy raises and sage skips the face). */
+    private fun convexHullArea(cycle: IntArray): Double =
+        convexHullArea(cycle.map { Point(positions[2 * it], positions[2 * it + 1]) })
 
     /**
      * Solves the Tutte system (every free vertex at the weighted barycentre of its neighbours)
@@ -216,36 +223,56 @@ class IteratedTutte(private val problem: TutteProblem, private val settings: Lay
     }
 
     private companion object {
-        const val CG_TOLERANCE = 1e-10
-
-        /** Weights below this fraction of the largest one are raised to it (keeps the system regular). */
-        const val MIN_RELATIVE_WEIGHT = 1e-12
+        const val CG_TOLERANCE = 1e-13
 
         /** Weights of the first (plain) embedding. */
         const val INITIAL_WEIGHT = 1e-6
 
-        /** How fast a weight follows the squared edge length. */
+        /** How fast a weight follows `|uv|^4` (sage's `eps = 0.1`). */
         const val SMOOTHING = 0.1
 
         fun fourth(x: Double) = x * x * x * x
-
-        /** Non-finite weights become the largest finite one; tiny ones are raised (see [MIN_RELATIVE_WEIGHT]). */
-        fun guarded(w: DoubleArray): DoubleArray {
-            val max = w.filter { it.isFinite() }.maxOrNull() ?: 0.0
-            if (max <= 0.0) return DoubleArray(w.size) { 1.0 }
-            return DoubleArray(w.size) { i -> if (w[i].isFinite()) w[i].coerceAtLeast(max * MIN_RELATIVE_WEIGHT) else max }
-        }
-
-        /** `|w0 / |w0| - w1 / |w1||`, as in draw7.sage. */
-        fun weightChange(w0: DoubleArray, w1: DoubleArray): Double {
-            val n0 = sqrt(w0.sumOf { it * it })
-            val n1 = sqrt(w1.sumOf { it * it })
-            var s = 0.0
-            for (i in w0.indices) {
-                val d = w0[i] / n0 - w1[i] / n1
-                s += d * d
-            }
-            return sqrt(s)
-        }
     }
+
+    /** `|w0 / |w0| - w1 / |w1||` over the edges with their [TutteProblem.multiplicity], as in draw7.sage. */
+    private fun weightChange(w0: DoubleArray, w1: DoubleArray): Double {
+        val m = problem.multiplicity
+        var n0 = 0.0
+        var n1 = 0.0
+        for (i in w0.indices) {
+            n0 += m[i] * w0[i] * w0[i]
+            n1 += m[i] * w1[i] * w1[i]
+        }
+        n0 = sqrt(n0)
+        n1 = sqrt(n1)
+        var s = 0.0
+        for (i in w0.indices) {
+            val d = w0[i] / n0 - w1[i] / n1
+            s += m[i] * d * d
+        }
+        return sqrt(s)
+    }
+}
+
+/** Area of the convex hull of [points] (Andrew's monotone chain); 0 for fewer than 3 points or collinear ones. */
+fun convexHullArea(points: List<Point>): Double {
+    val pts = points.distinct().sortedWith(compareBy({ it.x }, { it.y }))
+    if (pts.size < 3) return 0.0
+    fun cross(o: Point, a: Point, b: Point) = (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+    val hull = ArrayList<Point>()
+    for (pass in 0..1) {
+        val start = hull.size
+        for (p in if (pass == 0) pts else pts.asReversed()) {
+            while (hull.size >= start + 2 && cross(hull[hull.size - 2], hull[hull.size - 1], p) <= 0) hull.removeAt(hull.size - 1)
+            hull.add(p)
+        }
+        hull.removeAt(hull.size - 1)
+    }
+    var s = 0.0
+    for (i in hull.indices) {
+        val a = hull[i]
+        val b = hull[(i + 1) % hull.size]
+        s += a.x * b.y - b.x * a.y
+    }
+    return abs(s) / 2
 }

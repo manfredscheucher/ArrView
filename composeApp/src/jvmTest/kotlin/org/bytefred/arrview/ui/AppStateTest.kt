@@ -68,9 +68,14 @@ class AppStateTest {
     @Test
     fun clickOnTheOuterFaceOrAQuadrangleDoesNothing() {
         val s = state()
+        // a quadrangle drawn outside (the default outer face, the most symmetric one, is a triangle)
+        s.makeOuterFace(start.faces.indices.first { start.faces[it].size == 4 })
+        s.settle()
         s.clickFace(assertNotNull(s.outerFace))
         s.clickFace(start.faces.indices.first { start.faces[it].size == 4 && it != s.outerFace })
         assertEquals(start, s.arrangement)
+        // only Make outer face is undoable
+        s.undo()
         assertFalse(s.canUndo)
     }
 

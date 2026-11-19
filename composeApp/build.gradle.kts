@@ -291,4 +291,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
 // the JVM tests use a fresh in-memory preference store (Prefs.jvm.kt), never the real desktop one
 tasks.withType<Test>().configureEach {
     systemProperty("arrview.prefs", "memory")
+    // the full drawing sweep takes minutes: only with -PfullSweep
+    if (!project.hasProperty("fullSweep")) filter.excludeTestsMatching("*.DrawingFullSweepTest")
 }

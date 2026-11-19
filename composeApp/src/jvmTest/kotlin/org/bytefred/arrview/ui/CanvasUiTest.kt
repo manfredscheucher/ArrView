@@ -18,8 +18,8 @@ import org.bytefred.arrview.core.triangleFlip
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 /** The real app driven by clicks: header, toolbar status, and faces on the canvas. */
 @OptIn(ExperimentalTestApi::class)
@@ -78,6 +78,10 @@ class CanvasUiTest {
         waitUntil(timeoutMillis = 10_000) { s.outerFace == f }
         assertNotEquals(d.outerFace, f)
         assertEquals(start, s.arrangement, "only the view changed")
-        assertFalse(s.canUndo, "the outer face is no undo step")
+        // an undo step (Manfred, 2026-11-19)
+        assertTrue(s.canUndo, "the outer face is an undo step")
+        onNodeWithTag("menu-Edit").performClick()
+        onNodeWithText("Undo").performClick()
+        waitUntil(timeoutMillis = 10_000) { s.outerFace == d.outerFace }
     }
 }
