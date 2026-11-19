@@ -2,6 +2,89 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-19: UI overhaul
+
+### Request (Manfred)
+
+UI as slim as possible but understandable. Model 2 is the default and is chosen only in Settings;
+model 1 is legacy and asks first; widgets renamed and merged; explanations into (i) popovers; a Help
+page on the three graphs; a limit of open widgets; PoCoView's notice for files with several
+arrangements; a note instead of a crash when the browser has no WebGL.
+
+### Decisions (as implemented)
+
+1. Model 2 is the default (`AppState.preferredModel`, Reset). The toolbar's "Drawing: Model 1 /
+   Model 2" chips and the View menu's model items are gone. Settings, Layout: dropdown
+   "Visualization" with "Model 2: primal-dual graph" and "Model 1: primal graph (legacy)"
+   (`DrawModel.option`); the (i) next to it opens Help > Visualization. The toolbar label "Widgets"
+   stays.
+2. Choosing model 1 (`AppState.chooseModel`): dialog "Model 1", "Model 1 is the legacy view. It can
+   only show intersecting arrangements.", "Do not show again", OK / Cancel; OK switches. Not
+   intersecting (`hasModel1` false: some pair does not cross, or n = 2): the dialog always shows,
+   "Model 1 can only show intersecting arrangements. This arrangement is not intersecting.", only OK,
+   model 2 stays. Arrangements with digons are intersecting and allowed.
+3. Whenever model 1 is chosen and the next arrangement has no model 1 (digon collapse, load, import,
+   open file, example, set step, undo, redo, applied text): dialog "The arrangement is no longer
+   intersecting. Switching to model 2." with "Do not show again" and OK; the change waits for OK,
+   then model 2 is chosen (stays chosen, also after undo) and the change is done; suppressed:
+   silently. Both flags are stored with the other settings (`model1Confirm`, `model1Fallback`, "off"
+   once ticked; localStorage on the web, Java preferences on the desktop).
+4. Widgets "Triangle hypergraph" -> "Triangles", "Intersection graph" -> "Intersections" (chips,
+   titles, View menu, Help, user guide, tests; `Widget.TRIANGLES`, `Widget.INTERSECTIONS`). Stored ids
+   of the old names still open the new widgets.
+5. "Sequences" merged into "Encoding": sequences, then model 1 sparse6, then model 2 sparse6, each
+   heading with an (i) (`SEQUENCES_INFO`, `MODEL1_INFO`, `MODEL2_INFO`), checked against the code and
+   the website's information page (see "Decisions to confirm").
+6. Help page "Visualization" (Help menu after General, and the (i) of Visualization): the primal,
+   dual and primal-dual graph, each a figure drawn in the app (`HelpFigures.kt`: the start example
+   n6-digonfree-nonr-8-triangles in model 2 with faint curves and the graph on top: primal = crossings
+   and arcs; dual = a dot per cell, an edge through every arc between its two cells; primal-dual =
+   crossing (black), arc (green) and cell (blue) vertices with their incidence edges), then one
+   paragraph each on model 1, model 2 and the iteration, then the two Felsner-Scheucher papers and the
+   website's information page.
+7. Settings: the Layout note is an (i) after the heading (`LAYOUT_INFO`: two sentences and the
+   papers). eps is no longer in the GUI and no longer stored (stays in `LayoutSettings` with its
+   default). Max. iterations stays. No "Implementation" dropdown.
+8. At most 2 widgets are open by default; opening one more closes the one opened first
+   (`AppState.maxColumns`, PoCoView's setting; PoCoView closes the least recently clicked one, ArrView
+   the oldest, as asked). Settings, group "Widgets": "Max. widgets: 2" with - / +
+   (1 .. number of widgets), PoCoView's wording; lowering it closes the oldest; stored as
+   `maxWidgets`; Reset sets 2.
+9. GUI texts: the Layout note and the Encoding explanations went into (i) popovers (`InfoButton`);
+   Help General's model paragraph became two sentences pointing to Help > Visualization; Help >
+   Widgets lost the model description and eps in its Settings paragraph; "Save changes?" names the
+   Encoding widget; Help General's examples sentence describes the examples by purpose. Toolbar,
+   status line and the other dialogs had no explanation longer than one short sentence (the Welcome
+   text is Manfred's wording, unchanged).
+10. Sets notice (PoCoView's `SetsLoadedDialog`, ported): after loading a file or example set with
+   several arrangements: "k arrangements loaded", "Showing the first of k. Switch between them with
+   the arrows < > at the top (or PageUp / PageDown)." ("arrangement i" when another member is shown),
+   "Don't show again" (stored `setsNotice`), OK.
+11. Web (Chrome crash "reading 'getParameter'": Skiko gets no WebGL context, e.g. hardware
+   acceleration off; reproduced with `--disable-webgl`): `index.html` tests
+   `getContext('webgl2') || getContext('webgl')` before it loads the app; without WebGL it shows
+   "ArrView needs WebGL. Turn on hardware acceleration in the browser settings (Chrome: Settings ->
+   System -> Use graphics acceleration) and reload." The error handler maps the getParameter crash to
+   the same note. Same change in PoCoView, ktoy, ksat-chess and the ksat-extra playground.
+
+### Decisions to confirm
+
+- The sequences (i): the draft said "the outer face fixes the orientation; + entered, - left". In
+  the code the sign belongs to the circles' own orientation (from the input), not to the outer face:
+  +j means circle j crosses from the right of circle i to its left. The (i) says that.
+- The model 2 (i) says what the code writes: arc-crossing and arc-cell edges (no crossing-cell
+  edges) and a leaf at every cell vertex. The model 1 (i) points to the website's information page.
+- The switch-to-model-2 notice is titled "Model 2"; a click outside it counts as OK (it has no
+  Cancel); a click outside the model 1 dialog counts as Cancel.
+- The WebGL probe accepts webgl as well as webgl2 (as asked); Skiko asks for webgl2 only, so a
+  browser with WebGL 1 only still crashes, then the error handler shows the note.
+- Checkbox labels: "Do not show again" in the model dialogs (Manfred's wording), "Don't show again" in
+  the Welcome dialog and the sets notice (as before / as in PoCoView). Unify?
+- Not done (reviewer suggestions, not asked for): clickable links for the papers and the information
+  page on Help > Visualization; merging the duplicate digon-create paragraphs of Help General.
+- The figures leave out the outer cell's vertex (dual and primal-dual: stubs), as the model 2
+  drawing does.
+
 ## 2026-11-19: Examples by purpose
 
 ### Request (Manfred, via the coordinator)
