@@ -95,8 +95,8 @@ class RenderTest {
         // an edited draft
         all.editDraft(TextFormat.SEQUENCES, "{1: [2, -2], 2: [1]}")
         all.openWidgets.clear()
-        all.openWidgets.add(Widget.SEQUENCES)
-        render(all, w = 420, h = 860, file = "widget-sequences-portrait.png")
+        all.openWidgets.add(Widget.ENCODING)
+        render(all, w = 420, h = 860, file = "widget-encoding-portrait.png")
     }
 
     @Test

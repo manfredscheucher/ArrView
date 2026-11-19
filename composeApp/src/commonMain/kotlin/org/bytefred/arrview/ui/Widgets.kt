@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -73,6 +74,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.crosses
 import org.bytefred.arrview.core.intersectionGraph
@@ -93,10 +95,9 @@ fun WidgetContent(state: AppState, w: Widget) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         when (w) {
             Widget.PROPERTIES -> PropertiesWidget(state)
-            Widget.SEQUENCES -> SequencesWidget(state)
             Widget.ENCODING -> EncodingWidget(state)
-            Widget.INTERSECTION_GRAPH -> IntersectionGraphWidget(state)
-            Widget.TRIANGLE_HYPERGRAPH -> TriangleHypergraphWidget(state)
+            Widget.INTERSECTIONS -> IntersectionsWidget(state)
+            Widget.TRIANGLES -> TrianglesWidget(state)
             Widget.SETTINGS -> SettingsWidget(state)
         }
     }
@@ -155,17 +156,17 @@ private fun BigNumber(symbol: String, name: String, value: Int, modifier: Modifi
     }
 }
 
-/** The intersection sequences, one line per circle, editable. */
-@Composable
-private fun SequencesWidget(state: AppState) {
-    DraftEditor(state, TextFormat.SEQUENCES, wrap = false)
-}
-
-/** Model 1 (if intersecting) and model 2 sparse6, editable, with Copy. */
+/**
+ * The three texts of the arrangement, editable: the sequences (one line per circle), model 1 sparse6
+ * (if intersecting) and model 2 sparse6, each with an (i) saying what it encodes; the sparse6 strings
+ * with Copy.
+ */
 @Composable
 private fun EncodingWidget(state: AppState) {
     val arr = state.arrangement
-    Heading(TextFormat.MODEL1.label)
+    EncodingHeading(TextFormat.SEQUENCES, SEQUENCES_INFO)
+    DraftEditor(state, TextFormat.SEQUENCES, wrap = false)
+    EncodingHeading(TextFormat.MODEL1, MODEL1_INFO)
     if (!arr.isIntersecting) {
         val (c, d) = remember(arr) { (0 until arr.n).flatMap { c -> (c + 1 until arr.n).map { c to it } }.first { (c, d) -> !arr.crosses(c, d) } }
         Text(
@@ -175,9 +176,27 @@ private fun EncodingWidget(state: AppState) {
     }
     // an edit made while it was intersecting stays until applied or reverted
     if (arr.isIntersecting || TextFormat.MODEL1 in state.drafts) DraftEditor(state, TextFormat.MODEL1, wrap = true, copy = true)
-    Heading(TextFormat.MODEL2.label)
+    EncodingHeading(TextFormat.MODEL2, MODEL2_INFO)
     DraftEditor(state, TextFormat.MODEL2, wrap = true, copy = true)
 }
+
+/** The heading of one encoding with its (i). */
+@Composable
+private fun EncodingHeading(format: TextFormat, info: String) = Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Text(format.label, style = MaterialTheme.typography.titleSmall)
+    InfoButton(info, format.name)
+}
+
+/** What the sequences encode (the (i) in the Encoding widget); the sign as in Arrangement and the Formats page. */
+internal const val SEQUENCES_INFO = "For each circle, the order of its crossings with the other circles along its " +
+    "orientation: +j where circle j crosses from the right of this circle to its left, -j the other way; so +j in " +
+    "list i and -i in list j are the same crossing."
+
+internal const val MODEL1_INFO = "The dual graph of the arrangement: a vertex per cell, an edge per arc, encoded as sparse6 " +
+    "(website format mod1s6 / enc, see the information page of the pseudocircles website)."
+
+internal const val MODEL2_INFO = "The primal-dual graph: a vertex per crossing, arc and cell, an edge where an arc meets a " +
+    "crossing or a cell, and a leaf at every cell vertex; sparse6 (website format mod2s6)."
 
 /**
  * The [format] text of the arrangement, editable, with Apply and Revert (PoCoView's Data widget
@@ -257,7 +276,7 @@ internal fun segmentDistance(p: Offset, a: Offset, b: Offset): Float {
  * or opens a menu of the cells.
  */
 @Composable
-private fun IntersectionGraphWidget(state: AppState) {
+private fun IntersectionsWidget(state: AppState) {
     val arr = state.arrangement
     val edges = remember(arr) { arr.intersectionGraph() }
     val actions = state.actions
@@ -446,7 +465,7 @@ internal fun possibleList(what: String, entries: List<Pair<List<Int>, Int>>): St
  * pointer, or opens a menu if there are several.
  */
 @Composable
-private fun TriangleHypergraphWidget(state: AppState) {
+private fun TrianglesWidget(state: AppState) {
     val arr = state.arrangement
     val actions = state.actions
     val triples = actions.triples
@@ -534,13 +553,14 @@ private val HYPEREDGE_LINE = Color(0x66FB8C00)
 private val GRAPH_SIZE = 240.dp
 
 /**
- * Display (colour scheme, line width) and Layout (model, max. iterations, eps), each under a
- * heading as PoCoView's widget subgroups, and one Reset to defaults for all of it.
+ * Display (colour scheme, line width), Widgets (how many are open) and Layout (visualization, max.
+ * iterations), each under a heading as PoCoView's widget subgroups, and one Reset to defaults for
+ * all of it. The explanations are behind (i) icons.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SettingsWidget(state: AppState) {
     val settings = state.layoutSettings
+    val openDialog = LocalOpenDialog.current
     Text("Display", style = MaterialTheme.typography.titleSmall)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Colour scheme", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
@@ -552,9 +572,30 @@ private fun SettingsWidget(state: AppState) {
     Slider(state.lineWidth, { state.lineWidth = it }, valueRange = AppState.LINE_WIDTH_RANGE, modifier = Modifier.testTag("line-width"))
 
     Spacer(Modifier.height(12.dp))
-    Text("Layout", style = MaterialTheme.typography.titleSmall)
-    Text(LAYOUT_NOTE, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ModelChips(state) }
+    Text("Widgets", style = MaterialTheme.typography.titleSmall)
+    // PoCoView's Max. widgets row
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Max. widgets: ${state.maxColumns}", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        TextButton(onClick = { state.changeMaxColumns(state.maxColumns - 1) }, enabled = state.maxColumns > 1, modifier = Modifier.testTag("max-widgets-minus")) { Text("-") }
+        TextButton(onClick = { state.changeMaxColumns(state.maxColumns + 1) }, enabled = state.maxColumns < Widget.entries.size, modifier = Modifier.testTag("max-widgets-plus")) { Text("+") }
+    }
+
+    Spacer(Modifier.height(12.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Layout", style = MaterialTheme.typography.titleSmall)
+        InfoButton(LAYOUT_INFO, "layout")
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Visualization", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        // the Help page on the three graphs and the two models
+        InfoIcon("visualization") {
+            state.helpPage = HelpPage.VISUALIZATION
+            openDialog(DialogKind.HELP)
+        }
+    }
+    SelectField(null, state.preferredModel.option, DrawModel.entries, { it.option }, Modifier.fillMaxWidth().testTag("visualization")) {
+        state.chooseModel(it)
+    }
     fun iterations(n: Int) = state.changeLayoutSettings(state.layoutSettings.copy(maxIterations = n))
     SettingRow("Max. iterations") {
         CompactNumberField(
@@ -562,12 +603,6 @@ private fun SettingsWidget(state: AppState) {
             ITERATION_CHARS, "max-iterations",
             Steppers({ iterations(settings.maxIterations - 1) }, settings.maxIterations > 1, { iterations(settings.maxIterations + 1) }, true),
         ) { n -> if (n != null) iterations(n) }
-    }
-    SettingRow("eps") {
-        CompactNumberField(
-            state, epsText(settings.eps), { it.toDoubleOrNull()?.takeIf { e -> e.isFinite() && e > 0.0 } }, "a positive number",
-            MAX_FIELD_LENGTH, "eps",
-        ) { e -> if (e != null) state.changeLayoutSettings(state.layoutSettings.copy(eps = e)) }
     }
     Spacer(Modifier.height(8.dp))
     OutlinedButton(onClick = state::resetSettings) { Text("Reset to defaults") }
@@ -585,10 +620,10 @@ private fun SettingRow(label: String, control: @Composable () -> Unit) {
 /** Max. iterations has no upper bound; the field is wide enough for 6 digits (longer text scrolls). */
 private const val ITERATION_CHARS = 6
 
-/** Below the Layout heading of the Settings widget. */
-internal const val LAYOUT_NOTE = "Parameters of the drawing only (iterated Tutte embedding); they do not change the " +
-    "arrangement. Model 1 draws the crossings as in Felsner-Scheucher, Triangles and Drawings; Model 2 the " +
-    "primal-dual graph as in Felsner-Scheucher, On Circularizability (see About)."
+/** The (i) of the Layout group of the Settings widget. */
+internal const val LAYOUT_INFO = "Parameters of the drawing only; they do not change the arrangement. The drawing is the " +
+    "iterated weighted Tutte embedding of Felsner and Scheucher (Arrangements of Pseudocircles: Triangles and Drawings, " +
+    "DCG 2021, Section 4; On Circularizability, DCG 2020)."
 
 /** [v] with one decimal, the same on the JVM and the web (where 3.0 prints as "3"). */
 internal fun oneDecimal(v: Float): String {

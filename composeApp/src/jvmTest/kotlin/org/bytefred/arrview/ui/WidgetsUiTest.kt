@@ -38,7 +38,7 @@ class WidgetsUiTest {
     fun editSequencesApplyValidAndInvalid() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        onNodeWithText("Sequences").performClick()
+        onNodeWithText("Encoding").performClick()
         val editor = onNodeWithTag("editor-SEQUENCES")
         assertEquals(start.n, editor.text()!!.lines().size)
         onNodeWithTag("apply-SEQUENCES").assertIsNotEnabled()
@@ -88,7 +88,7 @@ class WidgetsUiTest {
     fun intersectionGraphEdgeCount() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        onNodeWithText("Intersection graph").performClick()
+        onNodeWithText("Intersections").performClick()
         onNodeWithTag("intersection-graph").assertIsDisplayed()
         assertEquals("15 of 15 pairs cross", onNodeWithTag("intersection-graph-count").text())
         val set = Examples.byName("n5-connected-all")!!
@@ -103,9 +103,8 @@ class WidgetsUiTest {
         setContent { App(s, initialDialog = DialogKind.NONE) }
         onNodeWithText("Settings").performClick()
         onNodeWithTag("max-iterations").performTextReplacement("25")
-        onNodeWithTag("eps").performTextReplacement("1e-5")
         waitForIdle()
-        assertEquals(LayoutSettings(25, 1e-5), s.layoutSettings)
+        assertEquals(LayoutSettings(25), s.layoutSettings)
         // invalid input is not taken over
         onNodeWithTag("max-iterations").performTextReplacement("0")
         onNodeWithText("at least 1").assertIsDisplayed()
@@ -114,6 +113,5 @@ class WidgetsUiTest {
         waitForIdle()
         assertEquals(LayoutSettings(), s.layoutSettings)
         assertEquals("50", onNodeWithTag("max-iterations").text())
-        assertEquals("1e-8", onNodeWithTag("eps").text())
     }
 }

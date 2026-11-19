@@ -16,14 +16,21 @@ internal const val LAYOUT_PREF = "layout"
 internal const val OPEN_WIDGETS_PREF = "openWidgets"
 internal const val WIDE_WEIGHTS_PREF = "wideWeights"
 internal const val STACKED_WEIGHTS_PREF = "stackedWeights"
+internal const val MAX_WIDGETS_PREF = "maxWidgets"
 internal const val MODEL_PREF = "model"
 internal const val MAX_ITERATIONS_PREF = "maxIterations"
-internal const val EPS_PREF = "eps"
 internal const val COLOR_SCHEME_PREF = "colorScheme"
 internal const val LINE_WIDTH_PREF = "lineWidth"
 
 /** "off" once "Don't show again" was ticked in the Welcome dialog. */
 const val WELCOME_PREF = "welcome"
+
+/** "off" once "Don't show again" was ticked in the notice after loading several arrangements (PoCoView's). */
+internal const val SETS_NOTICE_PREF = "setsNotice"
+
+/** "off" once "Do not show again" was ticked in the model 1 dialog / the switch to model 2 notice. */
+internal const val MODEL1_CONFIRM_PREF = "model1Confirm"
+internal const val MODEL1_FALLBACK_PREF = "model1Fallback"
 
 // stored values are checked: anything unreadable gives the default (null) or is clamped, so a
 // corrupt store can never break the GUI

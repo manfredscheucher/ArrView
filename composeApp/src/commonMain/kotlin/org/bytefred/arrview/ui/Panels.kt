@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,10 +23,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import org.bytefred.arrview.core.DrawModel
-import org.bytefred.arrview.core.hasModel1
 
-/** The row below the menu bar: the drawing model, the widget toggles and the status at the right. */
+/** The row below the menu bar: the widget toggles and the status at the right. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ToolBar(state: AppState) {
@@ -36,9 +32,6 @@ fun ToolBar(state: AppState) {
         Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        ToolbarLabel("Drawing")
-        ModelChips(state)
-        VerticalDivider(Modifier.height(32.dp).align(Alignment.CenterVertically).padding(horizontal = 4.dp))
         ToolbarLabel("Widgets")
         for (w in Widget.entries) FilterChip(
             selected = w in state.openWidgets, onClick = { state.toggleWidget(w) },
@@ -52,17 +45,6 @@ fun ToolBar(state: AppState) {
         }
         ToolbarStatus(state)
     }
-}
-
-/** Model 1 / Model 2 (toolbar, Settings widget); model 1 only where it exists. */
-@Composable
-fun ModelChips(state: AppState) {
-    for (m in DrawModel.entries) FilterChip(
-        selected = state.model == m,
-        onClick = { state.changeModel(m) },
-        enabled = m == DrawModel.MODEL2 || state.arrangement.hasModel1,
-        label = { Text(m.label) },
-    )
 }
 
 /**

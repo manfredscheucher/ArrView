@@ -405,7 +405,8 @@ class ActionsUiTest {
         assertEquals(0, markPixels())
         // a face with a digon create
         val (arr, f) = withCreateFace { it == 1 }
-        runOnIdle { s.load("test", arr); s.changeModel(DrawModel.MODEL2) }
+        // model 2 first: in model 1 the load of a non-intersecting arrangement waits for the switch notice
+        runOnIdle { s.changeModel(DrawModel.MODEL2); s.load("test", arr) }
         awaitFitted(s, view)
         val d2 = s.currentDrawing!!
         onNodeWithTag("canvas").performMouseInput { moveTo(view.at(d2, f) - Offset(1f, 0f)); moveTo(view.at(d2, f)) }
@@ -427,7 +428,7 @@ class ActionsUiTest {
     fun graphMenuOfCellsWithSubmenus() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, pool.first(), widget = Widget.INTERSECTIONS)
         val size = graphSize("intersection-graph")
         // a pair with several cells, one of them with several options, whose cells along circle i
         // are not in face order (so the menu order really comes from the ordering)
@@ -472,7 +473,7 @@ class ActionsUiTest {
     fun graphMenuOfOneCellShowsItsOptions() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, pool.first(), widget = Widget.INTERSECTIONS)
         val size = graphSize("intersection-graph")
         val (arr, pair, at) = findPair(size) { a, i, j -> a.createsOf(i, j).size >= 2 && a.createsOf(i, j).map { it.face }.toSet().size == 1 }
         runOnIdle { s.load("test", arr) }
@@ -494,7 +495,7 @@ class ActionsUiTest {
         val s = state()
         val view = ViewTransform()
         val start = Examples.start.arrangement()
-        show(s, view, start, widget = Widget.TRIANGLE_HYPERGRAPH)
+        show(s, view, start, widget = Widget.TRIANGLES)
         val size = graphSize("triangle-hypergraph")
         val at = assertNotNull(hyperPoint(start, size) { hits, _ -> hits.size >= 2 })
         assertEquals("${start.triangleCount} triangles on ${s.actions.triples.size} triples", onNodeWithTag("triangle-hypergraph-count").text())
@@ -528,7 +529,7 @@ class ActionsUiTest {
         val krupp = Arrangement.krupp()
         val s = state()
         val view = ViewTransform()
-        show(s, view, krupp, widget = Widget.TRIANGLE_HYPERGRAPH)
+        show(s, view, krupp, widget = Widget.TRIANGLES)
         val size = graphSize("triangle-hypergraph")
         val circle = with(density) { vertexCircle(3, size) }
         onNodeWithTag("triangle-hypergraph").performMouseInput { click((circle.at(0) + circle.at(1) + circle.at(2)) / 3f) }
@@ -557,8 +558,8 @@ class ActionsUiTest {
         val star = Arrangement.parse("{1: [2, -2, 3, -3, 4, -4, 5, -5], 2: [-1, 1], 3: [-1, 1], 4: [-1, 1], 5: [-1, 1]}")
         val s = state()
         val view = ViewTransform()
-        show(s, view, star, widget = Widget.INTERSECTION_GRAPH)
-        runOnIdle { s.toggleWidget(Widget.TRIANGLE_HYPERGRAPH) }
+        show(s, view, star, widget = Widget.INTERSECTIONS)
+        runOnIdle { s.toggleWidget(Widget.TRIANGLES) }
         waitForIdle()
         assertEquals("possible digon creates (6): 2 3 (x2), 2 4 (x2), 2 5 (x2), 3 4 (x2), 3 5 (x2), 4 5 (x2)", onNodeWithTag("possible-creates").text())
         assertEquals("possible digon collapses (0): none", onNodeWithTag("possible-collapses").text())
@@ -596,7 +597,7 @@ class ActionsUiTest {
         val view = ViewTransform()
         // a unique create and a collapse: an arrangement with a create pair of one option and a collapsible digon
         val arr = candidates.first { a -> CellActions(a).let { x -> x.createPairs.any { it.second == 1 } && x.collapsePairs.isNotEmpty() } }
-        show(s, view, arr, widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, arr, widget = Widget.INTERSECTIONS)
         val a = s.actions
         val (single, _) = a.createPairs.first { it.second == 1 }
         entry("possible-creates", single).assertExists()
@@ -624,7 +625,7 @@ class ActionsUiTest {
         val star = Arrangement.parse("{1: [2, -2, 3, -3, 4, -4, 5, -5], 2: [-1, 1], 3: [-1, 1], 4: [-1, 1], 5: [-1, 1]}")
         val s = state()
         val view = ViewTransform()
-        show(s, view, star, widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, star, widget = Widget.INTERSECTIONS)
         onNodeWithTag("possible-creates-2-3").assertExists()
         assertEquals("2 3 (x2)", onNodeWithTag("possible-creates-2-3").text())
         onNodeWithTag("possible-creates-2-3").performMouseInput { click(center) }
@@ -657,7 +658,7 @@ class ActionsUiTest {
         val view = ViewTransform()
         // a triple with one triangle flips directly
         val arr = candidates.first { a -> CellActions(a).triangleTriples.any { it.second == 1 } }
-        show(s, view, arr, widget = Widget.TRIANGLE_HYPERGRAPH)
+        show(s, view, arr, widget = Widget.TRIANGLES)
         val (t, _) = s.actions.triangleTriples.first { it.second == 1 }
         entry("possible-flips", t).performMouseInput { moveTo(center) }
         waitForIdle()
@@ -689,7 +690,7 @@ class ActionsUiTest {
     fun graphClickOnAUniquePairFlipsIt() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, pool.first(), widget = Widget.INTERSECTIONS)
         val size = graphSize("intersection-graph")
         for (creates in listOf(true, false)) {
             val (arr, pair, at) = findPair(size, { it == 1 }, creates)
@@ -709,7 +710,7 @@ class ActionsUiTest {
     fun stripesAreTwiceAsStrongForAmbiguousPairs() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view, pool.first(), widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, pool.first(), widget = Widget.INTERSECTIONS)
         val size = graphSize("intersection-graph")
         // an arrangement with a unique and an ambiguous pair, both with a clean point on the edge
         val (arr, points) = pool.firstNotNullOf { a ->
@@ -740,7 +741,7 @@ class ActionsUiTest {
         // two circles: both collapses are refused, so nothing is striped and a click does nothing
         val s = state()
         val view = ViewTransform()
-        show(s, view, Arrangement.two(), widget = Widget.INTERSECTION_GRAPH)
+        show(s, view, Arrangement.two(), widget = Widget.INTERSECTIONS)
         val size = graphSize("intersection-graph")
         val circle = with(density) { vertexCircle(2, size) }
         onNodeWithTag("intersection-graph").performMouseInput { click((circle.at(0) + circle.at(1)) / 2f) }
@@ -771,7 +772,7 @@ class ActionsUiTest {
     fun hypergraphClickOnASingleTriangleFlipsIt() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view, Examples.start.arrangement(), widget = Widget.TRIANGLE_HYPERGRAPH)
+        show(s, view, Examples.start.arrangement(), widget = Widget.TRIANGLES)
         val size = graphSize("triangle-hypergraph")
         val (arr, at) = (listOf(Examples.start.arrangement()) + pool).firstNotNullOf { a ->
             hyperPoint(a, size) { hits, triples -> hits.size == 1 && triples.getValue(hits[0]).size == 1 }?.let { a to it }

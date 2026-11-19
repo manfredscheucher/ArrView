@@ -87,7 +87,7 @@ class EditingSessionTest {
                 if (s.arrangement != arr) history.add(s.arrangement)
                 assertNull(LinhartOrtner.check(s.arrangement.lists), name)
                 assertEquals(loaded.n, s.arrangement.n)
-                assertEquals(if (s.arrangement.hasModel1) DrawModel.MODEL1 else DrawModel.MODEL2, s.model, name)
+                assertEquals(DrawModel.MODEL2, s.model, name)
                 assertEquals(if (s.arrangement == loaded) name else "$name (modified)", s.title)
             }
             // where every collapse would disconnect the arrangement, most steps are refused
@@ -126,14 +126,20 @@ class EditingSessionTest {
         s.changeModel(DrawModel.MODEL1)
         s.settle()
         assertEquals(DrawModel.MODEL1, s.currentDrawing?.model)
-        // a collapse leaves model 1 (not intersecting); the choice comes back with undo
+        // a collapse leaves model 1 (not intersecting): after OK in the notice model 2 is chosen,
+        // and stays after undo
+        val before = s.arrangement
         s.collapseDigon(s.arrangement.faces.indices.first { s.arrangement.faces[it].size == 2 })
+        assertTrue(s.modelDialog is ModelDialog.Fallback)
+        assertEquals(before, s.arrangement, "the collapse waits for OK")
+        s.confirmModelDialog()
         s.settle()
         assertEquals(DrawModel.MODEL2, s.currentDrawing?.model)
-        assertEquals(DrawModel.MODEL1, s.preferredModel)
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
         s.undo()
         s.settle()
-        assertEquals(DrawModel.MODEL1, s.currentDrawing?.model)
+        assertEquals(before, s.arrangement)
+        assertEquals(DrawModel.MODEL2, s.currentDrawing?.model)
     }
 
     @Test
@@ -231,16 +237,16 @@ class EditingSessionTest {
     fun widgetsDividersAndLayoutModeAreRemembered() {
         val s = state()
         s.openWidgets.clear()
-        s.openWidgets.addAll(listOf(Widget.SETTINGS, Widget.SEQUENCES))
+        s.openWidgets.addAll(listOf(Widget.SETTINGS, Widget.ENCODING))
         s.layoutMode = LayoutMode.PORTRAIT
         s.wideWeights = mapOf(null to 3f, Widget.SETTINGS to 1.5f)
-        s.stackedWeights = mapOf(null to 1f, Widget.SEQUENCES to 0.5f)
+        s.stackedWeights = mapOf(null to 1f, Widget.ENCODING to 0.5f)
         s.saveDisplayPrefs()
         val t = state()
-        assertEquals(listOf(Widget.SETTINGS, Widget.SEQUENCES), t.openWidgets.toList())
+        assertEquals(listOf(Widget.SETTINGS, Widget.ENCODING), t.openWidgets.toList())
         assertEquals(LayoutMode.PORTRAIT, t.layoutMode)
         assertEquals(mapOf(null to 3f, Widget.SETTINGS to 1.5f), t.wideWeights)
-        assertEquals(mapOf(null to 1f, Widget.SEQUENCES to 0.5f), t.stackedWeights)
+        assertEquals(mapOf(null to 1f, Widget.ENCODING to 0.5f), t.stackedWeights)
         // all widgets closed is remembered too
         t.openWidgets.clear()
         t.saveDisplayPrefs()
@@ -255,14 +261,13 @@ class EditingSessionTest {
         savePref(STACKED_WEIGHTS_PREF, "=")
         savePref(MODEL_PREF, "MODEL3")
         savePref(MAX_ITERATIONS_PREF, "0")
-        savePref(EPS_PREF, "NaN")
         val s = state()
         assertEquals(LayoutMode.AUTO, s.layoutMode)
         assertEquals(listOf(Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
         // shares are clamped to 0.01..100, unreadable ones dropped
-        assertEquals(mapOf<Widget?, Float>(Widget.SETTINGS to 100f, Widget.SEQUENCES to 0.01f), s.wideWeights)
+        assertEquals(mapOf<Widget?, Float>(Widget.SETTINGS to 100f, Widget.ENCODING to 0.01f), s.wideWeights)
         assertTrue(s.stackedWeights.isEmpty())
-        assertEquals(DrawModel.MODEL1, s.preferredModel)
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
         assertEquals(LayoutSettings(), s.layoutSettings)
         assertNotNull(s.currentDrawing)
     }
@@ -322,11 +327,11 @@ class EditingSessionTest {
         val start = s.arrangement
         s.flipTriangle(start.faces.indices.first { start.faces[it].size == 3 && it != s.outerFace })
         s.settle()
-        s.changeModel(DrawModel.MODEL2)
+        s.changeModel(DrawModel.MODEL1)
         s.settle()
         // back to drawings computed before: there at once, no layout to wait for
-        s.changeModel(DrawModel.MODEL1)
-        assertEquals(DrawModel.MODEL1, s.currentDrawing?.model)
+        s.changeModel(DrawModel.MODEL2)
+        assertEquals(DrawModel.MODEL2, s.currentDrawing?.model)
         s.undo()
         assertEquals(start, s.currentDrawing?.arrangement)
         s.redo()

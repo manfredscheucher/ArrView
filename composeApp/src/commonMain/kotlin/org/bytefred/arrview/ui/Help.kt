@@ -2,8 +2,11 @@ package org.bytefred.arrview.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -16,19 +19,25 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.LayoutSettings
 
 /** The Help menu's pages, in menu order (About has its own dialog). */
 enum class HelpPage(val title: String) {
     GENERAL("General"),
+    VISUALIZATION("Visualization"),
     WIDGETS("Widgets"),
     FORMATS("Formats"),
     SHORTCUTS("Keyboard shortcuts"),
 }
 
-/** One Help page in a [BigDialog]: plain paragraphs; the shortcuts page lists the keys in bold. */
+/**
+ * One Help page in a [BigDialog]: plain paragraphs; the shortcuts page lists the keys in bold, the
+ * Visualization page has the figures of the three graphs (in the colours of [scheme]).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HelpDialog(page: HelpPage, onDismiss: () -> Unit) {
+fun HelpDialog(page: HelpPage, scheme: ColorScheme, onDismiss: () -> Unit) {
     BigDialog(page.title, onDismiss, buttons = { TextButton(onClick = onDismiss) { Text("OK") } }) {
         val vScroll = rememberScrollState()
         ScrollbarBox(vScroll, Modifier.weight(1f).fillMaxWidth()) {
@@ -39,6 +48,17 @@ fun HelpDialog(page: HelpPage, onDismiss: () -> Unit) {
                 if (page == HelpPage.SHORTCUTS) {
                     for ((key, action) in SHORTCUTS) KeyLine(key, action)
                     Paragraph(SHORTCUTS_NOTE)
+                } else if (page == HelpPage.VISUALIZATION) {
+                    Paragraph(VISUALIZATION_INTRO)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        for (kind in GraphKind.entries) Column(Modifier.width(FIGURE_SIZE)) {
+                            Text(kind.title, style = MaterialTheme.typography.titleSmall)
+                            GraphFigure(kind, scheme)
+                            Text(kind.caption, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                    for (text in VISUALIZATION_TEXT) Paragraph(text)
+                    for (paper in VISUALIZATION_REFERENCES) Text(paper, style = MaterialTheme.typography.bodySmall)
                 } else {
                     for (text in helpText(page)) Paragraph(text)
                 }
@@ -50,6 +70,8 @@ fun HelpDialog(page: HelpPage, onDismiss: () -> Unit) {
 /** The paragraphs of [page] as plain text (the shortcuts page: "key: action" per key). */
 internal fun helpText(page: HelpPage): List<String> = when (page) {
     HelpPage.GENERAL -> GENERAL_TEXT
+    HelpPage.VISUALIZATION -> listOf(VISUALIZATION_INTRO) + GraphKind.entries.map { "${it.title}: ${it.caption}" } +
+        VISUALIZATION_TEXT + VISUALIZATION_REFERENCES
     HelpPage.WIDGETS -> WIDGETS_TEXT
     HelpPage.FORMATS -> FORMATS_TEXT
     HelpPage.SHORTCUTS -> SHORTCUTS.map { (key, action) -> "$key: $action" } + SHORTCUTS_NOTE
@@ -69,9 +91,6 @@ private fun KeyLine(key: String, action: String) {
         style = MaterialTheme.typography.bodyLarge,
     )
 }
-
-/** [eps] as typed and shown: `1e-8`, not `1.0E-8` (the JVM's toString). */
-fun epsText(eps: Double): String = eps.toString().replace("E", "e").replace(".0e", "e")
 
 /** What arrangements of pseudocircles are (Welcome dialog and the first Help paragraph). */
 internal const val PSEUDOCIRCLES_INTRO = "ArrView is a viewer for arrangements of pseudocircles: closed curves where every " +
@@ -102,15 +121,10 @@ private val GENERAL_TEXT = listOf(
         "with the wheel or by pinching.",
     "Where there are several ways to create a digon of circles i and j, they are listed along circle i " +
         "(the smaller number), in the order of its sequence, then along circle j.",
-    "Model 1 and Model 2 (toolbar, View menu, Settings widget) are two ways to draw. Model 1 draws the " +
-        "crossings only, a digon's two circles touch along a short piece (blue dot). It needs an " +
-        "intersecting arrangement (every two circles cross) of at least 3 circles. Model 2 draws digons as regions and " +
-        "works for every arrangement. The drawing is an iterated Tutte embedding as in the paper by " +
-        "Felsner and Scheucher (see About), each circle a B-spline, as in their programs; by default the " +
-        "face with the most symmetries is drawn outside.",
-    "In the Arrangement menu, Examples... has the bundled arrangements: Sets (by group, as on the " +
-        "pseudocircles website) and Singletons. A selected one shows its description, n, how many " +
-        "arrangements it has and where it comes from (a page of the website, a paper). Loading a member of a " +
+    "The drawing is model 2 by default; model 1 (legacy) is chosen in the Settings widget (Visualization) " +
+        "and shows intersecting arrangements only. The Help page Visualization explains both.",
+    "In the Arrangement menu, Examples... lists the bundled arrangements by purpose, as on the pseudocircles " +
+        "website; an open group says what it is, a selected set shows its description. Loading a member of a " +
         "set opens the whole set: < and > in the toolbar (or PageUp / PageDown) step through it. " +
         "Import... reads pasted text and " +
         "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG " +
@@ -120,28 +134,47 @@ private val GENERAL_TEXT = listOf(
         "saved, only discarded.",
 )
 
+private const val VISUALIZATION_INTRO = "ArrView draws an arrangement as a plane embedding of one of its graphs. " +
+    "The figures show the three graphs of the start example n6-digonfree-nonr-8-triangles over its model 2 curves."
+
+private val VISUALIZATION_TEXT = listOf(
+    "Model 1 (legacy) is the iterated weighted Tutte embedding of the primal graph; each circle is a B-spline " +
+        "through its crossings. The Tutte embedding needs a 3-connected graph, so model 1 shows intersecting " +
+        "arrangements (every two circles cross) of at least 3 circles only. The two arcs of a digon are one edge " +
+        "there: the two circles touch along a short piece (blue dot).",
+    "Model 2 (default) is the same on the primal-dual graph; each circle is a B-spline through its crossing and " +
+        "arc vertices. It works for every connected arrangement and draws digons as regions.",
+    "Iterated: the first embedding has equal edge weights; then each edge weight grows with the edge's length " +
+        "and the areas of its two faces, and the graph is embedded again, up to Max. iterations times (Settings). " +
+        "The outer face is a regular polygon; by default it is the face with the most symmetries.",
+    "References:",
+)
+
+private val VISUALIZATION_REFERENCES = PAPERS.take(2) +
+    "The information page of the pseudocircles website (models and formats; see About)."
+
 private val WIDGETS_TEXT = listOf(
     "Widgets are columns next to the canvas (below it on a narrow window). The toolbar and the View menu " +
-        "show and hide them. The open widgets, the divider positions, the model and the layout settings " +
-        "are remembered for the next start.",
+        "show and hide them. By default at most ${AppState.DEFAULT_MAX_WIDGETS} are open (Settings widget, Max. widgets); " +
+        "opening another one closes the one opened first. The open widgets, the divider positions and the " +
+        "settings are remembered for the next start.",
     "Properties: n, the numbers of crossings and faces, the p-vector (pk faces with k sides, p2 digons " +
         "and p3 triangles), the pairs of circles that do not cross, the classes and how many triples of " +
         "pairwise crossing circles are Krupp or NonKrupp. Intersecting: every two circles cross. " +
         "Digon-free: no digon. Pseudo great circles: intersecting and every triple a Krupp. Cylindrical: " +
         "two faces are separated by every circle.",
-    "Sequences: for every circle the crossings along it (see Formats). Edit them and press Apply; " +
-        "ArrView checks the conditions of Linhart and Ortner and says why invalid input is rejected. " +
-        "Revert brings back the current sequences.",
-    "Encoding: the model 1 and model 2 sparse6 strings (see Formats), editable the same way. Copy puts " +
-        "a string on the clipboard. Model 1 exists only for intersecting arrangements.",
-    "Intersection graph: the circles as vertices 1 to n in their colours, an edge where two circles cross. " +
+    "Encoding: the sequences, the model 1 and the model 2 sparse6 string (see Formats); the (i) next to each " +
+        "says what it encodes. Edit one and press Apply; ArrView checks the conditions of Linhart and Ortner " +
+        "and says why invalid input is rejected. Revert brings back the current text, Copy puts a sparse6 " +
+        "string on the clipboard. Model 1 exists only for intersecting arrangements.",
+    "Intersections: the intersection graph, the circles as vertices 1 to n in their colours, an edge where two circles cross. " +
         "A dashed edge: the two circles do not cross but can create a digon. A yellow stripe marks every pair " +
         "that can create or collapse a digon, twice as strong if there are several ways; click it to do it " +
         "(a menu lists the faces if there are several, a face with several ways opens a submenu). Below the " +
         "graph: the possible digon creates and collapses, e.g. possible digon creates (3): 1 3 (x2), 2 4, 2 5. " +
         "(x2) marks a pair with 2 ways. The entries are links: a click does what a click on the pair in the " +
         "graph does, and pointing at one highlights the pair and its faces.",
-    "Triangle hypergraph: the same vertices, and a transparent triangle for every triple of circles that " +
+    "Triangles: the triangle hypergraph, the same vertices, and a transparent triangle for every triple of circles that " +
         "bounds a triangle face, so overlapping triangles add up to darker areas. A triple with two or more " +
         "triangle faces is twice as strong. Click a triangle to flip it; where several are under the mouse, " +
         "a menu lists them with their faces (several triples: a submenu per triple). A triple is always written " +
@@ -149,26 +182,23 @@ private val WIDGETS_TEXT = listOf(
         "order around, e.g. 1 3 2. Below it: the possible " +
         "triangle flips, e.g. possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it " +
         "(several triangles: a menu); pointing at one highlights the triple and its faces.",
-    "Settings: Display and Layout. Display: the colour scheme of the circles (" +
+    "Settings: Display, Widgets and Layout. Display: the colour scheme of the circles (" +
         ColorScheme.entries.joinToString(", ") { if (it == ColorScheme.DEFAULT) "${it.label} (default)" else it.label } +
         "; Standard is a fixed list of 12 colours, rainbow and rainbow2 are computed from n) and the line width (default ${AppState.DEFAULT_LINE_WIDTH.toInt()} px, also in Export SVG). The " +
-        "scheme colours the curves, labels, SVG and the vertices of the graph views. Layout: the parameters of " +
-        "the drawing only (iterated Tutte embedding), they do not change the arrangement. Model 1 draws the " +
-        "crossings as in Felsner and Scheucher, Triangles and Drawings; Model 2 the primal-dual graph (crossings, " +
-        "edges and faces as vertices) as in Felsner and Scheucher, On Circularizability. Model 1 / Model 2, " +
-        "Max. iterations (default ${LayoutSettings().maxIterations}) and eps (default " +
-        "${epsText(LayoutSettings().eps)}). The drawing stops after max. iterations, or earlier when the " +
-        "weights change by less than eps. Reset to defaults resets everything in the widget.",
+        "scheme colours the curves, labels, SVG and the vertices of the graph views. Widgets: Max. widgets " +
+        "(default ${AppState.DEFAULT_MAX_WIDGETS}). Layout, the drawing only: Visualization (default " +
+        "${DrawModel.MODEL2.option}; see Help > Visualization) and Max. iterations (default ${LayoutSettings().maxIterations}). Reset to defaults resets " +
+        "everything in the widget.",
 )
 
 private val FORMATS_TEXT = listOf(
     "Sequences: {1: [2, -2, 3, -3], 2: [...], ...}. List i has the crossings of circle i in the order of " +
-        "its orientation: +j where circle j crosses circle i from its right to its left, -j where it " +
+        "its orientation: +j where circle j crosses from the right of circle i to its left, -j where it " +
         "crosses from left to right. So +j in list i and -i in list j are the same crossing.",
     "Model 1 sparse6: the dual graph of an intersecting arrangement (a vertex per face, an edge per arc " +
         "between two crossings) in the sparse6 format of nauty.",
-    "Model 2 sparse6: the vertex-edge-face graph (a vertex per crossing, arc and face, an edge where " +
-        "they meet) plus a leaf at every face vertex, so faces can be told apart. It works for every " +
+    "Model 2 sparse6: the primal-dual graph (a vertex per crossing, arc and face, an edge from every arc " +
+        "to its two crossings and two faces) plus a leaf at every face vertex, so faces can be told apart. It works for every " +
         "arrangement. The older encoding with marker hubs is read too.",
     "Both are the formats of the pseudocircles website (see About). ArrView may number the vertices " +
         "differently, so its strings describe the same arrangements but need not be equal to the website's.",

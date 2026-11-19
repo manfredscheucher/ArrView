@@ -65,13 +65,13 @@ fun closedUniformBSpline(ctrl: List<Point>): List<Cubic> {
     }
 }
 
-/** The two drawings of an arrangement. */
-enum class DrawModel(val label: String) {
+/** The two drawings of an arrangement; [option] is the entry of the Visualization dropdown (Settings). */
+enum class DrawModel(val label: String, val option: String) {
     /** The primal graph: crossings are the vertices, a digon's two arcs are one edge, so its curves touch (intersecting only). */
-    MODEL1("Model 1"),
+    MODEL1("Model 1", "Model 1: primal graph (legacy)"),
 
-    /** The vertex-edge-face graph: digons are real 2-gons (always available). */
-    MODEL2("Model 2"),
+    /** The vertex-edge-face graph: digons are real 2-gons (always available, the default). */
+    MODEL2("Model 2", "Model 2: primal-dual graph"),
 }
 
 /** Model 1 needs an intersecting arrangement with a face that is not a digon (not n = 2). */

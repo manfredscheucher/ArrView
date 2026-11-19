@@ -145,10 +145,9 @@ class EditingStateTest {
     @Test
     fun layoutSettingsAreRemembered() {
         val s = state()
-        s.changeLayoutSettings(LayoutSettings(maxIterations = 30, eps = 1e-5))
+        s.changeLayoutSettings(LayoutSettings(maxIterations = 30))
         s.saveDisplayPrefs()
-        assertEquals(LayoutSettings(30, 1e-5), state().layoutSettings)
-        assertEquals("1e-5", epsText(1e-5))
-        assertEquals("1e-8", epsText(LayoutSettings().eps))
+        // eps is not in the GUI (Manfred, 2026-11-19): only max. iterations is remembered
+        assertEquals(LayoutSettings(maxIterations = 30), state().layoutSettings)
     }
 }

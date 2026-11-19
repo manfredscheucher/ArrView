@@ -11,10 +11,10 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.CoroutineScope
@@ -113,23 +113,23 @@ class WidgetButtonsUiTest {
         setContent { CompositionLocalProvider(LocalClipboardManager provides clipboard) { App(s, initialDialog = DialogKind.NONE) } }
         val copies = onAllNodesWithText("Copy")
         copies.assertCountEquals(2)
-        copies[0].performClick()
+        copies[0].performScrollTo().performClick()
         waitForIdle()
         assertEquals(s.text(TextFormat.MODEL1), clipboard.copied?.text)
         assertEquals("Copied", s.status?.text)
-        copies[1].performClick()
+        copies[1].performScrollTo().performClick()
         waitForIdle()
         assertEquals(s.text(TextFormat.MODEL2), clipboard.copied?.text)
         // an unapplied edit is what the field shows, so that is copied
         onNodeWithTag("editor-MODEL2").performTextReplacement(":edited")
-        copies[1].performClick()
+        copies[1].performScrollTo().performClick()
         waitForIdle()
         assertEquals(":edited", clipboard.copied?.text)
     }
 
     @Test
     fun revertDropsTheEditOfEachEditor() = runComposeUiTest {
-        val s = state(Widget.SEQUENCES, Widget.ENCODING)
+        val s = state(Widget.ENCODING)
         setContent { App(s, initialDialog = DialogKind.NONE) }
         for (format in TextFormat.entries) {
             val tag = format.name
@@ -150,17 +150,17 @@ class WidgetButtonsUiTest {
 
     @Test
     fun aDraftSurvivesClosingTheWidgetAndArrangementChanges() = runComposeUiTest {
-        val s = state(Widget.SEQUENCES, Widget.ENCODING)
+        val s = state(Widget.ENCODING)
         setContent { App(s, initialDialog = DialogKind.NONE) }
         runOnIdle { s.load("nonkrupp", nonKrupp) }
         onNodeWithTag("editor-SEQUENCES").performTextReplacement("{1: [2, -2], 2: [1, -1]}")
         val model1 = s.text(TextFormat.MODEL1)
         onNodeWithTag("editor-MODEL1").performTextReplacement("$model1 ")
-        // close Sequences with its x and open it again: the edit is still there
+        // close Encoding with its x and open it again: the edits are still there
         onAllNodesWithText("x")[0].performClick()
         waitForIdle()
-        assertEquals(listOf(Widget.ENCODING), s.openWidgets.toList())
-        onNodeWithText("Sequences").performClick()
+        assertTrue(s.openWidgets.isEmpty())
+        onNodeWithText("Encoding").performClick()
         waitForIdle()
         assertEquals("{1: [2, -2], 2: [1, -1]}", onNodeWithTag("editor-SEQUENCES").text())
         // a digon collapse makes it non-intersecting: the model 1 edit stays, with the note
@@ -188,7 +188,6 @@ class WidgetButtonsUiTest {
         runOnIdle { s.load("two", Arrangement.two()) }
         assertEquals(s.text(TextFormat.MODEL1), onNodeWithTag("editor-MODEL1").text())
         onNodeWithText("Only for intersecting arrangements", substring = true).assertDoesNotExist()
-        onNodeWithText("Model 1").assertIsNotEnabled()
         assertEquals(DrawModel.MODEL2, s.model)
         // the 3-Chain: the first pair that does not cross is named
         runOnIdle { s.load("chain", chain) }
@@ -197,48 +196,116 @@ class WidgetButtonsUiTest {
     }
 
     @Test
-    fun settingsWidgetChipsFieldsAndReset() = runComposeUiTest {
+    fun settingsWidgetDropdownFieldsAndReset() = runComposeUiTest {
         val s = state(Widget.SETTINGS)
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        // the widget's model chips (the toolbar has the same)
-        onAllNodesWithText("Model 2").assertCountEquals(2)
-        onAllNodesWithText("Model 2").onLast().performClick()
+        // the model is chosen only here: no model chips in the toolbar
+        onNodeWithText("Model 1").assertDoesNotExist()
+        onNodeWithText(DrawModel.MODEL2.option).assertExists()
+        // Model 1: the dialog, Cancel keeps model 2
+        onNodeWithTag("visualization").performClick()
+        waitForIdle()
+        assertEquals(DrawModel.entries.map { it.option }, listOf("Model 1: primal graph (legacy)", "Model 2: primal-dual graph"))
+        menuItem(DrawModel.MODEL1.option).performClick()
+        waitForIdle()
+        onNodeWithText(modelDialogText(ModelDialog.Confirm)).assertExists()
+        onNodeWithText("Cancel").performClick()
         waitForIdle()
         assertEquals(DrawModel.MODEL2, s.model)
-        onAllNodesWithText("Model 2")[0].assertIsSelected()
-        onAllNodesWithText("Model 1").onLast().performClick()
+        // OK switches
+        onNodeWithTag("visualization").performClick()
+        waitForIdle()
+        menuItem(DrawModel.MODEL1.option).performClick()
+        waitForIdle()
+        onNodeWithTag("model-dialog-ok").performClick()
         waitForIdle()
         assertEquals(DrawModel.MODEL1, s.model)
+        onNodeWithText(DrawModel.MODEL1.option).assertExists()
         for (bad in listOf("0", "-1", "abc", "")) {
             onNodeWithTag("max-iterations").performTextReplacement(bad)
             onNodeWithText("at least 1").assertExists()
         }
-        for (bad in listOf("0", "-1e-3", "x", "NaN", "Infinity")) {
-            onNodeWithTag("eps").performTextReplacement(bad)
-            onNodeWithText("a positive number").assertExists()
-        }
         assertEquals(LayoutSettings(), s.layoutSettings)
-        // no upper bound on max. iterations; at most 12 characters are taken
+        // no upper bound on max. iterations
         onNodeWithTag("max-iterations").performTextReplacement("1000")
-        onNodeWithTag("eps").performTextReplacement("0.00012345678901")
         waitForIdle()
         assertEquals(1000, s.layoutSettings.maxIterations)
-        assertEquals("0.0001234567", onNodeWithTag("eps").text())
-        assertEquals(0.0001234567, s.layoutSettings.eps)
-        // the widget's Model 2 chip; Reset brings back Model 1 and the layout settings
-        onAllNodesWithText("Model 2").onLast().performClick()
-        waitForIdle()
-        assertEquals(DrawModel.MODEL2, s.preferredModel)
+        // Reset brings back model 2 and the layout settings
         onNodeWithText("Reset to defaults").assertIsEnabled().performClick()
         waitForIdle()
         assertEquals(LayoutSettings(), s.layoutSettings)
-        assertEquals(DrawModel.MODEL1, s.preferredModel)
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
+    }
+
+    @Test
+    fun theVisualizationInfoOpensItsHelpPage() = runComposeUiTest {
+        val s = state(Widget.SETTINGS)
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        onNodeWithTag("info-visualization").performClick()
+        waitForIdle()
+        assertEquals(HelpPage.VISUALIZATION, s.helpPage)
+        onNodeWithTag("big-dialog").assertExists()
+        for (kind in GraphKind.entries) onNodeWithTag("figure-${kind.name}").assertExists()
+    }
+
+    @Test
+    fun theEncodingInfosShowTheirTexts() = runComposeUiTest {
+        val s = state(Widget.ENCODING)
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        // sequences first, then model 1, then model 2
+        val tops = TextFormat.entries.map { onNodeWithTag("info-${it.name}").fetchSemanticsNode().boundsInRoot.top }
+        assertEquals(tops.sorted(), tops)
+        for ((format, text) in listOf(TextFormat.SEQUENCES to SEQUENCES_INFO, TextFormat.MODEL1 to MODEL1_INFO, TextFormat.MODEL2 to MODEL2_INFO)) {
+            onNodeWithText(text).assertDoesNotExist()
+            onNodeWithTag("info-${format.name}").performClick()
+            waitForIdle()
+            assertEquals(text, onNodeWithTag("info-${format.name}-text").text())
+            onNodeWithTag("info-${format.name}").performClick()
+            waitForIdle()
+        }
+    }
+
+    @Test
+    fun atMostTwoWidgetsByDefault() = runComposeUiTest {
+        val s = state(Widget.PROPERTIES)
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        onNodeWithText("Encoding").performClick()
+        onNodeWithText("Triangles").performClick()
+        waitForIdle()
+        // the third closes the oldest
+        assertEquals(listOf(Widget.ENCODING, Widget.TRIANGLES), s.openWidgets.toList())
+        onNodeWithText("Settings").performClick()
+        waitForIdle()
+        assertEquals(listOf(Widget.TRIANGLES, Widget.SETTINGS), s.openWidgets.toList())
+        // Max. widgets in Settings
+        onNodeWithText("Max. widgets: 2").assertExists()
+        onNodeWithTag("max-widgets-plus").performClick()
+        waitForIdle()
+        assertEquals(3, s.maxColumns)
+        onNodeWithText("Properties").performClick()
+        waitForIdle()
+        assertEquals(listOf(Widget.TRIANGLES, Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
+        // lowering it closes the oldest
+        onNodeWithTag("max-widgets-minus").performClick()
+        waitForIdle()
+        assertEquals(listOf(Widget.SETTINGS, Widget.PROPERTIES), s.openWidgets.toList())
+        onNodeWithTag("max-widgets-minus").performClick()
+        waitForIdle()
+        assertEquals(1, s.maxColumns)
+        assertEquals(listOf(Widget.PROPERTIES), s.openWidgets.toList())
+        onNodeWithText("Settings").performClick()
+        waitForIdle()
+        assertEquals(listOf(Widget.SETTINGS), s.openWidgets.toList())
+        onNodeWithTag("max-widgets-minus").assertIsNotEnabled()
+        runOnIdle { s.changeMaxColumns(4); s.saveDisplayPrefs() }
+        assertEquals(4, AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default)).maxColumns)
     }
 
     @Test
     fun toolbarWidgetChipsAndCloseButtons() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
+        runOnIdle { s.changeMaxColumns(Widget.entries.size) }
         for (w in Widget.entries) onNodeWithText(w.label).performClick()
         waitForIdle()
         assertEquals(Widget.entries, s.openWidgets.toList())

@@ -81,7 +81,7 @@ class MenusAndDialogsUiTest {
         val items = mapOf(
             "Arrangement" to ARRANGEMENT_MENU,
             "Edit" to listOf("Undo", "Redo"),
-            "View" to listOf("Fit", "Zoom in", "Zoom out", "Model 1", "Model 2") + Widget.entries.map { it.label } +
+            "View" to listOf("Fit", "Zoom in", "Zoom out") + Widget.entries.map { it.label } +
                 LayoutMode.entries.map { it.name.lowercase() },
             "Help" to HelpPage.entries.map { it.title } + "About ArrView",
         )
@@ -137,31 +137,20 @@ class MenusAndDialogsUiTest {
     }
 
     @Test
-    fun viewModelItems() = runComposeUiTest {
+    fun theModelIsNotInTheViewMenu() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         onNodeWithTag("menu-View").performClick()
-        menuItem("Model 2").performClick()
         waitForIdle()
-        assertEquals(DrawModel.MODEL2, s.model)
-        // a check item keeps the menu open
-        assertEquals("View", s.openMenu)
-        waitUntil(timeoutMillis = 10_000) { s.drawing?.model == DrawModel.MODEL2 }
-        menuItem("Model 1").performClick()
-        waitForIdle()
-        assertEquals(DrawModel.MODEL1, s.model)
-        closeMenu()
-        // not intersecting: model 1 is off and model 2 drawn
-        runOnIdle { s.load("chain", chain) }
-        onNodeWithTag("menu-View").performClick()
-        menuItem("Model 1").assertIsNotEnabled()
-        assertEquals(DrawModel.MODEL2, s.model)
+        menuItem("Model 1").assertDoesNotExist()
+        menuItem("Model 2").assertDoesNotExist()
     }
 
     @Test
     fun viewWidgetItemsToggleSeveralInOneOpening() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
+        runOnIdle { s.changeMaxColumns(Widget.entries.size) }
         onNodeWithTag("menu-View").performClick()
         for (w in Widget.entries) menuItem(w.label).performClick()
         waitForIdle()
@@ -333,7 +322,7 @@ class MenusAndDialogsUiTest {
         runOnIdle { s.editDraft(TextFormat.SEQUENCES, "{1: [2, -2], 2: [1, -1]}") }
         import(chain.toString())
         onNodeWithText("Save changes?").assertExists()
-        onNodeWithText("A text edited in the Sequences or Encoding widget is not applied.").assertExists()
+        onNodeWithText("A text edited in the Encoding widget is not applied.").assertExists()
         // the arrangement itself is saved: no format buttons, a draft is never saved implicitly
         onNodeWithText("Save JSON").assertDoesNotExist()
         onNodeWithText("Discard").performClick()

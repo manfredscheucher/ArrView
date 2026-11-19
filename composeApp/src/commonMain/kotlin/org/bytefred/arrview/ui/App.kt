@@ -16,12 +16,14 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -80,7 +82,7 @@ fun App(
                 mutableStateOf(initialDialog ?: if (loadPref(WELCOME_PREF) == "off") DialogKind.NONE else DialogKind.WELCOME)
             }
             Dialogs(state, dialog, open = { dialog = it }) { dialog = DialogKind.NONE }
-            Column(Modifier.fillMaxSize()) {
+            CompositionLocalProvider(LocalOpenDialog provides { dialog = it }) { Column(Modifier.fillMaxSize()) {
                 MenuBar(state, view) { dialog = it }
                 ToolBar(state)
                 HorizontalDivider()
@@ -137,10 +139,13 @@ fun App(
                         SplitPane(panels(1f), state.stackedWeights, { state.stackedWeights = it }, horizontal = false, Modifier.fillMaxSize())
                     }
                 }
-            }
+            } }
         }
     } }
 }
+
+/** Opens a dialog from inside the app (the Settings widget's (i) opens the Help page Visualization). */
+val LocalOpenDialog = staticCompositionLocalOf<(DialogKind) -> Unit> { {} }
 
 /** Escape closes the open menu (the menu bar takes the focus while one is open). */
 private fun closeMenuOnEscape(e: KeyEvent, state: AppState): Boolean {

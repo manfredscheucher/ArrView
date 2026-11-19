@@ -3,7 +3,7 @@ package org.bytefred.arrview.core
 /** File extensions offered when opening an arrangement file. */
 val LOAD_EXTENSIONS = listOf("json", "txt", "enc", "mod1s6", "mod2s6", "s6")
 
-/** The text forms of an arrangement (Import / Export, the Sequences and Encoding widgets). */
+/** The text forms of an arrangement (Import / Export, the Encoding widget). */
 enum class TextFormat(val label: String) {
     SEQUENCES("Sequences"),
     MODEL1("Model 1 sparse6"),

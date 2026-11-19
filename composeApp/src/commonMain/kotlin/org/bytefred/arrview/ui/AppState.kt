@@ -47,15 +47,31 @@ import kotlin.time.TimeSource
 /** The panels next to the canvas; each one is a column that can be shown or hidden. */
 enum class Widget(val label: String) {
     PROPERTIES("Properties"),
-    SEQUENCES("Sequences"),
     ENCODING("Encoding"),
-    INTERSECTION_GRAPH("Intersection graph"),
-    TRIANGLE_HYPERGRAPH("Triangle hypergraph"),
+    INTERSECTIONS("Intersections"),
+    TRIANGLES("Triangles"),
     SETTINGS("Settings"),
 }
 
-/** The widget stored under [id] (an old "LAYOUT" is the Settings widget, which replaced it). */
-internal fun widgetById(id: String): Widget? = if (id == "LAYOUT") Widget.SETTINGS else Widget.entries.firstOrNull { it.name == id }
+/** The widget stored under [id]; the ids of renamed or merged widgets ("LAYOUT", "SEQUENCES", ...) still work. */
+internal fun widgetById(id: String): Widget? = when (id) {
+    "LAYOUT" -> Widget.SETTINGS
+    "SEQUENCES" -> Widget.ENCODING
+    "INTERSECTION_GRAPH" -> Widget.INTERSECTIONS
+    "TRIANGLE_HYPERGRAPH" -> Widget.TRIANGLES
+    else -> Widget.entries.firstOrNull { it.name == id }
+}
+
+/**
+ * The dialogs around model 1 (Settings, Visualization). [Confirm]: model 1 was chosen, OK switches.
+ * [NotIntersecting]: model 1 was chosen but cannot show the arrangement, OK only. [Fallback]: the
+ * next arrangement has no model 1, OK switches to model 2 and runs [Fallback.action].
+ */
+sealed class ModelDialog {
+    data object Confirm : ModelDialog()
+    data object NotIntersecting : ModelDialog()
+    class Fallback(val action: () -> Unit) : ModelDialog()
+}
 
 enum class LayoutMode { AUTO, PORTRAIT, LANDSCAPE }
 
@@ -140,9 +156,25 @@ class AppState(
     /** Member [i] as last saved. */
     private fun savedMember(i: Int): Arrangement = savedEdits[i] ?: arrangementSet[i]
 
-    /** The model chosen in the menu; model 1 falls back to model 2 where it does not exist. */
-    var preferredModel by mutableStateOf(DrawModel.MODEL1)
+    /** The model chosen in Settings (Visualization); model 1 falls back to model 2 where it does not exist. */
+    var preferredModel by mutableStateOf(DrawModel.MODEL2)
         private set
+
+    /**
+     * The number of arrangements when a load holds more than one (null otherwise), so the UI can tell
+     * the user (PoCoView's); the UI clears it after showing it.
+     */
+    var loadedSetsNotice by mutableStateOf<Int?>(null)
+
+    /** The open model dialog (see [ModelDialog]), or null. */
+    var modelDialog by mutableStateOf<ModelDialog?>(null)
+        private set
+
+    /** "Do not show again" of the model 1 dialog ([ModelDialog.Confirm]). */
+    var model1ConfirmOff by mutableStateOf(false)
+
+    /** "Do not show again" of the switch to model 2 ([ModelDialog.Fallback]). */
+    var model1FallbackOff by mutableStateOf(false)
 
     /** The model drawn. */
     val model: DrawModel get() = if (preferredModel == DrawModel.MODEL1 && arrangement.hasModel1) DrawModel.MODEL1 else DrawModel.MODEL2
@@ -162,14 +194,15 @@ class AppState(
 
     /** Everything of the Settings widget is at its default. */
     val settingsAreDefault: Boolean
-        get() = colorScheme == ColorScheme.DEFAULT && lineWidth == DEFAULT_LINE_WIDTH &&
-            preferredModel == DrawModel.MODEL1 && layoutSettings == LayoutSettings()
+        get() = colorScheme == ColorScheme.DEFAULT && lineWidth == DEFAULT_LINE_WIDTH && maxColumns == DEFAULT_MAX_WIDGETS &&
+            preferredModel == DrawModel.MODEL2 && layoutSettings == LayoutSettings()
 
-    /** Settings widget "Reset to defaults": colour scheme, line width, model, max. iterations, eps. */
+    /** Settings widget "Reset to defaults": colour scheme, line width, max. widgets, visualization, max. iterations. */
     fun resetSettings() {
         colorScheme = ColorScheme.DEFAULT
         lineWidth = DEFAULT_LINE_WIDTH
-        preferredModel = DrawModel.MODEL1
+        changeMaxColumns(DEFAULT_MAX_WIDGETS)
+        preferredModel = DrawModel.MODEL2
         layoutSettings = LayoutSettings()
         relayout()
     }
@@ -241,8 +274,26 @@ class AppState(
     /** Open widget columns, in opening order. */
     val openWidgets = mutableStateListOf(Widget.PROPERTIES)
 
+    /** At most this many widgets are open; opening one more closes the oldest (PoCoView's Max. widgets). */
+    var maxColumns by mutableIntStateOf(DEFAULT_MAX_WIDGETS)
+        private set
+
     fun toggleWidget(w: Widget) {
-        if (w in openWidgets) openWidgets.remove(w) else openWidgets.add(w)
+        if (w in openWidgets) {
+            openWidgets.remove(w)
+        } else {
+            openWidgets.add(w)
+            closeExtraWidgets()
+        }
+    }
+
+    fun changeMaxColumns(k: Int) {
+        maxColumns = k.coerceIn(1, Widget.entries.size)
+        closeExtraWidgets()
+    }
+
+    private fun closeExtraWidgets() {
+        while (openWidgets.size > maxColumns) openWidgets.removeFirst()
     }
 
     /** The status message (see [showInfo] and [showNote]). */
@@ -258,10 +309,7 @@ class AppState(
     /** What the Examples dialog shows, kept while it is closed. */
     val examples = ExamplesState()
 
-    /**
-     * Unapplied edits of the Sequences and Encoding widgets, per format; text equal to the
-     * current arrangement's is no draft.
-     */
+    /** Unapplied edits of the Encoding widget, per format; text equal to the current arrangement's is no draft. */
     val drafts = mutableStateMapOf<TextFormat, String>()
 
     /** Incremented to ask the canvas to fit the view to the drawing. */
@@ -291,12 +339,17 @@ class AppState(
         OPEN_WIDGETS_PREF to openWidgets.joinToString(",") { it.name },
         WIDE_WEIGHTS_PREF to encodeWeights(wideWeights),
         STACKED_WEIGHTS_PREF to encodeWeights(stackedWeights),
+        MAX_WIDGETS_PREF to maxColumns.toString(),
         MODEL_PREF to preferredModel.name,
+        MODEL1_CONFIRM_PREF to onOff(model1ConfirmOff),
+        MODEL1_FALLBACK_PREF to onOff(model1FallbackOff),
         MAX_ITERATIONS_PREF to layoutSettings.maxIterations.toString(),
-        EPS_PREF to layoutSettings.eps.toString(),
         COLOR_SCHEME_PREF to colorScheme.name,
         LINE_WIDTH_PREF to lineWidth.toString(),
     )
+
+    /** A "Do not show again" flag as stored: "off" once ticked (as the Welcome dialog's), else "on". */
+    private fun onOff(off: Boolean) = if (off) "off" else "on"
 
     /** What [displayPrefs] was at the last load or save: only changed settings are written. */
     private var savedDisplay: Map<String, String> = emptyMap()
@@ -328,9 +381,12 @@ class AppState(
         }
         loadPref(WIDE_WEIGHTS_PREF)?.let { wideWeights = decodeWeights(it) }
         loadPref(STACKED_WEIGHTS_PREF)?.let { stackedWeights = decodeWeights(it) }
+        loadPref(MAX_WIDGETS_PREF)?.toIntOrNull()?.let { changeMaxColumns(it) }
+        closeExtraWidgets()
         enumPref<DrawModel>(MODEL_PREF)?.let { preferredModel = it }
+        model1ConfirmOff = loadPref(MODEL1_CONFIRM_PREF) == "off"
+        model1FallbackOff = loadPref(MODEL1_FALLBACK_PREF) == "off"
         loadPref(MAX_ITERATIONS_PREF)?.toIntOrNull()?.takeIf { it >= 1 }?.let { layoutSettings = layoutSettings.copy(maxIterations = it) }
-        loadPref(EPS_PREF)?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }?.let { layoutSettings = layoutSettings.copy(eps = it) }
         enumPref<ColorScheme>(COLOR_SCHEME_PREF)?.let { colorScheme = it }
         loadPref(LINE_WIDTH_PREF)?.toFloatOrNull()?.takeIf { it.isFinite() }?.let { lineWidth = it.coerceIn(LINE_WIDTH_RANGE) }
         savedDisplay = displayPrefs()
@@ -359,9 +415,61 @@ class AppState(
         fitRequest++
     }
 
+    /** Switches to [m] (tests, the model dialogs); the Settings dropdown goes through [chooseModel]. */
     fun changeModel(m: DrawModel) {
         preferredModel = m
         relayout()
+    }
+
+    /**
+     * The Visualization dropdown: model 2 switches at once; model 1 asks first ([ModelDialog.Confirm],
+     * unless turned off), or says that it cannot show this arrangement ([ModelDialog.NotIntersecting]).
+     */
+    fun chooseModel(m: DrawModel) {
+        when {
+            m == DrawModel.MODEL2 -> changeModel(m)
+            !arrangement.hasModel1 -> modelDialog = ModelDialog.NotIntersecting
+            model1ConfirmOff -> changeModel(m)
+            else -> modelDialog = ModelDialog.Confirm
+        }
+    }
+
+    /** OK in the open model dialog; [dontShowAgain] is its checkbox. */
+    fun confirmModelDialog(dontShowAgain: Boolean = false) {
+        val dialog = modelDialog ?: return
+        modelDialog = null
+        when (dialog) {
+            ModelDialog.Confirm -> {
+                if (dontShowAgain) model1ConfirmOff = true
+                changeModel(DrawModel.MODEL1)
+            }
+            ModelDialog.NotIntersecting -> {}
+            is ModelDialog.Fallback -> {
+                if (dontShowAgain) model1FallbackOff = true
+                preferredModel = DrawModel.MODEL2
+                dialog.action()
+            }
+        }
+    }
+
+    /** Cancel in the model 1 dialog: the model stays. */
+    fun cancelModelDialog() {
+        modelDialog = null
+    }
+
+    /**
+     * Runs [action], which shows [next]. If model 1 is chosen but cannot show it, model 2 is chosen
+     * first: at once if the notice is turned off, else after OK in [ModelDialog.Fallback].
+     */
+    private fun showing(next: Arrangement, action: () -> Unit) {
+        when {
+            preferredModel != DrawModel.MODEL1 || next.hasModel1 -> action()
+            model1FallbackOff -> {
+                preferredModel = DrawModel.MODEL2
+                action()
+            }
+            else -> modelDialog = ModelDialog.Fallback(action)
+        }
     }
 
     fun changeLayoutSettings(settings: LayoutSettings) {
@@ -435,8 +543,11 @@ class AppState(
         relayout()
     }
 
-    /** Replaces the arrangement (undoable); the outer face is kept if it still exists. */
-    private fun change(next: Arrangement) {
+    /**
+     * Replaces the arrangement (undoable) and shows [info]; the outer face is kept if it still
+     * exists. Deferred while [ModelDialog.Fallback] asks (see [showing]).
+     */
+    private fun change(next: Arrangement, info: String) = showing(next) {
         // the face drawn outside now stays outside if the change keeps it
         val keep = outerFace?.let { arrangement.faceKey(it) } ?: outerKey
         undoStack.addLast(snapshot())
@@ -449,6 +560,7 @@ class AppState(
         menuHighlight = null
         graphHighlight = null
         relayout()
+        showInfo(info)
     }
 
     private fun updateUndoFlags() {
@@ -457,19 +569,25 @@ class AppState(
     }
 
     fun undo() {
-        val prev = undoStack.removeLastOrNull() ?: return
-        redoStack.addLast(snapshot())
-        updateUndoFlags()
-        restore(prev)
-        status = null
+        val prev = undoStack.lastOrNull() ?: return
+        showing(prev.arrangement) {
+            undoStack.removeLast()
+            redoStack.addLast(snapshot())
+            updateUndoFlags()
+            restore(prev)
+            status = null
+        }
     }
 
     fun redo() {
-        val next = redoStack.removeLastOrNull() ?: return
-        undoStack.addLast(snapshot())
-        updateUndoFlags()
-        restore(next)
-        status = null
+        val next = redoStack.lastOrNull() ?: return
+        showing(next.arrangement) {
+            redoStack.removeLast()
+            undoStack.addLast(snapshot())
+            updateUndoFlags()
+            restore(next)
+            status = null
+        }
     }
 
     /** Shows [arr] under [name] (undoable), with the default outer face and a fitted view. */
@@ -481,14 +599,17 @@ class AppState(
      */
     fun loadSet(name: String, arrangements: ArrangementSet, start: Int = 0) {
         require(start in 0 until arrangements.size) { "no member ${start + 1} in ${arrangements.size}" }
-        undoStack.addLast(snapshot())
-        redoStack.clear()
-        updateUndoFlags()
-        restore(HistoryEntry(arrangements[start], name, null, arrangements, start, emptyMap()))
-        savedEdits = emptyMap()
-        drafts.clear()
-        status = null
-        requestFit()
+        showing(arrangements[start]) {
+            undoStack.addLast(snapshot())
+            redoStack.clear()
+            updateUndoFlags()
+            restore(HistoryEntry(arrangements[start], name, null, arrangements, start, emptyMap()))
+            savedEdits = emptyMap()
+            drafts.clear()
+            status = null
+            requestFit()
+            loadedSetsNotice = arrangements.size.takeIf { it > 1 }
+        }
     }
 
     /**
@@ -501,7 +622,7 @@ class AppState(
         if (unappliedDraft) pendingLeave = { switchToSet(index) } else switchToSet(index)
     }
 
-    private fun switchToSet(index: Int) {
+    private fun switchToSet(index: Int) = showing(member(index)) {
         val next = member(index)
         edits = storedEdits()
         setIndex = index
@@ -560,8 +681,8 @@ class AppState(
         get() = (edits.keys + savedEdits.keys + setIndex).any { member(it) != savedMember(it) }
 
     /**
-     * A Sequences or Encoding widget holds an edit that differs from the current arrangement's
-     * text (compared live, as in PoCoView: after an undo a draft may equal it again).
+     * The Encoding widget holds an edit that differs from the current arrangement's text (compared
+     * live, as in PoCoView: after an undo a draft may equal it again).
      */
     val unappliedDraft: Boolean
         get() = drafts.any { (format, text) -> !format.availableFor(arrangement) || text != text(format) }
@@ -624,7 +745,7 @@ class AppState(
     /** The texts of the current arrangement, computed once per arrangement (model 2 of n = 42 is long). */
     private var texts: Pair<Arrangement, MutableMap<TextFormat, String>>? = null
 
-    /** The current arrangement in [format] (Export, the Sequences and Encoding widgets); see [TextFormat.availableFor]. */
+    /** The current arrangement in [format] (Export, the Encoding widget); see [TextFormat.availableFor]. */
     fun text(format: TextFormat): String {
         val cache = texts?.takeIf { it.first == arrangement }?.second ?: mutableMapOf<TextFormat, String>().also { texts = arrangement to it }
         return cache.getOrPut(format) { format.write(arrangement) }
@@ -653,8 +774,7 @@ class AppState(
         }
         drafts.remove(format)
         if (next == arrangement) return
-        change(next)
-        showInfo("Applied the ${format.label.lowercase()}")
+        change(next, "Applied the ${format.label.lowercase()}")
     }
 
     /**
@@ -681,16 +801,14 @@ class AppState(
             showNote("Cannot create the digon: ${e.message}")
             return
         }
-        change(next)
-        showInfo("Created a digon of ${op.i + 1} and ${op.j + 1}")
+        change(next, "Created a digon of ${op.i + 1} and ${op.j + 1}")
     }
 
     /** Triangle flip of face [f] (undoable). */
     fun flipTriangle(f: Int) {
         if (arrangement.faces.getOrNull(f)?.size != 3) return
         try {
-            change(arrangement.triangleFlip(f))
-            showInfo("Flipped a triangle")
+            change(arrangement.triangleFlip(f), "Flipped a triangle")
         } catch (e: InvalidArrangementException) {
             showNote("Cannot flip: ${e.message}")
         }
@@ -709,8 +827,7 @@ class AppState(
             showNote("the arrangement would fall apart")
             return
         }
-        change(next)
-        showInfo("Collapsed a digon")
+        change(next, "Collapsed a digon")
     }
 
     companion object {
@@ -724,6 +841,9 @@ class AppState(
 
         const val DEFAULT_LINE_WIDTH = 4f
         val LINE_WIDTH_RANGE = 0.5f..8f
+
+        /** Widgets open at a time by default (PoCoView's). */
+        const val DEFAULT_MAX_WIDGETS = 2
 
         /** Drawings kept for undo / redo and switching back and forth. */
         private const val CACHE_SIZE = 32

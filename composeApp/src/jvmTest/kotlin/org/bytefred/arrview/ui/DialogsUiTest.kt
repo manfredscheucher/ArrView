@@ -75,6 +75,12 @@ class DialogsUiTest {
         assertEquals("n4-intersecting-all", s.name)
         assertEquals("n4-intersecting-all · set 5/8", s.title)
         assertEquals(set.arrangement(4), s.arrangement)
+        // the notice after loading several arrangements; "Don't show again" turns it off
+        onNodeWithText("8 arrangements loaded").assertExists()
+        onNodeWithText("Don't show again").performClick()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
+        assertEquals("off", loadPref(SETS_NOTICE_PREF))
         // the dialog is as it was left
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()

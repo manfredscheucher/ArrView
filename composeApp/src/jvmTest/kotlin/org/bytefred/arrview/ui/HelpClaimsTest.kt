@@ -41,12 +41,22 @@ class HelpClaimsTest {
     @Test
     fun layoutDefaults() {
         assertSays(HelpPage.WIDGETS, "Max. iterations (default ${LayoutSettings().maxIterations})")
-        assertSays(HelpPage.WIDGETS, "eps (default ${epsText(LayoutSettings().eps)})")
+        assertSays(HelpPage.WIDGETS, "Max. widgets (default ${AppState.DEFAULT_MAX_WIDGETS})")
+        assertTrue("eps" !in pages.getValue(HelpPage.WIDGETS), "eps is not in the GUI")
     }
 
     @Test
     fun modelNames() {
-        for (m in DrawModel.entries) assertSays(HelpPage.GENERAL, m.label)
+        assertSays(HelpPage.WIDGETS, "Visualization (default ${DrawModel.MODEL2.option};")
+        assertSays(HelpPage.GENERAL, "The drawing is model 2 by default")
+    }
+
+    @Test
+    fun visualizationPage() {
+        for (kind in GraphKind.entries) assertSays(HelpPage.VISUALIZATION, kind.title)
+        assertSays(HelpPage.VISUALIZATION, Examples.start.name)
+        for (paper in PAPERS.take(2)) assertSays(HelpPage.VISUALIZATION, paper)
+        assertSays(HelpPage.VISUALIZATION, "up to Max. iterations times (Settings)")
     }
 
     @Test
@@ -67,7 +77,7 @@ class HelpClaimsTest {
 
     @Test
     fun model1NeedsAnIntersectingArrangementOfThreeCircles() {
-        assertSays(HelpPage.GENERAL, "It needs an intersecting arrangement (every two circles cross) of at least 3 circles.")
+        assertSays(HelpPage.VISUALIZATION, "so model 1 shows intersecting arrangements (every two circles cross) of at least 3 circles only.")
         for (set in Examples.sets.filter { it.n <= 5 }) for (i in 0 until set.size) {
             val arr = set.arrangement(i)
             assertEquals(arr.isIntersecting && arr.n >= 3, arr.hasModel1, set.memberName(i))
@@ -109,7 +119,7 @@ class HelpClaimsTest {
     @Test
     fun userGuideLayoutDefaults() {
         val d = LayoutSettings()
-        assertTrue("Layout (model, max. iterations (${d.maxIterations}), eps (${epsText(d.eps)}))" in guide.replace("\n  ", " "))
+        assertTrue("Layout (Visualization: model 2 or model 1, max. iterations (${d.maxIterations}))" in guide.replace("\n  ", " "))
         assertTrue("line width 0.5 to 8, default 4" in guide.replace("\n  ", " "))
         assertEquals(0.5f..8f, AppState.LINE_WIDTH_RANGE)
         assertEquals(4f, AppState.DEFAULT_LINE_WIDTH)
@@ -138,8 +148,8 @@ class HelpClaimsTest {
     }
 
     @Test
-    fun examplesSetsAndSingletons() {
-        assertSays(HelpPage.GENERAL, "Examples... has the bundled arrangements: Sets (by group, as on the pseudocircles website) and Singletons.")
+    fun examplesByPurpose() {
+        assertSays(HelpPage.GENERAL, "Examples... lists the bundled arrangements by purpose, as on the pseudocircles website; an open group says what it is, a selected set shows its description.")
     }
 
     @Test
@@ -189,6 +199,6 @@ class HelpClaimsTest {
         val example = "1* 2 3* 2"
         assertTrue(example in entries, "$entries")
         assertTrue("`$example`" in guide, "USER_GUIDE.md: create menu example")
-        assertTrue("Triangle hypergraph: " in guide && "dashed for a non-crossing pair" in guide, "USER_GUIDE.md: graph views")
+        assertTrue("- Triangles (the triangle hypergraph): " in guide && "dashed for a non-crossing pair" in guide, "USER_GUIDE.md: graph views")
     }
 }

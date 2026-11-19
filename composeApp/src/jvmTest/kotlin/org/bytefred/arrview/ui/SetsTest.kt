@@ -176,6 +176,10 @@ class SetsTest {
         onNodeWithText("+").performClick()
         onNodeWithText("Load").performClick()
         waitForIdle()
+        // the notice after loading several arrangements (PoCoView's)
+        onNodeWithText("Showing arrangement 3 of 8.", substring = true).assertExists()
+        onNodeWithText("OK").performClick()
+        waitForIdle()
         assertEquals(n4.name, s.name)
         assertEquals(2, s.setIndex)
         assertEquals(n4.arrangement(2), s.arrangement)
@@ -203,6 +207,10 @@ class SetsTest {
         val s = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         setContent { App(s, initialDialog = DialogKind.NONE) }
         runOnIdle { s.loadSet(n4.name, ArrangementSet(n4.size, n4::arrangement)) }
+        waitForIdle()
+        onNodeWithText("8 arrangements loaded").assertExists()
+        onNodeWithText("Showing the first of 8.", substring = true).assertExists()
+        onNodeWithText("OK").performClick()
         waitForIdle()
         // keys: PageDown / . next, PageUp / , previous
         onNodeWithTag("canvas").performKeyInput { pressKey(Key.PageDown) }

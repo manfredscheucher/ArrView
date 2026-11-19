@@ -11,6 +11,9 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.percentOffset
@@ -71,12 +74,20 @@ class SettingsUiTest {
         runOnIdle {
             s.toggleWidget(Widget.PROPERTIES)
             s.toggleWidget(Widget.SETTINGS)
-            s.toggleWidget(Widget.INTERSECTION_GRAPH)
+            s.toggleWidget(Widget.INTERSECTIONS)
         }
         awaitDrawing(s)
         waitForIdle()
-        // the Layout group says that it only changes the drawing
-        onNodeWithText(LAYOUT_NOTE).assertExists()
+        // the Layout group: no long note, its (i) says that it only changes the drawing
+        onNodeWithText(LAYOUT_INFO).assertDoesNotExist()
+        onNodeWithTag("info-layout").performClick()
+        waitForIdle()
+        onNodeWithTag("info-layout-text").assertExists()
+        assertEquals(LAYOUT_INFO, onNodeWithTag("info-layout-text").text())
+        onNodeWithTag("info-layout").performClick()
+        waitForIdle()
+        // eps is not in the widget
+        onNodeWithTag("eps").assertDoesNotExist()
         val n = s.arrangement.n
         onNodeWithText("Display").assertExists()
         onNodeWithText("Colour scheme").assertExists()
@@ -123,12 +134,13 @@ class SettingsUiTest {
         waitForIdle()
         assertTrue(s.lineWidth < 1f, "line width ${s.lineWidth}")
         // Reset to defaults: everything in the widget
-        runOnIdle { s.changeModel(DrawModel.MODEL2); s.changeLayoutSettings(LayoutSettings(9, 1e-3)) }
+        runOnIdle { s.changeModel(DrawModel.MODEL1); s.changeLayoutSettings(LayoutSettings(9)); s.changeMaxColumns(4) }
         onNodeWithText("Reset to defaults").performClick()
         waitForIdle()
         assertEquals(ColorScheme.DEFAULT, s.colorScheme)
         assertEquals(AppState.DEFAULT_LINE_WIDTH, s.lineWidth)
-        assertEquals(DrawModel.MODEL1, s.preferredModel)
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
+        assertEquals(AppState.DEFAULT_MAX_WIDGETS, s.maxColumns)
         assertEquals(LayoutSettings(), s.layoutSettings)
         assertTrue(s.settingsAreDefault)
     }
@@ -140,7 +152,7 @@ class SettingsUiTest {
         runOnIdle { s.toggleWidget(Widget.SETTINGS) }
         waitForIdle()
         // as high as the buttons, no 280 dp minimum width
-        for (tag in listOf("max-iterations", "eps")) {
+        for (tag in listOf("max-iterations")) {
             val size = onNodeWithTag(tag).fetchSemanticsNode().size
             with(density) {
                 assertEquals(ButtonDefaults.MinHeight.roundToPx(), size.height, tag)
@@ -152,8 +164,10 @@ class SettingsUiTest {
         waitForIdle()
         assertEquals(1, s.layoutSettings.maxIterations)
         onNodeWithText("\u2212").assertIsNotEnabled()
-        onNodeWithText("+").performClick()
-        onNodeWithText("+").performClick()
+        // the stepper's + (Max. widgets has one too)
+        val plus = onAllNodes(hasText("+") and !hasTestTag("max-widgets-plus")).onFirst()
+        plus.performClick()
+        plus.performClick()
         waitForIdle()
         assertEquals(3, s.layoutSettings.maxIterations)
         assertEquals("3", onNodeWithTag("max-iterations").text())
@@ -164,12 +178,6 @@ class SettingsUiTest {
         onNodeWithTag("max-iterations").performTextReplacement("0")
         onNodeWithText("at least 1").assertExists()
         assertEquals(2, s.layoutSettings.maxIterations)
-        // eps has no buttons
-        onNodeWithTag("eps").performTextReplacement("1e-3")
-        waitForIdle()
-        assertEquals(1e-3, s.layoutSettings.eps)
-        onNodeWithTag("eps").performTextReplacement("-1")
-        onNodeWithText("a positive number").assertExists()
     }
 
     @Test

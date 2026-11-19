@@ -63,7 +63,7 @@ fun Dialogs(state: AppState, kind: DialogKind, open: (DialogKind) -> Unit, close
         DialogKind.EXAMPLES -> ExamplesDialog(state, close)
         DialogKind.WELCOME -> WelcomeDialog(close = close, showExamples = { open(DialogKind.EXAMPLES) })
         DialogKind.ABOUT -> AboutDialog(close)
-        DialogKind.HELP -> HelpDialog(state.helpPage, close)
+        DialogKind.HELP -> HelpDialog(state.helpPage, state.colorScheme, close)
     }
     LaunchedEffect(state.pendingLeave != null) { if (state.pendingLeave != null && kind == DialogKind.SAVE) close() }
     // Load / Import / Open file / closing with unsaved changes (PoCoView's); after the other
@@ -79,8 +79,54 @@ fun Dialogs(state: AppState, kind: DialogKind, open: (DialogKind) -> Unit, close
         TextButton(onClick = state::discardAndLeave) { Text("Discard") }
         TextButton(onClick = state::cancelLeave) { Text("Cancel") }
     }
+    // the model dialogs (Settings, or a change that model 1 cannot show) on top of what opened them
+    state.modelDialog?.let { ModelDialogView(state, it) }
+    state.loadedSetsNotice?.let { count -> if (loadPref(SETS_NOTICE_PREF) != "off") SetsLoadedDialog(state, count) else state.loadedSetsNotice = null }
     // last, so it shows on top of the dialog the error came from
     state.error?.let { ErrorDialog(it) { state.error = null } }
+}
+
+/**
+ * The model dialogs (see [ModelDialog]): a short text, "Do not show again" where the dialog can be
+ * turned off, OK, and Cancel for the model 1 choice. Closing the dialog otherwise counts as OK
+ * (Cancel for the model 1 choice).
+ */
+@Composable
+private fun ModelDialogView(state: AppState, dialog: ModelDialog) {
+    var dontShow by remember(dialog) { mutableStateOf(false) }
+    val ok = { state.confirmModelDialog(dontShow) }
+    val confirm = dialog == ModelDialog.Confirm
+    AlertDialog(
+        onDismissRequest = if (confirm) state::cancelModelDialog else ok,
+        confirmButton = { TextButton(onClick = ok, Modifier.testTag("model-dialog-ok")) { Text("OK") } },
+        dismissButton = if (confirm) ({ TextButton(onClick = state::cancelModelDialog) { Text("Cancel") } }) else null,
+        title = { Text(if (dialog is ModelDialog.Fallback) "Model 2" else "Model 1") },
+        text = {
+            Column {
+                Text(modelDialogText(dialog), style = MaterialTheme.typography.bodyMedium)
+                if (dialog != ModelDialog.NotIntersecting) DontShowAgain(dontShow) { dontShow = it }
+            }
+        },
+    )
+}
+
+/** The text of a model dialog (also checked by the tests). */
+internal fun modelDialogText(dialog: ModelDialog): String = when (dialog) {
+    ModelDialog.Confirm -> "Model 1 is the legacy view. It can only show intersecting arrangements."
+    ModelDialog.NotIntersecting -> "Model 1 can only show intersecting arrangements. This arrangement is not intersecting."
+    is ModelDialog.Fallback -> "The arrangement is no longer intersecting. Switching to model 2."
+}
+
+/** The "Do not show again" checkbox of a dialog ([label]: its wording there); the label toggles too. */
+@Composable
+private fun DontShowAgain(checked: Boolean, label: String = "Do not show again", onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.padding(top = 8.dp).toggleable(checked, role = Role.Checkbox, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked, onCheckedChange = null)
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+    }
 }
 
 /** A load or apply error the user must see (the toolbar status is for info): one OK button. */
@@ -95,7 +141,7 @@ private fun ErrorDialog(message: String, onDismiss: () -> Unit) = AlertDialog(
 /** What "Save changes?" says is unsaved, or null if nothing (the dialog shows no empty text). */
 private fun unsavedText(state: AppState): String? = buildList {
     if (state.arrangementUnsaved) add("Your changes to \"${state.name}\" are not saved.")
-    if (state.unappliedDraft) add("A text edited in the Sequences or Encoding widget is not applied.")
+    if (state.unappliedDraft) add("A text edited in the Encoding widget is not applied.")
 }.joinToString(" ").takeIf { it.isNotEmpty() }
 
 /**
@@ -232,14 +278,28 @@ private fun WelcomeDialog(close: () -> Unit, showExamples: () -> Unit) {
                 )
                 Spacer(Modifier.height(10.dp))
                 FeedbackBox("Interesting arrangements, ideas or general feedback?")
-                // the label toggles too
-                Row(
-                    Modifier.toggleable(dontShow, role = Role.Checkbox) { dontShow = it },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(dontShow, onCheckedChange = null)
-                    Text("Don't show again", style = MaterialTheme.typography.bodyMedium)
-                }
+                DontShowAgain(dontShow, "Don't show again") { dontShow = it }
+            }
+        },
+    )
+}
+
+/** After loading a file or an example set with several arrangements (PoCoView's sets notice). */
+@Composable
+private fun SetsLoadedDialog(state: AppState, count: Int) {
+    var dontShow by remember { mutableStateOf(false) }
+    fun done() { if (dontShow) savePref(SETS_NOTICE_PREF, "off"); state.loadedSetsNotice = null }
+    AlertDialog(
+        onDismissRequest = ::done,
+        confirmButton = { TextButton(onClick = ::done) { Text("OK") } },
+        title = { Text("$count arrangements loaded") },
+        text = {
+            Column {
+                Text(
+                    "Showing ${if (state.setIndex == 0) "the first" else "arrangement ${state.setIndex + 1}"} of $count. Switch between them with the arrows < > at the top (or PageUp / PageDown).",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                DontShowAgain(dontShow, "Don't show again") { dontShow = it }
             }
         },
     )
@@ -286,7 +346,7 @@ private const val ABOUT = "ArrView shows arrangements of pseudocircles, draws th
 
 private const val LINHART_ORTNER = "https://www.combinatorics.org/ojs/index.php/eljc/article/view/v11i1r30"
 
-private val PAPERS = listOf(
+internal val PAPERS = listOf(
     "S. Felsner, M. Scheucher: Arrangements of Pseudocircles: Triangles and Drawings. Discrete & Computational Geometry (2021).",
     "S. Felsner, M. Scheucher: Arrangements of Pseudocircles: On Circularizability. Discrete & Computational Geometry (2020).",
     "J. Linhart, R. Ortner: On the combinatorial structure of arrangements of oriented pseudocircles. " +

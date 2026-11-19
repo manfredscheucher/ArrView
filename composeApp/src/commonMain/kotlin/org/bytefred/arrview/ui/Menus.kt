@@ -41,8 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import org.bytefred.arrview.core.DrawModel
-import org.bytefred.arrview.core.hasModel1
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -184,12 +182,6 @@ fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Un
                 MenuItem(state, "Fit") { state.requestFit() }
                 MenuItem(state, "Zoom in") { view.zoomCenter(ZOOM_STEP) }
                 MenuItem(state, "Zoom out") { view.zoomCenter(1 / ZOOM_STEP) }
-                HorizontalDivider()
-                MenuHeading("Drawing")
-                for (m in DrawModel.entries) {
-                    val enabled = m == DrawModel.MODEL2 || state.arrangement.hasModel1
-                    CheckMenuItem(m.label, state.model == m, enabled) { state.changeModel(m) }
-                }
                 HorizontalDivider()
                 for (w in Widget.entries) CheckMenuItem(w.label, w in state.openWidgets) { state.toggleWidget(w) }
                 HorizontalDivider()

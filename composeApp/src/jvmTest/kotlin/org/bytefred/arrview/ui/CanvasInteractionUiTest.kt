@@ -88,11 +88,16 @@ class CanvasInteractionUiTest {
         // within 10 px of the dot
         onNodeWithTag("canvas").performMouseInput { click(view.toScreen(at) + Offset(6f, 0f)) }
         waitForIdle()
+        // no longer intersecting: the notice, then the collapse in model 2
+        onNodeWithText(modelDialogText(ModelDialog.Fallback {})).assertExists()
+        onNodeWithText("Do not show again").assertExists()
+        assertEquals(nonKrupp, s.arrangement)
+        onNodeWithTag("model-dialog-ok").performClick()
+        waitForIdle()
         assertEquals(nonKrupp.digonCollapse(f), s.arrangement)
         assertEquals("Collapsed a digon", s.status?.text)
-        // no longer intersecting: drawn in model 2, the model 1 chip is off
         assertEquals(DrawModel.MODEL2, s.model)
-        onNodeWithText("Model 1").assertIsNotEnabled()
+        assertEquals(DrawModel.MODEL2, s.preferredModel)
     }
 
     @Test
@@ -216,7 +221,7 @@ class CanvasInteractionUiTest {
     }
 
     @Test
-    fun toolbarModelChipsSwitchTheDrawingAlsoAfterEdits() = runComposeUiTest {
+    fun modelSwitchesTheDrawingAlsoAfterEdits() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
         show(s, view)
@@ -224,10 +229,10 @@ class CanvasInteractionUiTest {
         waitForIdle()
         val flipped = s.arrangement
         assertNotEquals(start, flipped)
-        onNodeWithText("Model 2").performClick()
+        runOnIdle { s.changeModel(DrawModel.MODEL2) }
         waitUntil(timeoutMillis = 10_000) { s.currentDrawing?.model == DrawModel.MODEL2 }
         assertEquals(flipped, s.currentDrawing!!.arrangement)
-        onNodeWithText("Model 1").assertIsEnabled().performClick()
+        runOnIdle { s.changeModel(DrawModel.MODEL1) }
         waitUntil(timeoutMillis = 10_000) { s.currentDrawing?.model == DrawModel.MODEL1 }
         // undo keeps the chosen model
         runOnIdle { s.undo() }
@@ -313,7 +318,8 @@ class CanvasInteractionUiTest {
     fun zoomAndFitKeys() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
-        show(s, view)
+        // the default model: no switch after the first fit
+        show(s, view, start, DrawModel.MODEL2)
         val fitted = view.scale
         for (key in listOf(Key.Plus, Key.Equals, Key.NumPadAdd)) {
             val before = view.scale
@@ -355,10 +361,10 @@ class CanvasInteractionUiTest {
         assertNull(s.openMenu)
         // typing in a field
         onNodeWithText("Settings").performClick()
-        onNodeWithTag("eps").performClick()
+        onNodeWithTag("max-iterations").performClick()
         waitForIdle()
         assertTrue(s.textFieldsFocused > 0)
-        onNodeWithTag("eps").performKeyInput { pressKey(Key.Minus); pressKey(Key.Zero) }
+        onNodeWithTag("max-iterations").performKeyInput { pressKey(Key.Minus); pressKey(Key.Zero) }
         waitForIdle()
         assertEquals(scale, view.scale)
         assertEquals(flipped, s.arrangement)
