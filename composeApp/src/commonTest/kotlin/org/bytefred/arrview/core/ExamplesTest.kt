@@ -21,6 +21,9 @@ class ExamplesTest {
         "n5-digonfree-12-triangles" to 6, "n5-intersecting-13-triangles" to 1, "n6-digonfree-20-triangles" to 4,
         "n7-digonfree-28-triangles" to 19, "n7-digonfree-29-triangles" to 3, "n8-digonfree-37-triangles" to 7,
         "n9-digonfree-48-triangles" to 1,
+        "n4-intersecting-digongraphs" to 7, "n5-intersecting-digongraphs" to 27, "n6-intersecting-digongraphs" to 107,
+        "n7-intersecting-digongraphs" to 485, "n7-intersecting-trianglefree-digongraphs" to 99,
+        "n8-intersecting-nonplanar-digongraph" to 2,
     )
 
     private fun set(name: String) = assertNotNull(Examples.byName(name), name)
@@ -42,7 +45,8 @@ class ExamplesTest {
 
     @Test
     fun everyBundledFileIsInTheCatalogue() {
-        val paths = Examples.sets.mapNotNull { (it.data as? ExampleSet.Data.File)?.path }
+        val paths = Examples.sets.mapNotNull { (it.data as? ExampleSet.Data.File)?.path } +
+            Examples.sets.mapNotNull { it.coloursPath }
         assertEquals(GeneratedExamples.FILES.keys, paths.toSet())
         assertEquals(paths.size, paths.toSet().size)
     }
@@ -50,9 +54,9 @@ class ExamplesTest {
     @Test
     fun listSizes() {
         for ((name, size) in expectedSizes) assertEquals(size, set(name).size, name)
-        for (s in Examples.inGroup(ExampleGroup.FUREDI_PALASTI) + Examples.inGroup(ExampleGroup.SINGLETONS)) {
-            assertEquals(1, s.size, s.name)
-        }
+        val singles = listOf(ExampleGroup.FUREDI_PALASTI, ExampleGroup.NON_CIRCULARIZABLE, ExampleGroup.COLORINGS, ExampleGroup.THREE)
+        for (s in singles.flatMap(Examples::inGroup)) assertEquals(1, s.size, s.name)
+        assertEquals(Examples.sets.size, (singles.flatMap(Examples::inGroup) + Examples.sets.filter { it.name in expectedSizes }).size)
     }
 
     @Test
@@ -129,15 +133,43 @@ class ExamplesTest {
     @Test
     fun websitePagesAndPapers() {
         assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles", WebPage.NO_MORE_CIRCLES.url)
+        assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings", WebPage.COLORINGS.url)
+        val fromComputations = listOf(
+            "n6-intersecting-nonr-edelsbrunner-ramos", "n6-intersecting-nonr-all-triangles-krupp", "n9-great-nonr-pappus",
+            "n7-connected-koester",
+        )
         for (s in Examples.sets) {
-            // a page of the website: its data is from the website mirror
+            // a page of the website: its data is from the website mirror (the database also from the computations)
             if (s.page != null) {
-                val fromResults = s.group in listOf(ExampleGroup.INTERSECTING, ExampleGroup.DIGON_FREE) ||
-                    s.name == "n6-intersecting-nonr-edelsbrunner-ramos"
+                val fromResults = s.name.endsWith("-all") || s.name == "n6-intersecting-nonr-edelsbrunner-ramos"
                 assertTrue(s.source!!.startsWith("website/") || fromResults, s.name)
             }
-            if (s.group == ExampleGroup.SINGLETONS && s.page == null) assertEquals(null, s.paper, s.name)
+            if (s.name in fromComputations - "n6-intersecting-nonr-edelsbrunner-ramos") assertEquals(null, s.page, s.name)
+            if (s.source?.startsWith("computations/") == true && !s.name.endsWith("-all")) assertTrue(s.name in fromComputations, s.name)
         }
-        assertTrue(Examples.inGroup(ExampleGroup.SINGLETONS).all { it.size == 1 })
+    }
+
+    @Test
+    fun everyGroupHasADescriptionAndWellFormedLinks() {
+        val url = Regex("""https://[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9./?=_-]*""")
+        for (g in ExampleGroup.entries) {
+            assertTrue(g.title.isNotBlank() && g.description.endsWith("."), g.name)
+            // one or two short sentences
+            assertTrue(g.description.split(". ").size <= 2 && g.description.length <= 110, "${g.name}: ${g.description.length}")
+            assertTrue(g.page != null || g.paper != null, g.name)
+            for (link in listOfNotNull(g.page?.url, g.paper?.url)) assertNotNull(url.matchEntire(link), link)
+        }
+        for (s in Examples.sets) for (link in listOfNotNull(s.page?.url, s.paper?.url)) assertNotNull(url.matchEntire(link), link)
+        assertEquals("https://arxiv.org/abs/2205.08181", Paper.COLORING.url)
+    }
+
+    @Test
+    fun labelsAreShortAndUniqueWithinTheirGroup() {
+        for (g in ExampleGroup.entries) {
+            val labels = Examples.inGroup(g).map { it.label }
+            assertEquals(labels.size, labels.toSet().size, g.name)
+            for (l in labels) assertTrue(l.length <= 40, l)
+        }
+        for (s in Examples.sets) assertTrue(s.description.endsWith(".") && s.description.length <= 130, s.name)
     }
 }

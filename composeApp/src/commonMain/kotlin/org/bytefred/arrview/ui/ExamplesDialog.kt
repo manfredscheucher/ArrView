@@ -55,9 +55,10 @@ class ExamplesState {
 }
 
 /**
- * The groups of bundled examples ([Examples]), each set a leaf. The selected set shows its
- * description, size and, for a list, a chooser for the member. Load replaces the arrangement with
- * it (after "Save changes?", [AppState.leave]). The data is compiled in, so nothing has to load.
+ * The groups of bundled examples ([Examples]) by purpose, each with its description and links, and
+ * each set a leaf. The selected set shows its description, size and, for a list, a chooser for the
+ * member. Load replaces the arrangement with it (after "Save changes?", [AppState.leave]). The data
+ * is compiled in, so nothing has to load.
  */
 @Composable
 fun ExamplesDialog(state: AppState, close: () -> Unit) {
@@ -88,42 +89,46 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
                 MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(4.dp))
-            @Composable
-            fun leaves(sets: List<ExampleSet>, depth: Int) {
+            // two levels: the groups by purpose, then their sets; an open group starts with what it is
+            for (group in ExampleGroup.entries) {
+                val sets = Examples.inGroup(group)
+                TreeHeader("${group.title} (${sets.size})", 0, group.name in open) { toggle(group.name) }
+                HorizontalDivider()
+                if (group.name !in open) continue
+                GroupIntro(group)
                 for (set in sets) {
-                    TreeLeaf(set.name, depth, ex.selected == set) {
+                    TreeLeaf(leafLabel(set), 1, ex.selected == set) {
                         // the same leaf again keeps its (maybe invalid) number field
                         if (ex.selected != set) indexError = false
                         ex.selected = set
                     }
                     if (ex.selected == set) key(set.name) {
-                        ExampleDetails(state, set, ex.indexOf(set), depth) { i ->
+                        ExampleDetails(state, set, ex.indexOf(set), 1) { i ->
                             if (i != null) ex.index[set.name] = i
                             indexError = i == null
                         }
                     }
                 }
             }
-            // two levels: the sets by group, then the single named arrangements
-            TreeHeader(SETS, 0, SETS in open) { toggle(SETS) }
-            HorizontalDivider()
-            if (SETS in open) for (group in ExampleGroup.entries.filter { it != ExampleGroup.SINGLETONS }) {
-                val sets = Examples.inGroup(group)
-                TreeHeader("${group.title} (${sets.size})", 1, group.name in open) { toggle(group.name) }
-                if (group.name in open) leaves(sets, 2)
-            }
-            val singletons = Examples.inGroup(ExampleGroup.SINGLETONS)
-            TreeHeader("${ExampleGroup.SINGLETONS.title} (${singletons.size})", 0, ExampleGroup.SINGLETONS.name in open) {
-                toggle(ExampleGroup.SINGLETONS.name)
-            }
-            HorizontalDivider()
-            if (ExampleGroup.SINGLETONS.name in open) leaves(singletons, 1)
         }
     }
 }
 
-/** The top node of the sets (the groups below it). */
-private const val SETS = "Sets"
+/** The text of a leaf: the label and, for a list, how many arrangements it has. */
+internal fun leafLabel(set: ExampleSet): String = if (set.size == 1) set.label else "${set.label} (${set.size})"
+
+/** The description and links of an open group, above its sets. */
+@Composable
+private fun GroupIntro(group: ExampleGroup) {
+    Column(
+        Modifier.padding(start = INDENT + 8.dp, bottom = 4.dp).testTag("group-info"),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(group.description, style = MaterialTheme.typography.bodySmall)
+        group.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        group.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+    }
+}
 
 /** Indentation per tree level. */
 private val INDENT = 16.dp
@@ -208,6 +213,7 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
             ) { i -> onIndex(i?.minus(1)) }
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
+        if (set.hasColours) Text("The crossings are shown in their colours.", style = MaterialTheme.typography.bodySmall)
         set.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
         set.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
         Text(

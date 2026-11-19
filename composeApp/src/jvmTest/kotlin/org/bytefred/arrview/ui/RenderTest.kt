@@ -104,7 +104,7 @@ class RenderTest {
         for (kind in DialogKind.entries - DialogKind.NONE - DialogKind.HELP) {
             val s = state()
             if (kind == DialogKind.EXAMPLES) {
-                s.examples.expanded.addAll(listOf("Sets", ExampleGroup.GREAT.name, ExampleGroup.INTERSECTING.name, ExampleGroup.SINGLETONS.name))
+                s.examples.expanded.addAll(listOf(ExampleGroup.DATABASE.name, ExampleGroup.COLORINGS.name))
                 s.examples.selected = Examples.byName("n5-intersecting-all")
                 s.examples.index["n5-intersecting-all"] = 16
             }

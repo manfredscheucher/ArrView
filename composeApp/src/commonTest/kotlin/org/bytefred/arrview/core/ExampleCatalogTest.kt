@@ -55,12 +55,12 @@ class ExampleCatalogTest {
 
     @Test
     fun intersectingSetsAlsoHaveMembersWithDigons() {
-        for (s in Examples.inGroup(ExampleGroup.INTERSECTING)) assertTrue(members(s.name).any { it.digonCount > 0 }, s.name)
+        for (s in Examples.sets.filter { Regex("n\\d+-intersecting-all").matches(it.name) && it.n >= 3 }) assertTrue(members(s.name).any { it.digonCount > 0 }, s.name)
     }
 
     @Test
     fun connectedSetsIncludeNonIntersectingMembers() {
-        for (s in Examples.inGroup(ExampleGroup.CONNECTED)) {
+        for (s in Examples.sets.filter { Regex("n\\d+-connected-all").matches(it.name) }) {
             val list = members(s.name)
             assertTrue(list.any { !it.isIntersecting && it.nonIntersectingPairCount > 0 }, s.name)
             assertTrue(list.any { it.isIntersecting }, s.name)
@@ -134,8 +134,49 @@ class ExampleCatalogTest {
     fun descriptionsNameTheirSize() {
         for (s in Examples.sets) {
             assertTrue(s.description.endsWith("."), s.name)
-            if (s.group != ExampleGroup.SINGLETONS) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
+            if (s.group != ExampleGroup.THREE) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
             Regex("""-(\d+)-triangles$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} triangles" in s.description, s.description) }
         }
+    }
+
+    @Test
+    fun triangleSaturatedColouringsAreProper() {
+        val coloured = Examples.inGroup(ExampleGroup.COLORINGS).filter { it.hasColours }
+        assertEquals(6, coloured.size)
+        for (s in coloured) {
+            val arr = s.arrangement(0)
+            val colours = assertNotNull(s.colours(0), s.name)
+            assertEquals(arr.size, colours.size, s.name)
+            assertTrue(arr.isDigonFree, s.name)
+            for (k in 0 until arr.size) {
+                assertTrue(colours[k] in 0..2, s.name)
+                // one colour per crossing, neighbours along a circle differ
+                assertEquals(colours[k], colours[arr.partners[k]], "${s.name} crossing $k")
+                assertTrue(colours[k] != colours[arr.nextOnCircle(k)], "${s.name} crossing $k")
+            }
+            // triangle-saturated: every crossing is on a triangle
+            val onTriangle = BooleanArray(arr.size)
+            for (f in arr.faces.filter { it.size == 3 }) for (a in f) {
+                onTriangle[a / 2] = true
+                onTriangle[arr.partners[a / 2]] = true
+            }
+            assertTrue(onTriangle.all { it }, s.name)
+            assertEquals(s.name.split("-")[1] == "great", arr.isGreat, s.name)
+            assertTrue(Examples.crossingColours(arr).contentEquals(colours), s.name)
+        }
+        // only the stored arrangements: an edited one has no colours
+        val first = coloured.first().arrangement(0)
+        assertEquals(null, Examples.crossingColours(first.triangleFlip(first.faces.indexOfFirst { it.size == 3 })))
+        assertEquals(null, Examples.crossingColours(Examples.start.arrangement()))
+    }
+
+    @Test
+    fun koesterHasSevenCirclesAndOneNonCrossingPair() {
+        val koester = set("n7-connected-koester")
+        assertEquals(false, koester.hasColours)
+        val arr = koester.arrangement(0)
+        assertEquals(7, arr.n)
+        assertEquals(1, arr.nonIntersectingPairCount)
+        assertEquals(40, arr.crossingCount)
     }
 }

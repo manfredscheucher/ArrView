@@ -2,7 +2,6 @@ package org.bytefred.arrview.ui
 
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.DrawModel
-import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.LayoutSettings
@@ -141,7 +140,6 @@ class HelpClaimsTest {
     @Test
     fun examplesSetsAndSingletons() {
         assertSays(HelpPage.GENERAL, "Examples... has the bundled arrangements: Sets (by group, as on the pseudocircles website) and Singletons.")
-        assertEquals("Singletons", ExampleGroup.SINGLETONS.title)
     }
 
     @Test
