@@ -83,7 +83,7 @@ collinear segments ignored) and treats places closer than 1e-5 of the drawing as
 (crossing if the curve changes sides of the other one there, else touching); `CurveCheckTest`
 tests it on constructed curves. Result of the full sweep (4.5 min): 17772
 arrangements, 23858 drawings, no defect except model 1 digons: of 17529 model 1 digons, 320 cross
-visibly (in 294 drawings) and 1976 below a pixel; all others touch. All results valid.
+visibly (one pair each in 320 drawings) and 1976 below a pixel; all others touch. All results valid.
 
 - Model 2: no defects. Model 1 without digons: no defects. Krupp and its flips, the start example
   and the bundled n = 6 examples: clean (no visible defect).
