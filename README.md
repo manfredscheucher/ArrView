@@ -10,6 +10,7 @@ intersection graph and the classes (intersecting, digon-free, great, cylindrical
 flipped and digons collapsed. It is written in Kotlin Multiplatform (Compose) and also runs as a
 desktop app.
 
+- User manual (what you can do in the GUI): [doc/USER_GUIDE.md](doc/USER_GUIDE.md)
 - Specification and decisions: [doc/SPEC.md](doc/SPEC.md)
 - Building, testing, deploying: [doc/DEVELOPMENT.md](doc/DEVELOPMENT.md)
 

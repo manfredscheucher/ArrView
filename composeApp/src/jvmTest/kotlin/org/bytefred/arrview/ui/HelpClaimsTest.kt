@@ -22,6 +22,9 @@ class HelpClaimsTest {
     /** doc/USER_GUIDE.md (the tests run in composeApp/). */
     private val guide: String = File("../doc/USER_GUIDE.md").readText()
 
+    /** [guide] with its line breaks as spaces (sentences wrap). */
+    private val flatGuide: String = guide.replace(Regex("\\s*\n\\s*"), " ")
+
     private fun assertSays(page: HelpPage, claim: String) =
         assertTrue(claim in pages.getValue(page), "Help ${page.title} should say \"$claim\"")
 
@@ -71,8 +74,8 @@ class HelpClaimsTest {
     fun arrangementMenuItems() {
         // the menu itself: MenusAndDialogsUiTest.theMenusHaveTheirItems
         for (item in ARRANGEMENT_MENU) assertSays(HelpPage.GENERAL, item)
-        assertTrue("Arrangement: ${ARRANGEMENT_MENU.joinToString(", ")}." in guide, "USER_GUIDE.md: Arrangement menu")
-        assertTrue("Help: ${HelpPage.entries.joinToString(", ") { it.title }}, About." in guide.replace("\n  ", " "), "USER_GUIDE.md: Help menu")
+        for (item in ARRANGEMENT_MENU) assertTrue("**$item**" in guide, "USER_GUIDE.md: Arrangement menu $item")
+        assertTrue("short pages (${HelpPage.entries.joinToString(", ") { it.title }}) and About ArrView" in flatGuide, "USER_GUIDE.md: Help menu")
     }
 
     @Test
@@ -108,23 +111,30 @@ class HelpClaimsTest {
         val lines = helpText(HelpPage.SHORTCUTS)
         for (line in listOf("Esc: close the open menu", "Ctrl+Z: undo", "Ctrl+Shift+Z or Ctrl+Y: redo", "+ / -: zoom in / out", "Home or 0: fit")) {
             assertTrue(line in lines, line)
-            assertTrue("- $line" in guide, "USER_GUIDE.md: $line")
+            val (key, action) = line.split(": ")
+            assertTrue("| $key | $action |" in guide, "USER_GUIDE.md: $line")
         }
+        assertTrue("PageUp or , / PageDown or .: previous / next arrangement of a file or example set" in lines)
+        assertTrue("| PageUp or , | previous arrangement" in guide && "| PageDown or . | next arrangement" in guide, "USER_GUIDE.md: PageUp / PageDown")
         assertSays(HelpPage.SHORTCUTS, "On a Mac, Cmd works like Ctrl")
-        assertTrue("On a Mac, Cmd works like Ctrl." in guide)
-        val guideKeys = guide.substringAfter("## Keyboard shortcuts").lines().filter { it.startsWith("- ") }.map { it.drop(2) }
-        assertEquals(lines.filter { ": " in it && !it.startsWith("Mouse") }, guideKeys)
+        assertTrue("On a Mac, Cmd works like Ctrl and Ctrl+click like a right-click." in flatGuide)
+        // the key rows of the guide's table (before the mouse rows) are exactly the Help's keys, PageUp / PageDown split
+        val guideKeys = guide.substringAfter("## Keyboard and mouse").lines().filter { it.startsWith("| ") }
+            .map { it.split(" | ").first().removePrefix("| ") }.drop(1).takeWhile { !it.startsWith("Click") }
+        val helpKeys = lines.filter { ": " in it && !it.startsWith("Mouse") }.map { it.substringBefore(": ") }
+            .flatMap { if (it.startsWith("PageUp")) listOf("PageUp or ,", "PageDown or .") else listOf(it) }
+        assertEquals(helpKeys, guideKeys)
     }
 
     @Test
     fun userGuideLayoutDefaults() {
         val d = LayoutSettings()
-        assertTrue("Layout (Visualization: model 2 or model 1, max. iterations (${d.maxIterations}))" in guide.replace("\n  ", " "))
-        assertTrue("line width 0.5 to 8, default 4" in guide.replace("\n  ", " "))
+        assertTrue("Visualization (model 2, the default, or model 1) and Max. iterations (at least 1, default ${d.maxIterations})" in flatGuide)
+        assertTrue("Line width (0.5 to 8 px, default 4)" in flatGuide)
         assertEquals(0.5f..8f, AppState.LINE_WIDTH_RANGE)
         assertEquals(4f, AppState.DEFAULT_LINE_WIDTH)
-        val schemes = ColorScheme.entries.joinToString(", ") { if (it == ColorScheme.DEFAULT) "${it.label} (default)" else it.label }
-        assertTrue("colour scheme: $schemes;" in guide.replace("\n  ", " "), schemes)
+        assertEquals(listOf("Standard", "rainbow", "rainbow2"), ColorScheme.entries.map { it.label })
+        assertTrue("Colour scheme (Standard, the default, a fixed list of 12 colours; rainbow and rainbow2, computed from n)" in flatGuide)
     }
 
     @Test
@@ -135,9 +145,9 @@ class HelpClaimsTest {
         assertEquals("possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6", possibleList("triangle flips", listOf(listOf(0, 1, 2) to 2, listOf(0, 1, 3) to 1, listOf(2, 3, 5) to 1)))
         assertSays(HelpPage.WIDGETS, "possible triangle flips (3): 1 2 3 (x2), 1 2 4, 3 4 6; click an entry to flip it")
         assertSays(HelpPage.WIDGETS, "The entries are links: a click does what a click on the pair in the graph does")
-        assertTrue("Click an entry to do it, like a click on the pair" in guide.replace("\n  ", " "))
+        assertTrue("a click does what a click on the pair does" in flatGuide)
         assertEquals("possible digon collapses (0): none", possibleList("digon collapses", emptyList()))
-        assertTrue("\"possible digon creates (k): 1 3 (x2), 2 4\"" in guide.replace("\n  ", " "))
+        assertTrue("\"possible digon creates (k): 1 3 (x2), 2 4\"" in flatGuide)
     }
 
     @Test
@@ -183,7 +193,7 @@ class HelpClaimsTest {
         assertSays(HelpPage.GENERAL, "(for the outer face in a corner of the canvas)")
         assertSays(HelpPage.GENERAL, "one Create digon entry per pair of circles that can create a digon there (several ways: a submenu)")
         assertSays(HelpPage.GENERAL, "they are listed along circle i (the smaller number), in the order of its sequence, then along circle j.")
-        assertTrue("\"Create digon i j\" per pair" in guide && "listed along circle i" in guide, "USER_GUIDE.md: right-click creates, order")
+        assertTrue("\"Create digon i j\" per pair" in flatGuide && "listed along circle i" in flatGuide, "USER_GUIDE.md: right-click creates, order")
         assertSays(HelpPage.GENERAL, "the two sides of a digon create in orange")
         // orange: red > green > blue
         assertTrue(HIGHLIGHT_SIDE.red > HIGHLIGHT_SIDE.green && HIGHLIGHT_SIDE.green > HIGHLIGHT_SIDE.blue)
@@ -199,6 +209,6 @@ class HelpClaimsTest {
         val example = "1* 2 3* 2"
         assertTrue(example in entries, "$entries")
         assertTrue("`$example`" in guide, "USER_GUIDE.md: create menu example")
-        assertTrue("- Triangles (the triangle hypergraph): " in guide && "dashed for a non-crossing pair" in guide, "USER_GUIDE.md: graph views")
+        assertTrue("## Triangles" in guide && "A dashed edge: the two circles do not cross but can create a digon." in flatGuide, "USER_GUIDE.md: graph views")
     }
 }
