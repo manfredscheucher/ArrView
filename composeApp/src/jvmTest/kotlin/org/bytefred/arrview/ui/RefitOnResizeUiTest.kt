@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.Point
+import org.bytefred.arrview.core.TextFormat
+import org.bytefred.arrview.core.sequencesText
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -132,5 +134,18 @@ class RefitOnResizeUiTest {
         runOnIdle { s.toggleWidget(Widget.SETTINGS) }
         waitForIdle()
         assertEquals(scale, view.scale)
+        // an edit (a flip) does not count and does not refit
+        val before = s.arrangement
+        val t = s.arrangement.faces.indices.first { s.arrangement.faces[it].size == 3 }
+        runOnIdle { s.flipTriangle(t) }
+        waitUntil(timeoutMillis = 10_000) { s.currentDrawing != null }
+        assertTrue(view.userAdjusted)
+        assertEquals(scale, view.scale)
+        // Apply in the Encoding widget fits (as PoCoView's Apply): auto-fit again
+        runOnIdle { s.drafts[TextFormat.SEQUENCES] = sequencesText(before) }
+        runOnIdle { s.applyDraft(TextFormat.SEQUENCES) }
+        waitUntil(timeoutMillis = 10_000) { s.currentDrawing != null && view.fittedRequest == s.fitRequest }
+        assertFalse(view.userAdjusted)
+        assertFitted(s, view)
     }
 }

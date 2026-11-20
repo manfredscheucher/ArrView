@@ -775,7 +775,7 @@ class AppState(
     }
 
     /**
-     * Applies the edited [format] text (undoable). Invalid text goes to the error dialog with the
+     * Applies the edited [format] text (undoable) and fits the view. Invalid text goes to the error dialog with the
      * reason (sequences: the Linhart-Ortner condition that fails) and the draft stays.
      */
     fun applyDraft(format: TextFormat) {
@@ -789,6 +789,8 @@ class AppState(
         drafts.remove(format)
         if (next == arrangement) return
         change(next, "Applied the ${format.label.lowercase()}")
+        // as PoCoView's Apply: a fresh fit (and the automatic fit on resize again)
+        requestFit()
     }
 
     /**

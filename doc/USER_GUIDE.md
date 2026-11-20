@@ -21,8 +21,8 @@ https://manfredscheucher.github.io/ArrView/
   order of its sequence, then along circle j.
 - Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu (also for Make outer face).
 - While you have not zoomed or panned, the drawing is fitted again whenever the canvas changes size
-  (window, widgets, dividers). After a zoom or pan it stays; Fit (Home or 0) or loading brings the
-  automatic fit back.
+  (window, widgets, dividers). After a zoom or pan it stays; Fit (Home or 0), loading or Apply brings
+  the automatic fit back.
 - Drawing: model 2 (primal-dual graph, digons as regions) by default; model 1 (primal graph, legacy,
   intersecting arrangements only, a digon's circles touch) in Settings > Visualization, after a
   dialog. If the arrangement stops being intersecting, ArrView switches to model 2 with a notice.
