@@ -51,10 +51,13 @@ attribute, maybe there are more".
   does not show.
 - `"crossingColors"` (not `"colors"`, which is PoCoView's number of colours).
 
+### Decided later
+
+- Set-level metadata (members of large sets carry only their encoding) is fine. Manfred: "so wie
+  dus für sinnvoll empfindest passt scho".
+
 ### Open questions
 
-- Members of large sets carry only their encoding; the metadata is at set level. Is that what
-  "every arrangement a JSON with metadata" meant, or should every member repeat name/n?
 - File names keep the old stems (`colorings/n8_koester.json` holds `n7-connected-koester`); PoCoView
   names files after the example. Rename?
 - PoCoView's `"reference"` and `"colors"` (count) keys are not used. Add `"colors": 3` to the
