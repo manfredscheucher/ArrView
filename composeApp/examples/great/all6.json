@@ -1,0 +1,17 @@
+{
+  "name": "n6-great-all",
+  "n": 6,
+  "group": "Database",
+  "label": "Great, n = 6",
+  "description": "All arrangements of 6 great pseudocircles.",
+  "links": [
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/great/all6.enc.greatcircles.enc",
+  "arrangements": [
+    {"mod1s6": ":_kAb`K_LeKfLcMOdNP`HK_HLcJMdJNaIObIPeGQfGR_@HUVaBISTcDJYZeFGWX"},
+    {"mod1s6": ":_q@BKL`AKMbCLNaDMO_CNP_DOPhJKLiJKMeHLNfIMOeGNPfGOPeFGHIJ_@ABCD"},
+    {"mod1s6": ":_mCD`A_BeGfHiJlNOlMNlMOkPRkQRkPQaBIJS`CEGT_DFHU`AEIV_BFJWcDGHX"},
+    {"mod1s6": ":_sNOPQR_@ABC`ADEKaBDFI`CEGJ_BFHL_CGHMdIKNOeJKNPhLMQRfILOQgJMPR"}
+  ]
+}

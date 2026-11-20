@@ -73,4 +73,44 @@ class FilesTest {
         val connected = Examples.byName("n3-connected-all")!!.let { set -> (0 until set.size).map(set::arrangement).first { !it.isIntersecting } }
         assertEquals(0 to 0, connected.kruppTriples)
     }
+
+    @Test
+    fun jsonFormsAndCrossingColors() {
+        // the encoding is one attribute: sequences, mod1s6 or mod2s6; other keys are metadata
+        val m1 = readArrangement("{\"name\": \"k\", \"n\": 3, \"label\": \"x\", \"mod1s6\": ${jsonString(Model1.encode(krupp))}}")
+        assertEquals("k", m1.name)
+        assertEquals(krupp.canonical, m1.arrangement.canonical)
+        assertEquals(krupp.canonical, readArrangement("{\"mod2s6\": ${jsonString(Model2.encode(krupp))}}").arrangement.canonical)
+        // crossing colours: one word per entry, written and read back with the sequences
+        val colors = List(krupp.size) { listOf("R", "G", "B")[it % 3] }
+        val json = arrangementFile("c", krupp, FileFormat.JSON, colors)
+        assertTrue("\"$CROSSING_COLORS_KEY\": [" in json)
+        val read = readArrangement(json)
+        assertEquals(krupp, read.arrangement)
+        assertEquals(colors, read.colors)
+        assertNull(readArrangement(arrangementFile("c", krupp, FileFormat.JSON)).colors)
+        // a set object (the example files, Save file of a set), one object per line, a list (older files)
+        val set = arrangementsFile("both", listOf(krupp, start), FileFormat.JSON) { if (it == 0) colors else null }
+        val file = readArrangementFile(set)
+        assertEquals("both", file.name)
+        assertEquals(listOf(krupp, start), file.arrangements.map { it.arrangement })
+        assertEquals(listOf(colors, null), file.arrangements.map { it.colors })
+        val lines = arrangementFile("a", krupp, FileFormat.JSON).replace("\n", "") + "\n" + arrangementFile("b", start, FileFormat.JSON).replace("\n", "")
+        assertEquals(listOf("a", "b"), readArrangements(lines).map { it.name })
+        val list = "[" + arrangementFile("a", krupp, FileFormat.JSON) + ", " + arrangementFile("b", start, FileFormat.JSON) + "]"
+        assertEquals(listOf(krupp, start), readArrangements(list).map { it.arrangement })
+        // wrong ones say why
+        val bad = mapOf(
+            "{\"sequences\": [[2, 3, -2, -3], [1, -3, -1, 3], [1, 2, -1, -2]], \"mod1s6\": \":B\"}" to "not several",
+            "{\"name\": \"x\"}" to "expected one of",
+            "{\"n\": 4, \"sequences\": [[2, 3, -2, -3], [1, -3, -1, 3], [1, 2, -1, -2]]}" to "\"n\" is 4",
+            "{\"sequences\": [[2, 3, -2, -3], [1, -3, -1, 3], [1, 2, -1, -2]], \"crossingColors\": [[\"R\"]]}" to "shape",
+            "{\"mod2s6\": ${jsonString(Model2.encode(krupp))}, \"crossingColors\": []}" to "needs",
+            "{\"name\": \"s\", \"arrangements\": []}" to "list of objects",
+        )
+        for ((text, reason) in bad) {
+            val e = assertFailsWith<InvalidArrangementException>(text) { readArrangementFile(text) }
+            assertTrue(reason in e.message!!, "$text: ${e.message}")
+        }
+    }
 }

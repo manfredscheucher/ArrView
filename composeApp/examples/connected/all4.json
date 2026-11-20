@@ -1,0 +1,35 @@
+{
+  "name": "n4-connected-all",
+  "n": 4,
+  "group": "Database",
+  "label": "Connected, n = 4",
+  "description": "All connected arrangements of 4 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/pseudocircles/connected/all4.mod2s6",
+  "arrangements": [
+    {"mod2s6": ":~?@?k?`?qpFECa\\iIEGvHH?aUnQPhR@MIDQ}IEDHXGGs^e`@@xVP?AC|S?ABJZHOw`mcAq~AKFDA}SgUMJoohClEDCAKGOTJpp?kX??`@{s]SIo__of?@ca[c[OIOPGslDB@qV"},
+    {"mod2s6": ":~?@?k?OwmpEGcjSOIOmQ@x?j]cBA]AULHdAuICCGxG?o\\e`baeaEFHD|S?CTJzHGs^mdDmCCIECamScSLJO_`?jDCbqCCKFHOowkh?@ba{o[RIOPOklAGca{_YNHo@?ojCA`aN"},
+    {"mod2s6": ":~?@?k?OwknWbAqLiGDGVH?{_TnQ@`N@LHdAuICBAC[c?WMHXgGwhg`ca}i?AIzHGs^mbaavAIECamScSLJO_`?jDCbqCCMSJP_wgVBDcQ{o[RIO?OKd@FCa{_YNHo@?ojCA`aN"},
+    {"mod2s6": ":~?@?k??og`WacALiECFcZc[[NIVgwkd_dBAPKja__{ckYVrO`hNPABDlSCISJD|c_WMvQQnA?CCA]S_QKIoOW{hCCB`{CEDGo_ogfAEda{kYQHo@Ggj?ACAK[WMHPpXOnDBCAv"},
+    {"mod2s6": ":~?@?k??oipDGug_}xFFBq@Q|FDckCgWQHd[SCEOqQph^LAEc|CGEEGdlTOkVuQ@_z\\HI{G?CGDCA]S_QKIoOWSbCCB`{?IEGo_ogfAEda{kYQHo@Ggj@ABqC[WMHPpXOnBGDAv"},
+    {"mod2s6": ":ui@@_uhA@aysWSJGUGo_\\YfBqLq?AEVh?cf__aP}IADEckc?_QHxgg[SPsOo_^T?@AqCKMIDp?g[Z@AbqKCQQHq@Gw^?EBQSWSMGp`@?fA@`@f"},
+    {"mod2s6": ":~?@?k@PG{nWaBqDiCBFCJcs[RnP`PF@HDcaeI?AqRAuYAEEClCCITtO?`CeTJZGwgULvQAfAEFCD}S[OJIO?OwfBBbPs?CCGOOgcd@EDQsgYPHq@HOnBFcA{WWPJP`OkdCAbqn"},
+    {"mod2s6": ":ui@@?sfS`?ysSQMkQ@Ow]OlO?OSWLmQPXI|@Db{CCGPpOAHJHEDBKs[`g``_xNTEBaaCGEEEOO__^@DcQScUMFpp@?fA@bQ[SSKFO?gcd?ABQN"},
+    {"mod2s6": ":~?@?k@PG{nWaBqDiCBFCJcWWLFCzsWb_caqHGgUpO?UQSKJXgHJP@Aaami?CHd\\c[ULvQAfAEFCD}S[OJIO?OwfBBbPs?CCGOOgcdEECQsgWRIq@HOnBFcA{WULGoPPGlCAbqn"},
+    {"mod2s6": ":ui@@?kdS`apdYAADBJCSSNlPOocZ[cBPpA|@HwG?zD?AAQMQENGc{s[`g`@_xJTEBbQCCSNHo_gWT@@bA[?GGFPPG{bFCCASGUKHO@Gs\\BAAqN"},
+    {"mod2s6": ":ui?owodS__isOZWbaPgw]PlOO_gUKHvH?gb]_BkC?EGGWi@NHDCa{sW^g`@OpJTDBAP{CCDDo?W[\\CDBQK_SOHp_w{d@@BASOQJEo@?wbBECA^"},
+    {"mod2s6": ":ui?pWqh@@A`dYGGCa`|aGLlPpgw`[_czs?OJFCkC?ba`bqHNHDBa[sW`g`@OpJTDB@qCCSNHo_gcT@@bA[OOLFO@?{bEFCASGUKHP?wcZ?@aqN"},
+    {"mod2s6": ":kg?_o_ZO_?YSKGFCtGocSJjO?W_\\WdBzSGMKFvH_y|DDwGGOILpP?gcV??_ocGKIFoowo\\DBApk?AGEppGg^ACB@v"},
+    {"mod2s6": ":kg?_wa`??``DIEEDTHGml?FUGWOMHEbzSo^[`A`_y|DDwGGOILpP?gcV?BA`sCECBO?O_\\BDB@{SQJEoOw_ZABb@~"},
+    {"mod2s6": ":kg??LACHhPPGgVS_?_o[OMjP`?gYNkR@|iWMmOog]|CDwGGKGLpOo_SV??_o{GKHDP`_w^CDApk?AGEo_g[RGEB`~"},
+    {"mod2s6": ":ae??WOKIDrGGU\\BA`_|AACCayS_TScAYsGNW_?jS?CBBoO_SLCCAPS?CEBoOWSVGCa`^"},
+    {"mod2s6": ":kg??_}`@@AIS_QIiOOg[YNjPOwcWMkQptiULmO__Y|BBAkC?EKpOOOO^ABA@SCIGCpPWs\\BCa`c?MKFo?WOLFDbPv"},
+    {"mod2s6": ":ae?@[qAEfP_|AABA@PGmdGDTH?elA@`?g[TW_?jS?CCDoOWWNBCAPS?CDDoO_WNDCAPV"},
+    {"mod2s6": ":ui?pWqh@@A`dYQIFuGg[ZYfCJcCf]cCkC?IGFWg?Obc`bPxCcRrP?o[QJGYGOZT@DBq[GKHDOOWof?ABaC?OPHPpGs^ABApcSOLHPOww`BAAqN"},
+    {"mod2s6": ":ae??WOVKa`hscVO_`P?idBA@pTQMHjO_ta?@@AJSCCDBOowcV??_pSOMHDo_gWP?AA@V"},
+    {"mod2s6": ":~?@?k?a\\aELIUg__j[_?ZsS\\_cA`o{_QpO?gkWLJXHGkdefd|CGECCcQ}iaUuP`Or\\FG[GGWMRID]SWMIGO?GWXCCBq{SUMHQPXClFCCAkGGRIo?GshA@cqcSSKFQPxGnBEcQv"}
+  ]
+}

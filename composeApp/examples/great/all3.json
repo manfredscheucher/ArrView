@@ -1,0 +1,12 @@
+{
+  "name": "n3-great-all",
+  "n": 3,
+  "group": "Database",
+  "label": "Great, n = 3",
+  "description": "All arrangements of 3 great pseudocircles.",
+  "links": [
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/great/all3.enc.greatcircles.enc",
+  "mod1s6": ":GgXeBQAQAN"
+}

@@ -1,0 +1,40 @@
+{
+  "name": "n5-intersecting-digongraphs",
+  "n": 5,
+  "group": "Digongraphs",
+  "label": "n = 5, all types",
+  "description": "Intersecting arrangements of 5 pseudocircles, one for every type of digongraph.",
+  "links": [
+    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+  ],
+  "source": "website/arrangements/digongraphs/data/n5_all_types_of_digongraphs.enc",
+  "arrangements": [
+    {"mod1s6": ":UiFHgHcIbJcDIbEJ`KL`HKLaFGH_DEaFGMNR_BCDEO"},
+    {"mod1s6": ":UjDIfcHKdEHI`HIK`IK_GJaCEHbFGLaCDEPR_BFGJO"},
+    {"mod1s6": ":UhGkEGbJbCIJaFIJ`EL_CDIdFHIKaFHJ`EGLR_BCDKO"},
+    {"mod1s6": ":UhFGghIaFJcIeKaBMcDI_BL`DEfGMOQ_ABJL`CDENP"},
+    {"mod1s6": ":Ua@_dCiEFgH`E_FaGKbHLdIKdILcJMOcJNP_@EFaBGHS"},
+    {"mod1s6": ":UgFeGkAJdKdFKbEIbCIJ_IJL_IL`ACJdFHNQ`ABCEGM"},
+    {"mod1s6": ":Ub@`fAajDHeIcHbIa`LMNfJLNgKMN_DEfGJKR_BCDEHI"},
+    {"mod1s6": ":UjDHcJcJceGHI_IKM_HIKaFLM`DEHbFGIM`ABDEFGL"},
+    {"mod1s6": ":UkEIdHIJfGcKM`EIJ_DIcKMP`BEGJNaBFGHJ_ADFHQ"},
+    {"mod1s6": ":UkCHIJdFHeGIbFHJaGIJ_CH_CI`DElMPQR`ABDEFGJ"},
+    {"mod1s6": ":UeBChBjFGhIikL`JM`JM_DLeHIPbCFKNaCDFGQ_ADGLO"},
+    {"mod1s6": ":UjDedE_IJL_IKLaFJ`GKdEOPbFHIJcGHIK`ABCFGHQ"},
+    {"mod1s6": ":UhGcHdEdFfGaKLaHL`JKbEI_CHfGOQbDEIMN_@CJPR"},
+    {"mod1s6": ":UhFGbcdFIeGJbC_IM_JMaDI`EJhKLNObCPQ`ADEFGS"},
+    {"mod1s6": ":UiDHdHdeaIKLaILbGJK_FHcGKL`EFQbCGJPR_@EFHN"},
+    {"mod1s6": ":Uj@iJcGdIhMeGJbFHL_@FKLOaDEIJNaCEGNP_BFHKM"},
+    {"mod1s6": ":UfEhElJKhI`J_DINcFGLbEKMP`BJKMOaCDGLN_ADFGHI"},
+    {"mod1s6": ":UjDecIJcIKaGJbHKgHIJK`DFN_EFOaBGHQR_@DEFLM"},
+    {"mod1s6": ":UlDJeKjKbGILcHIMdEJKOP`AFGLN_AFHMN_@BCFGHI"},
+    {"mod1s6": ":UkCIdJeJfIbGKMaHLN`BGHLM`AGHKN_CEFIO_DEFJP"},
+    {"mod1s6": ":UjIlGIKhIKjLjMbCEGNaDFHO_CDNO`EFGHK_@ABCDEF"},
+    {"mod1s6": ":UeDhDkHIjgaIM_GLcEFJ`DKLPbCFJMO_@GKLNaBEFHIM"},
+    {"mod1s6": ":UeCdiDcmIKjLbEGKaFHL_CMNO_DMNP`BFGHIK`AEGHJL"},
+    {"mod1s6": ":UgEkEmKL_McGHJdIJN_EMOPaBFILN`BFGHKL`ACDFHIJ"},
+    {"mod1s6": ":UkBeJjdIMhKLcGIKbEJNOP_AFHLM_@FGHK`ACDFGIM"},
+    {"mod1s6": ":UiGhefbHKaGL`EI_FJ`DEIJM_DFIJNaCGKLObCHKLP"},
+    {"mod1s6": ":UmFfeIJMNdKLMNaBGIKM`CHJLN_@AEGHIJ_BCDGHKL"}
+  ]
+}

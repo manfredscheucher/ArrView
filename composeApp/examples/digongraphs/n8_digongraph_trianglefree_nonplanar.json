@@ -1,0 +1,15 @@
+{
+  "name": "n8-intersecting-nonplanar-digongraph",
+  "n": 8,
+  "group": "Digongraphs",
+  "label": "n = 8, triangle-free non-planar",
+  "description": "Intersecting arrangements of 8 pseudocircles with a triangle-free non-planar digongraph.",
+  "links": [
+    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+  ],
+  "source": "website/arrangements/digongraphs/data/n8_digongraph_trianglefree_nonplanar.enc",
+  "arrangements": [
+    {"mod1s6": ":ykDzhSvRfeh`]U]drgaEGY_FWh?u[bCRK{oYPqsaU]PKGI@GgXMOrp|GddDcYYQTLfCSgkYPih@KgX_b@kK{^SIuK_eSMGSSciUPHdSSMOHEuSWMPHESBI?AEbbixl@@B@gwmh"},
+    {"mod1s6": ":ykDa|oiZfDiDAcYfSrs{r?MQrPmG]aEYAXNLFdrKhCbRHxXmQ_OhT[_iYLfwpCy`To``PHFHCwGoZMFda{[cRLFb{_gTNhDCKSaPkESKQ_OkESSKPKFTJE?DGfDY|b@@B@hOqg"}
+  ]
+}

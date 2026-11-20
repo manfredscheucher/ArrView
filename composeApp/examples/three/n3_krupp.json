@@ -1,0 +1,14 @@
+{
+  "name": "n3-great-krupp",
+  "n": 3,
+  "group": "Krupp, NonKrupp, 3-Chain",
+  "label": "Krupp",
+  "description": "The Krupp: 3 great circles.",
+  "links": [],
+  "source": null,
+  "sequences": [
+    [2, 3, -2, -3],
+    [1, -3, -1, 3],
+    [1, 2, -1, -2]
+  ]
+}

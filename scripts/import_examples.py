@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
-"""Copy the bundled example files into composeApp/examples/ from the research folders.
+"""Refresh the data of the bundled example files composeApp/examples/*.json from the research folders.
 
-The files are taken verbatim (one sparse6 string per line, model 1 `.enc` or model 2 `.mod2s6`),
-except the colour dictionaries of the old sage code (`*.txt`: the dual graph as
-`{(u, v): 'colour', ...}`), which are converted to model 1 sparse6 (`.mod1s6`), the coloured
-draw7 drawings of the triangle-saturated arrangements (`*_1_1tutte7.ipe`), which give the
-intersection sequences (`.seq`) and the colour class of every crossing (`.colours`), and Koester's
-crossing graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage). The maxima of
-triangles for n = 8, 9 are intersection sequences from `../data/maxtri/` (copied verbatim). The Gradle task
-generateExamples embeds every file of composeApp/examples/ into the app; the catalogue (names,
-groups, descriptions) is in core/Examples.kt. Provenance: doc/DEVELOPMENT.md.
+Every example file is a JSON object (PoCoView's example format): the metadata (name, n, group,
+label, description, links, source), then the encoding of its arrangement, `"mod1s6"`, `"mod2s6"`
+(sparse6 strings) or `"sequences"` (one list per circle), for the triangle-saturated ones also
+`"crossingColors"` (R, G, B per entry of the sequences); a file with several arrangements has the
+list `"arrangements"` of such objects instead, one per line. This script rewrites only the data and
+keeps the metadata of an existing file (a new file gets placeholders to fill in, and has to be
+listed in composeApp/examples/index.json, which names the groups and their files).
+
+Data: the sparse6 lines of the website and the computations (`.enc` model 1, `.mod2s6` model 2);
+the colour dictionaries of the old sage code (`*.txt`: the dual graph as `{(u, v): 'colour', ...}`),
+converted to model 1 sparse6; the coloured draw7 drawings of the triangle-saturated arrangements
+(`*_1_1tutte7.ipe`), which give the sequences and the colour of every crossing; Koester's crossing
+graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage); the maxima of triangles for
+n = 8, 9, intersection sequences from `../data/maxtri/`. The Gradle task generateExamples embeds
+the files into the app. Provenance: doc/DEVELOPMENT.md.
 
     python3 scripts/import_examples.py [--research ~/github/research/pca/pseudocircles]
 """
 import argparse
+import json
 import math
 import os
 import re
 import subprocess
 import sys
 
-# (destination folder, source path relative to the research folder)
+# (destination folder, source path relative to the research folder); the file is
+# <folder>/<source name up to its first dot>.json
 SOURCES = [
     *[("great", f"computations/results/great/all{n}.enc.greatcircles.enc") for n in range(3, 9)],
     *[("intersecting", f"computations/results/abstract/all{n}.enc") for n in range(2, 6)],
@@ -66,11 +74,17 @@ SOURCES = [
 ]
 
 # intersection sequences copied verbatim from the pca folder (the parent of the research folder):
-# (destination folder, source path relative to the pca folder, destination name)
+# (destination folder, source path relative to the pca folder, destination stem)
 PCA_SEQUENCES = [
-    ("maxtriangles", "data/maxtri/n8_p3eq38.txt", "max8_digon_38_triangles.seq"),
-    ("maxtriangles", "data/maxtri/n9_p3eq50.txt", "max9_df_50_triangles.seq"),
+    ("maxtriangles", "data/maxtri/n8_p3eq38.txt", "max8_digon_38_triangles"),
+    ("maxtriangles", "data/maxtri/n9_p3eq50.txt", "max9_df_50_triangles"),
 ]
+
+# the metadata keys of an example file, in this order (PoCoView's), then the data
+METADATA = ["name", "n", "group", "label", "description", "links", "source"]
+
+# the colour classes 0, 1, 2 of the drawings as colour words
+COLOR_WORDS = ["R", "G", "B"]
 
 
 def sparse6(n, edges):
@@ -119,13 +133,13 @@ def colour_dict_to_sparse6(line):
     return sparse6(n, edges)
 
 
-def sequences_text(lists):
-    """ArrView's one-line text format: `{1: [2, -2], 2: [1, -1]}`."""
-    return "{" + ", ".join("%d: [%s]" % (c + 1, ", ".join(str(e) for e in l)) for c, l in enumerate(lists)) + "}"
+def parse_sequences(text):
+    """ArrView's text format `{1: [2, -2], 2: [1, -1]}` (keys 1..n in order) -> lists."""
+    return [[int(e) for e in l.replace(",", " ").split()] for l in re.findall(r"\[([^\]]*)\]", text)]
 
 
 def ipe_colouring(text):
-    """A draw7 drawing with coloured crossings -> (sequences, colour class 0/1/2 of every entry).
+    """A draw7 drawing with coloured crossings -> (sequences, colour word R/G/B of every entry).
 
     The curves are the gray B-splines (control point triples, the middle one is a crossing), the
     colours the fdisk marks at the crossings (red, green, blue = classes 0, 1, 2 as IPE_COLORS of
@@ -174,16 +188,60 @@ def ipe_colouring(text):
             col.append(cls)
         lists.append(lst)
         colours.append(col)
-    return sequences_text(lists), sequences_text(colours)
+    return lists, [[COLOR_WORDS[c] for c in col] for col in colours]
 
 
-def write(target, folder, name, lines):
-    os.makedirs(os.path.join(target, folder), exist_ok=True)
-    out = os.path.join(target, folder, name)
+def jlists(lists, indent):
+    """Lists as JSON arrays: on one line, or one list per line after `indent`."""
+    one = ["[" + ", ".join(json.dumps(e, ensure_ascii=False) for e in l) + "]" for l in lists]
+    if indent is None:
+        return "[" + ", ".join(one) + "]"
+    return "[\n" + ",\n".join(indent + x for x in one) + "\n" + indent[:-2] + "]"
+
+
+def data_members(member, indent):
+    """The data of one arrangement as JSON members: its encoding, maybe the crossing colours."""
+    out = []
+    for key, value in member.items():
+        out.append(json.dumps(key) + ": " + (jlists(value, indent) if isinstance(value, list) else json.dumps(value)))
+    return out
+
+
+def example_json(meta, members):
+    """The file: the metadata in METADATA order, then the data (one member inline, several as a list)."""
+    lines = []
+    for key in METADATA:
+        value = meta[key]
+        if key == "links":
+            text = "[]" if not value else "[\n" + ",\n".join(
+                "    {\"title\": %s, \"url\": %s}" % (json.dumps(l["title"], ensure_ascii=False), json.dumps(l["url"]))
+                for l in value) + "\n  ]"
+        else:
+            text = json.dumps(value, ensure_ascii=False)
+        lines.append("  " + json.dumps(key) + ": " + text)
+    if len(members) == 1:
+        lines += ["  " + m for m in data_members(members[0], "    ")]
+    else:
+        lines.append("  \"arrangements\": [\n" + ",\n".join(
+            "    {" + ", ".join(data_members(m, None)) + "}" for m in members) + "\n  ]")
+    return "{\n" + ",\n".join(lines) + "\n}\n"
+
+
+def write(target, folder, stem, members):
+    """Writes <folder>/<stem>.json with the given members, keeping the metadata of the file there."""
+    out = os.path.join(target, folder, stem + ".json")
+    if os.path.exists(out):
+        with open(out) as f:
+            meta = json.load(f)
+    else:
+        n = len(members[0]["sequences"]) if "sequences" in members[0] else 0
+        meta = {"name": stem, "n": n, "group": "TODO", "label": "TODO", "description": "TODO", "links": [], "source": None}
+        print(f"{folder}/{stem}.json is new: fill in its metadata and list it in index.json")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
-        f.write("\n".join(lines) + "\n")
+        f.write(example_json(meta, members))
     size = os.path.getsize(out)
-    print(f"{folder}/{name}: {len(lines)} lines, {size} bytes")
+    print(f"{folder}/{stem}.json: {len(members)} arrangement(s), {size} bytes")
     return size
 
 
@@ -196,27 +254,26 @@ def main():
     for folder, source in SOURCES:
         path = os.path.join(args.research, source)
         name = os.path.basename(source)
+        stem = name.split(".")[0]
         if name.endswith("_1_1tutte7.ipe"):
-            stem = name[:-len(".enc_1_1tutte7.ipe")]
             with open(path) as f:
-                seq, colours = ipe_colouring(f.read())
-            total += write(target, folder, stem + ".seq", [seq])
-            total += write(target, folder, stem + ".colours", [colours])
+                lists, colours = ipe_colouring(f.read())
+            total += write(target, folder, stem, [{"sequences": lists, "crossingColors": colours}])
             continue
         if name == "n8_koester.enc":
             script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "crossing_graph_sequences.sage")
             out = subprocess.run(["sage", script, path], check=True, capture_output=True, text=True).stdout
-            total += write(target, folder, "n8_koester.seq", [out.strip().splitlines()[-1]])
+            total += write(target, folder, stem, [{"sequences": parse_sequences(out.strip().splitlines()[-1])}])
             continue
         with open(path) as f:
             lines = [line.strip() for line in f if line.strip()]
         if name.endswith(".txt"):
             lines = [colour_dict_to_sparse6(line) for line in lines]
-            name = name[:-len(".txt")] + ".mod1s6"
-        total += write(target, folder, name, lines)
-    for folder, source, name in PCA_SEQUENCES:
+        key = "mod2s6" if name.endswith(".mod2s6") else "mod1s6"
+        total += write(target, folder, stem, [{key: line} for line in lines])
+    for folder, source, stem in PCA_SEQUENCES:
         with open(os.path.join(args.research, "..", source)) as f:
-            total += write(target, folder, name, [line.strip() for line in f if line.strip()])
+            total += write(target, folder, stem, [{"sequences": parse_sequences(line)} for line in f if line.strip()])
     print(f"total: {total} bytes")
 
 

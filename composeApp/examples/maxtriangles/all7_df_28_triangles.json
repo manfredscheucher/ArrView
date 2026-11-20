@@ -1,0 +1,33 @@
+{
+  "name": "n7-digonfree-28-triangles",
+  "n": 7,
+  "group": "Maximum number of triangles",
+  "label": "n = 7, 28 triangles",
+  "description": "All digon-free intersecting arrangements of 7 pseudocircles with 28 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_maximal_triangles/all7_df_28_triangles.enc",
+  "arrangements": [
+    {"mod1s6": ":ka?_[A@?c_WKIoPmEBHmiUjebks[NHCx@[qYLq`XGfHGdBco_PIUBPlFBCDrkSMKEbaCWMLFdQscSMGCacOUNHdckSKKIfccCCBCESIJ"},
+    {"mod1s6": ":ka?_[[@?d?GKwBAi`OtooXLtbPmmYisAHGeSfBqXQKHEBR{SkVLFwXoy]db@gwaRbaPOo_PcAa@GoXa``WsnCFca`dH@@?rqDPFCAQp_u^"},
+    {"mod1s6": ":ka_GC_@I@OxSmk@kDz`WvWKeixm[NGERTCcRIDX_sgTdAsKCGFCfIp[u\\``B`xDDBa@HCfECBq@CdBAAPhKjAEBa@GhAFEBHxD@A`_w{sc"},
+    {"mod1s6": ":ka?GGI@?e?xwMDUDAxLcp[Kej@mlVLsQPKgTfcA`UOJEbbsgqYMfgo[OLGcxOkWMLPPH?cTeBPo{eSa@pHCc^_dr@kwe___XpAda@`@s{^"},
+    {"mod1s6": ":ka?gK_@?_R?kQBS@owToiXLtBTWtZjeB{wqZORq@CcReBQPMKFDfRsKK[Mfww_QJGCX?g]PJeGocSJKFwGo]QJgWO[YOHfg_S[SIdbHhF"},
+    {"mod1s6": ":ka?g[MOCi??LomWLEydSkXMppOs_Qcap`[tMGcr@m[NHdbKWOOHPPxCfBAGscCMIIfWO_UKEcgOkaYLhW?CQIEBWgWMNGDRK?QMJDr@v"},
+    {"mod1s6": ":ka?GSMQ@_oXgADBkAGcUwYkez@mw\\NR`xWnLGcad?eTJDww_W[NQ@GgWQbaPWo_RbBqHOiVdAqPKgT`?rP|@?KERYDHCBBQHtPDBba@Wx"},
+    {"mod1s6": ":ka?WcIO?_QoCsD@i?yd[l[JERT_vVLtIhs{^ebaPM]OGca[KMIEFwo[WLGCh?gUKFcHGk]PKeg_waRLPQx_u[RoOOSo```_xSyhcAPPWq]N~"},
+    {"mod1s6": ":ka?wSE@?_SocULA`oZ`KrSLTR\\WxVNUBkgUOKfx_waZORPxGs`ba@Wo_PbaPOs_QcAPo{aQ`A`hOs^`ap`Kq__b`xSu`a@OpWmWMFRv"},
+    {"mod1s6": ":k`_GCAO@`OYoYoAmEBTWvVKfZXo|JEeRP}MKGcakw]OHdGogcTcAQXQKFHDrkKIJEbaCOIKFBqKcYOIEBS_SNGcqkKGFDbAxeAAJEraLH"},
+    {"mod1s6": ":k`_ggIH?_OGLOBBaVB@cvSJeypii]dbA@g~LFCr@eSNGcgHoya``P_se^ba@WoYMbaPW{_PcAPo{obbCAHGkYacqxcvEDCa`]CCIfdIj"},
+    {"mod1s6": ":km?_WOQX__oggrAA@`XiADBbB[?KGEeg?[OMLqPPCcXdbPxKtKFCA`maQIdbC{eTJeI@OkVKOo_SKFCO`Gk]PIoPOo_QJO@gweSJ~"},
+    {"mod1s6": ":k_OG_AKBapglokVKEYXOvTLEzhyUKEcQSg[NJeY@SkWLQ@HCdFGEb{SKbQOp?k[NGopp?oXQo__gUKFoO_oYRIPpGscSNoOOgeTJDr^"},
+    {"mod1s6": ":k_OG_AMDc`g{YmG`vAhWqYkEyxm]OGeRSoYQHdHOkeSjeB[_QMPP_yDFGFDQpyIMGDbQQEHDbAYIIIGCQPQCCEbqHIAA@b@huACFdRHs|"},
+    {"mod1s6": ":k_OGgAFCbPz`SsZjEBT[qZmFRt?aQHdHOo[UKQpg{mXcAQXQKFPo_ggWOGoOgkYOHOp?o[PHp@Gs]QIOppSoYQP@xSqZQOOOgUUJf~"},
+    {"mod1s6": ":k`?W_A@?d?gKMeQ`vAXcvSJeiPWtZieB{kqZORPo{_PdBA@EMQJFB{SKGCb`{OKFCeB{_WMGdA{OILFdRC[OHJDrSCSLGDSKGEJHeRhxF"},
+    {"mod1s6": ":k`?WgMHBd?GCA]@jAWSUH[JeypmqYkFhx?aQhdAhg~GCbPpuMGMFXGgULGpOw_[SNqp_s[SIpa@GeXLQ``CcRIoo`_{b_daxl?c`@`x?wh"},
+    {"mod1s6": ":k`_WoAD?_QoKIHU@uOdolVLEz@cvJEDAkw]OIDXhCcRaaaxgxVKErcOy]OpOo_SMFpp`?aQIp`G{_PHq@GgeYQPphGoX__ap|Eh``PWwg["},
+    {"mod1s6": ":k`_WwQ@?_R?[QJS?ogTogXjEb\\[pTNRq@CcRfERPmWLHCwO[y^a``XpBECAPW{`GDCAH[pFEcQX[~DCa`Xa[TJErqaAEEBqPqECIERQHF"}
+  ]
+}

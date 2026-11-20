@@ -1,0 +1,28 @@
+{
+  "name": "n5-digonfree-all",
+  "n": 5,
+  "group": "Database",
+  "label": "Digon-free intersecting, n = 5",
+  "description": "All digon-free intersecting arrangements of 5 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/abstract/all5_digonfree.enc",
+  "arrangements": [
+    {"mod1s6": ":Ua@_dCiEFgH`E_FaGKbHLdIKdILcJMOcJNP_@EFaBGHS"},
+    {"mod1s6": ":UgCdef`EG`EH_FG_FHbCIKaDILbCJMaDJNaBIJ_@GH"},
+    {"mod1s6": ":Ua?cB`i?EHaFdGcHbFeHKdG`JMOgLNcMOQaBFIL_@EJK"},
+    {"mod1s6": ":Ua?iCDGbEH`BCaFaFdGLeHMgHfNOPiJKP_@CDL_@BEM"},
+    {"mod1s6": ":Ui@CD_EFbCaDbEaFgHKMgHLNgIKLhJMN_@BCE_@ADF"},
+    {"mod1s6": ":Ua@_iFGHeGHdFcE`C_DaIKbJLaKMNbLMN`CEGO_DFHP"},
+    {"mod1s6": ":U_iACHbDG`E_FcEdFbGKMaHLNgIMhJNQ`ACEL_BDFK"},
+    {"mod1s6": ":Ua?a``gFkDEIgHIcJabJNgHNfMOP`FKLM_EHIN_BCDEJ"},
+    {"mod1s6": ":UbAe@_kEHJfGIbDHaCGeJfIO`CGIO_DHJP`ACKM_BDLN"},
+    {"mod1s6": ":UkCDEF`GHbGIaHJ_IJlMNO`BCDG`ACEH_BDFI_AEFJ"},
+    {"mod1s6": ":Ua@_kACHbDHeFIJ`G_GiJNOcDEFHaCEINbDFJO_@GKL"},
+    {"mod1s6": ":U_cAbab`_kGJhIeIfJaMbNOcKNOdLMP`CEHIK_DFGJL"},
+    {"mod1s6": ":Ua@`__kGHIJbEaFcEdFgILNhJMO`GHLM_IJNOaBCDEF"},
+    {"mod1s6": ":Ui@AaB`C_B_CdEIJdFIKeGJLfHKMgHLMdEFGH_@ABC"}
+  ]
+}

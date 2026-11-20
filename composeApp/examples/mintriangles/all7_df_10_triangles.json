@@ -1,0 +1,18 @@
+{
+  "name": "n7-digonfree-10-triangles",
+  "n": 7,
+  "group": "Minimum number of triangles",
+  "label": "n = 7, 10 triangles",
+  "description": "All digon-free intersecting arrangements of 7 pseudocircles with the minimum of 10 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_minimal_triangles/all7_df_10_triangles.txt",
+  "arrangements": [
+    {"mod1s6": ":k_OW_MHAc@G{eEDdpP?q@HdByC[SPiCxpQ@@FdgP?nEGeH[KtQHpq`qQTMr`xW|?COPiACKOp`YIqYPsSdGsdlfCsKefaDDC_ihfGDV"},
+    {"mod1s6": ":k_OWgQFHCQWo]EJbbG?aAHFO`O}LJGpqSsfC_@GGSlAJpRCOrYaEyhqO\\fDQpyCEgCSCgc`ccsS_gbnHI`tJLMHh`lNBLIGpdRWOIn"},
+    {"mod1s6": ":k`?W_?F@`q?CkLBDp@?q]H`AgskbFhrac?\\@Foa{{_WcabLGfFDex`qMLIFX@Sk]_?W_T@BOo_gXDOGgxPHHYLhXHLLSRqQia[NStay@T"},
+    {"mod1s6": ":k_OW_MHBAq?CkLBDp@c{QMdPaCgUPbaY[c[S_OQsGnNGQPPecRLPpXmW[bbQ`uOU_@GGT@ABGYIICOPuBIQ]VQraqYi^RtDDw}hcBSAj"}
+  ]
+}

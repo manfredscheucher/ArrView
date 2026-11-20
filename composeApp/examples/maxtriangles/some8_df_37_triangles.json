@@ -1,0 +1,21 @@
+{
+  "name": "n8-digonfree-37-triangles",
+  "n": 8,
+  "group": "Maximum number of triangles",
+  "label": "n = 8, 37 triangles",
+  "description": "Some digon-free intersecting arrangements of 8 pseudocircles with 37 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_maximal_triangles/some8_df_37_triangles.enc",
+  "arrangements": [
+    {"mod1s6": ":yb_GCAW@Dt?kEsLmEwSMD`@xRyQy]PUbaAuboiHx?cbSrQhWrSJeCdCeUKqpp[pKIeTtOolVpOohIkb@p?g]QbaQ@CcRaa@GgeoaBaxs}aQPB`x?`PIGGOUMLGD[s_PJEsY]CBBBsiXR"},
+    {"mod1s6": ":y`?WgA@?`OZ?usCm@JwyzXqgC\\|DWKezPs|`QVDK_SJPRq@TGieCQPWnHEda{weSPqryHIna`pxCcTb@q@KgT`a`Xs{d`AP`XKj`eRPkw]SoOW_SWLjhg{aVOhC{SKKFCaYYGOIGCY`T"},
+    {"mod1s6": ":y`?WoA@?e_Z?MDZKXSADEclFCYQu\\NvcT`NXSRPpCnSIdsS{_QHdghgw]TOo_wah_eTAlXEBa`XGlFCAp`OjDDAq`xDCCbAHSnOHfRy@BECAP_{lCCbq@tRDDCaXpAc`?pgwsZNgCYj"},
+    {"mod1s6": ":y`_ggAB@_owSAsDgVQMD@bNxRyQu[Mwc]DN_lFdKk_VKRAPKmWcbPqQ]SIdbKgaUKp@gw{hbaAPKgT`a`xXIlb@p`HCgfFsIPMhgCQXOoXRP`?{iaPhWOOQLMFT{?GYLfBqmIJEDsA`T"},
+    {"mod1s6": ":yc?WCE@A`Ow]LDdPWkALGdogsaYKQJEBS[eVKew`?g[NPQHSy^cBb@iQNKexOow]dbRh}WLGCRp}OIHDB@qQJHdRHu[NJDrPmGEHDCAUIFHdSIYGDGCSiYKFJDsADH??__Yt[nW^"},
+    {"mod1s6": ":y`_GCAuA_q@ScVZmXRly}`PwCQQufmIIPKgTJR@h_qYbA@p@JFCbqIYSVKEckkmXLHi`TAaPhGWS[OHDg_S]PHdgp?cSOiWxCeTPIgWO[NJhSsGKGDBBAeAFCaphdT@@B@h|?bQ^"},
+    {"mod1s6": ":yc`HCo@A`OIGEBT@voeCVOaxSQLH`ngCshEceCRXuOLJEHp?s[fdRHygYLfBlWmWKfhXGfHIdrsWMJHhggX?eSPqHGeSMo`QHGiTo?GLQkVooaDMnWPOo[_SMHX?ckVNgDCoYMFeBHgv"}
+  ]
+}

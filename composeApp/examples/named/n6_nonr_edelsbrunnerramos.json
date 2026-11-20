@@ -1,0 +1,13 @@
+{
+  "name": "n6-intersecting-nonr-edelsbrunner-ramos",
+  "n": 6,
+  "group": "Non-circularizable arrangements",
+  "label": "n = 6, Edelsbrunner–Ramos",
+  "description": "A non-circularizable intersecting arrangement of 6 pseudocircles (Edelsbrunner and Ramos).",
+  "links": [
+    {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/n6_nonr_edelsbrunnerramos.enc",
+  "mod1s6": ":_fEeepOoomNiKjLgHTUfGSTfHSU`AIMPW_BJNQXcDKLRV`CIKPR_DJLQRaBMNPQ"
+}

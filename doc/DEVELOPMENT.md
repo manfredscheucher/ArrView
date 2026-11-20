@@ -36,8 +36,8 @@ signed crossings, as in rusty-arrangements and Linhart–Ortner. Everything else
 | `PlaneGraph.kt`, `Graphs.kt` | embedded graphs: primal graph, vertex-edge-face graph | |
 | `Operations.kt` | intersection graph, class tests (Krupp, great, cylindrical, …), triangle flip, digon collapse, digon create, relabel/reverse/mirror | `flip_potential.rs::flip`, `test_*.sage` |
 | `CellActions.kt` | what can be flipped / collapsed / created per face, pair and triple; cell descriptions for menus | |
-| `Examples.kt` | catalogue of the bundled examples (data: `composeApp/examples/`) | |
-| `Formats.kt` | text forms (sequences, model 1 / 2 sparse6), file formats (JSON, text), reading with format detection | |
+| `Examples.kt` | the bundled examples: reads `composeApp/examples/index.json` and the JSON files | PoCoView `core/Examples.kt` |
+| `Formats.kt` | text forms (sequences, model 1 / 2 sparse6), file formats (JSON objects, sets, lines, text), reading with format detection | |
 | `Json.kt` | small strict JSON reader | PoCoView `core/Json.kt` |
 | `Tutte.kt` | iterated weighted Tutte embedding (`IteratedTutte`, one embedding per `step()`), literal port | `program_py3/draw7.sage`, `model2_program/draw3.sage` |
 | `Layout.kt` | model 1 / model 2 graphs, the B-spline curves (`graph_2_ipe`), face boundaries, hit test (`Drawing`) | draw7.sage / draw3.sage |
@@ -55,40 +55,66 @@ an entry of `Widget` plus a branch in `WidgetContent`.
 
 ## Example data
 
-The examples are compiled into the app: `composeApp/examples/` holds the data files (one sparse6
-string per line; `.mod2s6` is model 2, `.enc`/`.mod1s6` model 1, `.seq` intersection sequences,
-`.colours` the colour class of every crossing in the shape of the sequences), the Gradle task
-`generateExamples` embeds all of them into `GeneratedExamples.kt`, and `core/Examples.kt` names
-and groups them. `ExamplesTest` fails if a file is not in the catalogue or vice versa.
+The examples are compiled into the app: `composeApp/examples/` holds one JSON file per set
+(PoCoView's example format), `index.json` lists the groups in order (id, title, description, links,
+files), the Gradle task `generateExamples` embeds all of them into `GeneratedExamples.kt`, and
+`core/Examples.kt` parses them at first use (members are decoded when shown). `ExamplesTest` fails
+if a file is not in the index or vice versa.
 
-To refresh the files, run `python3 scripts/import_examples.py` (reads
+A file is the metadata, then the data:
+
+```json
+{
+  "name": "n6-digonfree-triangle-saturated-2",
+  "n": 6,
+  "group": "Triangle-saturated arrangements and colorings",
+  "label": "n = 6, no. 2",
+  "description": "A triangle-saturated arrangement of 6 pseudocircles.",
+  "links": [{"title": "Website: ...", "url": "..."}, {"title": "Paper: ...", "url": "..."}],
+  "source": "website/arrangements/colorings/triangle_sat/n6_triangle_sat_no2.enc_1_1tutte7.ipe",
+  "sequences": [[5, -2, ...], ...],
+  "crossingColors": [["B", "G", ...], ...]
+}
+```
+
+The encoding is one attribute: `"mod1s6"` or `"mod2s6"` (a sparse6 string, as on the website) or
+`"sequences"`; `"crossingColors"` (only with sequences) gives a colour word per entry. A file with
+several arrangements has `"arrangements": [{"mod1s6": "..."}, ...]` (one object per line) instead.
+The app reads the same objects in Open file and Import (`readArrangementFile` in `core/Formats.kt`).
+Names: `n<N>-<class>-<description>`; `source` is null for the typed-in ones (`three/`); the dialog
+shows a set's links only where they differ from its group's.
+
+To refresh the data, run `python3 scripts/import_examples.py` (reads
 `~/github/research/pca/pseudocircles/`, `--research` for another place; Koester's file needs
-`sage`). It copies the files verbatim, except the colour dictionaries of the old sage code (`*.txt`,
-the dual graph with edges coloured by circle), which it converts to model 1 sparse6 (`.mod1s6`), and
-the two conversions to intersection sequences (`.seq`, one arrangement per line) below.
+`sage`). It rewrites only the data of each file and keeps its metadata (a new file gets placeholders
+and must be added to `index.json`). It takes the sparse6 lines verbatim, except the colour
+dictionaries of the old sage code (`*.txt`, the dual graph with edges coloured by circle), which it
+converts to model 1 sparse6, and the conversions to sequences below. The JSON files were converted
+from the former plain files by `scripts/probe/ConvertExamplesProbe.kt` (one-off); the importer
+reproduces them byte for byte.
 
 Provenance (paths below `~/github/research/pca/pseudocircles/`; the website mirror there is
 identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 
-| `composeApp/examples/` | Source |
+| `composeApp/examples/` (`.json`) | Source |
 |---|---|
-| `great/all{3..8}.enc.greatcircles.enc` | `computations/results/great/` |
-| `intersecting/all{2..5}.enc` | `computations/results/abstract/` (same as website `pseudocircles/intersecting/all{n}.mod1s6`) |
-| `digonfree/all{3..6}_digonfree.enc` | `computations/results/abstract/` (same as website `intersecting/digonfree/`) |
-| `connected/all{3,4,5}.mod2s6` | `website/arrangements/pseudocircles/connected/` (NEW model 2 encoding) |
-| `mintriangles/*.mod1s6` | `website/arrangements/triangles/digonfree_minimal_triangles/*.txt` (converted) |
-| `maxtriangles/*.enc` | `website/arrangements/triangles/digonfree_maximal_triangles/` |
-| `maxtriangles/max8_digon_38_triangles.seq`, `maxtriangles/max9_df_50_triangles.seq` | `~/github/research/pca/data/maxtri/n8_p3eq38.txt`, `n9_p3eq50.txt` (intersection sequences, copied verbatim; the maxima for n = 8, 9 by computer search, not on the website) |
-| `fueredipalasti/fueredi_palasti_{6..42}.enc` | `website/arrangements/triangles/fueredi_palasti_construction/` |
-| `named/n5_nonr_number*.mod2s6` | `website/arrangements/nomorecircles/connected/` |
-| `named/n6_nonr_number{1,2,3}*.mod2s6` | `website/arrangements/nomorecircles/intersecting/digonfree/` |
-| `named/n6_nonr_all_triangles_krupp_number2.enc`, `named/n6_nonr_edelsbrunnerramos.enc`, `named/n9_nonr_pappus.enc` | `computations/results/` |
-| `named/n6_sym6_{2,3}.mod2s6`, `named/n6_connected_digonfree_sym*.mod2s6` | `website/arrangements/nomorecircles/{intersecting,connected}/additional/` |
-| `digongraphs/*.enc` | `website/arrangements/digongraphs/data/` (model 1, although the page says primal-dual graphs) |
-| `colorings/*.seq`, `colorings/*.colours` | `website/arrangements/colorings/triangle_sat/*.enc_1_1tutte7.ipe` (sequences and crossing colours read from the drawings; `ExampleColoursDataTest` checks them against the `.enc` files, copied to `jvmTest/resources/data/colorings/`) |
-| `colorings/n8_koester.seq` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the file name) |
+| `great/all{3..8}` | `computations/results/great/` |
+| `intersecting/all{2..5}` | `computations/results/abstract/` (same as website `pseudocircles/intersecting/all{n}.mod1s6`) |
+| `digonfree/all{3..6}_digonfree` | `computations/results/abstract/` (same as website `intersecting/digonfree/`) |
+| `connected/all{3,4,5}` | `website/arrangements/pseudocircles/connected/` (NEW model 2 encoding) |
+| `mintriangles/*` | `website/arrangements/triangles/digonfree_minimal_triangles/*.txt` (converted) |
+| `maxtriangles/all*`, `some*` | `website/arrangements/triangles/digonfree_maximal_triangles/` |
+| `maxtriangles/max8_digon_38_triangles`, `maxtriangles/max9_df_50_triangles` | `~/github/research/pca/data/maxtri/n8_p3eq38.txt`, `n9_p3eq50.txt` (intersection sequences; the maxima for n = 8, 9 by computer search, not on the website) |
+| `fueredipalasti/fueredi_palasti_{6..42}` | `website/arrangements/triangles/fueredi_palasti_construction/` |
+| `named/n5_nonr_number*` | `website/arrangements/nomorecircles/connected/` |
+| `named/n6_nonr_number{1,2,3}*` | `website/arrangements/nomorecircles/intersecting/digonfree/` |
+| `named/n6_nonr_all_triangles_krupp_number2`, `named/n6_nonr_edelsbrunnerramos`, `named/n9_nonr_pappus` | `computations/results/` |
+| `named/n6_sym6_{2,3}`, `named/n6_connected_digonfree_sym*` | `website/arrangements/nomorecircles/{intersecting,connected}/additional/` |
+| `digongraphs/*` | `website/arrangements/digongraphs/data/` (model 1, although the page says primal-dual graphs) |
+| `colorings/n*_triangle_sat_*` | `website/arrangements/colorings/triangle_sat/*.enc_1_1tutte7.ipe` (sequences and crossing colours R, G, B read from the drawings; `ExampleColoursDataTest` checks them against the `.enc` files, copied to `jvmTest/resources/data/colorings/`) |
+| `colorings/n8_koester` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the file name) |
 
-Krupp, NonKrupp and 3-Chain are typed in as sequences in `Examples.kt`.
+Krupp, NonKrupp and 3-Chain (`three/`) are typed in (no source).
 
 ## Tests
 

@@ -71,10 +71,14 @@ https://manfredscheucher.github.io/ArrView/
   crosses from the right of i to its left, -j the other way.
 - Model 1 sparse6: the dual graph (intersecting only). Model 2 sparse6: the vertex-edge-face graph
   with a leaf at every face vertex.
-- Files: JSON `{"name": ..., "sequences": [[...], ...]}` or the sequences as text. Import and Open
-  file detect the format.
-- Several arrangements (one sparse6 string per line, several sequences one after the other, or a JSON
-  list of the objects) are loaded as a set, like an example set; Save file writes all of them.
+- Files: JSON `{"name": ..., "n": ..., "sequences": [[...], ...]}` or the sequences as text. In JSON,
+  `"mod1s6"` or `"mod2s6"` may replace `"sequences"`, `"crossingColors"` (R, G, B per entry) colours
+  the crossings, other keys are ignored. Import and Open file detect the format.
+- Several arrangements (one sparse6 string per line, several sequences one after the other, a JSON
+  object with `"arrangements": [...]`, one JSON object per line, or a JSON list) are loaded as a set,
+  like an example set; Save file writes all of them.
+- Coloured crossings: drawn as coloured dots while the arrangement is as loaded (the six
+  triangle-saturated examples); an edit removes them, undo brings them back.
 
 ## Keyboard shortcuts
 

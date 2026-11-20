@@ -1,0 +1,13 @@
+{
+  "name": "n5-digonfree-8-triangles",
+  "n": 5,
+  "group": "Minimum number of triangles",
+  "label": "n = 5, 8 triangles",
+  "description": "All digon-free intersecting arrangements of 5 pseudocircles with the minimum of 8 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_minimal_triangles/all5_df_8_triangles.txt",
+  "mod1s6": ":U_`c?B`CaBDg?fhfIbcGK_`HMaINeJObPjKQfLRgHMS"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "n3-connected-all",
+  "n": 3,
+  "group": "Database",
+  "label": "Connected, n = 3",
+  "description": "All connected arrangements of 3 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/pseudocircles/connected/all3.mod2s6",
+  "arrangements": [
+    {"mod2s6": ":ae?`GmX?Baxs?GGgOOOadBBAYcWMIjP?gip@@`ZSCGDCO?O_VBA``SWMHDo?_[T@@?pN"},
+    {"mod2s6": ":ae?P?iXEDrgW[OJgO?|ICDiOOgWRU``@La?AAAjS?ECBoOOSTAA@PK?MGDOoocV@BA@^"},
+    {"mod2s6": ":Wg@BDEgcEicFk_AmaBo_@DFq`CEF_ABD_@ABcDEF"}
+  ]
+}

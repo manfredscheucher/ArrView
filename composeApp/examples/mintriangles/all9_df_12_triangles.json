@@ -1,0 +1,18 @@
+{
+  "name": "n9-digonfree-12-triangles",
+  "n": 9,
+  "group": "Minimum number of triangles",
+  "label": "n = 9, 12 triangles",
+  "description": "All digon-free intersecting arrangements of 9 pseudocircles with the minimum of 12 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_minimal_triangles/all9_df_12_triangles.txt",
+  "arrangements": [
+    {"mod1s6": ":~?@I__E?`oKE`GkD`G_KboeAcoUCa?wS_WGUdwGWc@CXa`IHCxw\\fg?GBgKLGG[KGWWabAMCHHOdf@uHFa]NFqa@dai?DgKVJG[WJWWPEQyJCgSoc`KpepoqaOgr_PAiLYkubb]_Iqow`_mbMgkcMwSdNHKeHruSFRyTFb}MFsAwOX{vOicuOw{sLSQICCUYEsYPCc]nKBhG"},
+    {"mod1s6": ":~?@I__E?`oKE`GkD`G_KboeAAhGPd?QGDGEADh]AEH?PEWgQEgcRdHS\\bg?M_qAFGWWaaoqC@QQSHXsefa]NFwEUIg?U_p[k`p_l``CXJgmDKHGRepoqaOgr_O{OLIciLX{jLgwvgAkkMGWJgqOybAGzbQC{aA?|b`S}f`{~iAd?bsEHICI[HsMDCqXCkRHDcb@EcS]nKBhG"},
+    {"mod1s6": ":~?@I__E?`OQF@gQJ@WOJa?q?_XKD`@MM_WGU`p]A@`aOCWgQcxO[aPUNDgaLGIKacQMJC`MZFAUIHhoffQaGDAe_Ig?U_o[VJICabQyKGa}JGrAcHREPCbIYErMICBQHBxw^LhSvb`{kMGcIhriHIBm]IRqTIbuMIry?GB}BGSAlJcEFGcIEGsMcPGWPPXcYPgGNCC]tLbhG"},
+    {"mod1s6": ":~?@I__ED@G[B@gQIAWUCAw_Kc?}EcWUCCxW??WGUdwGWeXIRd@qHDWwNgOuKGWkagwkRHHodaaYHFA]\\FaaGD@ShbaA??p]FEAqEEQuPEayQJxgZKGgOaO{qf`{rb`SsiaktaA?ubR]_GRaIEy[yeqWzcaS{cQO|`aK}`qG~_qD?jBd@_A@AisM?BcQUFsU@BsYAC@hFkRGyQN"}
+  ]
+}

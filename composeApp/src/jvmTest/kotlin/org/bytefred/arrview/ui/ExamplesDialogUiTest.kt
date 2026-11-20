@@ -19,8 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
-import org.bytefred.arrview.core.Paper
-import org.bytefred.arrview.core.WebPage
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,7 +53,7 @@ class ExamplesDialogUiTest {
     fun aMemberOfEverySetLoadsByClicks() = runComposeUiTest(testTimeout = 5.minutes) {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        for (group in ExampleGroup.entries) {
+        for (group in Examples.groups) {
             val sets = Examples.inGroup(group)
             for ((k, set) in sets.withIndex()) {
                 openExamples()
@@ -109,7 +107,7 @@ class ExamplesDialogUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         val set = Examples.byName("n5-intersecting-all")!!
-        val group = header(ExampleGroup.DATABASE)
+        val group = header(Examples.group("database"))
         openExamples()
         click(group)
         click(leafLabel(set))
@@ -139,20 +137,19 @@ class ExamplesDialogUiTest {
         openExamples()
         onNodeWithText("Most of the data is from the pseudocircles website").assertExists()
         // the groups, all collapsed: no descriptions, no leaves
-        for (group in ExampleGroup.entries) onNodeWithText(header(group)).assertExists()
+        for (group in Examples.groups) onNodeWithText(header(group)).assertExists()
         onNodeWithTag("group-info").assertDoesNotExist()
         // an open group shows what it is and where it comes from, then its sets
-        for (group in ExampleGroup.entries) {
+        for (group in Examples.groups) {
             click(header(group))
             onNodeWithText(group.description).assertExists()
-            group.page?.let { onNodeWithText("Website: ${it.title}").assertExists() }
-            group.paper?.let { onNodeWithText("Paper: ${it.title}").assertExists() }
+            for (link in group.links) onNodeWithText(link.title).assertExists()
             for (set in Examples.inGroup(group)) onNodeWithText(leafLabel(set)).assertExists()
             click(header(group))
             onNodeWithText(group.description).assertDoesNotExist()
         }
         // a single arrangement: the note "1 arrangement", no number selection, where its data is from
-        click(header(ExampleGroup.NON_CIRCULARIZABLE))
+        click(header(Examples.group("non-circularizable")))
         val nonr = Examples.byName("n5-intersecting-nonr-1")!!
         click(nonr.label)
         onNodeWithText(nonr.description).assertExists()
@@ -163,21 +160,20 @@ class ExamplesDialogUiTest {
         click("n = 9 great, non-Pappus")
         onNodeWithText("Data: computations/results/n9_nonr_pappus.enc").assertExists()
         // typed in: where it comes from
-        click(header(ExampleGroup.THREE))
+        click(header(Examples.group("three")))
         click("Krupp")
         onNodeWithText("n = 3, 1 arrangement").assertExists()
         onNodeWithText("Typed in as intersection sequences").assertExists()
         // a list of the database: the count in the label, the chooser
-        click(header(ExampleGroup.DATABASE))
+        click(header(Examples.group("database")))
         click("Intersecting, n = 4 (8)")
         onNodeWithText("n = 4, 8 arrangements").assertExists()
         onNodeWithTag("example-index").assertExists()
         // a coloured one; Koester's arrangement is with them
-        click(header(ExampleGroup.COLORINGS))
+        click(header(Examples.group("colorings")))
         click("n = 6, no. 2")
         // the links of the group are not repeated
-        onAllNodesWithText("Paper: ${Paper.COLORING.title}").assertCountEquals(1)
-        onAllNodesWithText("Website: ${WebPage.COLORINGS.title}").assertCountEquals(1)
+        for (link in Examples.group("colorings").links) onAllNodesWithText(link.title).assertCountEquals(1)
         click("n = 7, Koester")
         onNodeWithText("n = 7, 1 arrangement").assertExists()
         onNodeWithText("Data: computations/biconnected_results/n8_koester.enc").assertExists()
@@ -188,13 +184,22 @@ class ExamplesDialogUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click(header(ExampleGroup.COLORINGS))
+        click(header(Examples.group("colorings")))
         click("n = 6, no. 2")
         onNodeWithText("Load").performClick()
         waitForIdle()
         val set = Examples.byName("n6-digonfree-triangle-saturated-2")!!
         assertEquals(set.name, s.name)
-        assertTrue(Examples.crossingColours(s.arrangement) != null)
+        assertEquals(set.colors(0), s.crossingColors)
+        assertEquals(60, s.crossingColors!!.size)
+        // an edit drops them, undo brings them back
+        s.flipTriangle(s.arrangement.faces.indexOfFirst { it.size == 3 })
+        assertEquals(null, s.crossingColors)
+        s.undo()
+        assertEquals(set.colors(0), s.crossingColors)
+        // an uncoloured example has none
+        s.loadSet("x", ArrangementSet(1, Examples.start.set::colors) { Examples.start.arrangement() })
+        assertEquals(null, s.crossingColors)
     }
 
     @Test
@@ -203,7 +208,7 @@ class ExamplesDialogUiTest {
         val start = s.arrangement
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click(header(ExampleGroup.THREE))
+        click(header(Examples.group("three")))
         click("Krupp")
         onNodeWithText("Cancel").performClick()
         waitForIdle()

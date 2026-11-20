@@ -1,0 +1,20 @@
+{
+  "name": "n4-intersecting-digongraphs",
+  "n": 4,
+  "group": "Digongraphs",
+  "label": "n = 4, all types",
+  "description": "Intersecting arrangements of 4 pseudocircles, one for every type of digongraph.",
+  "links": [
+    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+  ],
+  "source": "website/arrangements/digongraphs/data/n4_all_types_of_digongraphs.enc",
+  "arrangements": [
+    {"mod1s6": ":MmOkrOMa@sQEPKQeTCOqDL"},
+    {"mod1s6": ":MeIKK@C]?boA]XBGeSqYDKj"},
+    {"mod1s6": ":MeI[kDNOsRG_\\IgaGXC@dMf"},
+    {"mod1s6": ":MeISWxGS{rGaHIgBG\\CAeMb"},
+    {"mod1s6": ":MmQPRpK]@COGeXRIVCOqeN"},
+    {"mod1s6": ":MgM[|AGSyGcK\\KAeOe?PFOf"},
+    {"mod1s6": ":MsK`RgRCPRGR?OrFP?HBFR"}
+  ]
+}

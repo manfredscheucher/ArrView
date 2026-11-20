@@ -203,11 +203,14 @@ private val FORMATS_TEXT = listOf(
         "arrangement. The older encoding with marker hubs is read too.",
     "Both are the formats of the pseudocircles website (see About). ArrView may number the vertices " +
         "differently, so its strings describe the same arrangements but need not be equal to the website's.",
-    "Save file writes JSON {\"name\": ..., \"sequences\": [[...], ...]} (list i for circle i) or the " +
-        "sequences as text. Open file and Import read both and sparse6 lines; model 1 is tried first.",
+    "Save file writes JSON {\"name\": ..., \"n\": ..., \"sequences\": [[...], ...]} (list i for circle i; " +
+        "coloured crossings add \"crossingColors\") or the sequences as text. Open file and Import read both and " +
+        "sparse6 lines; model 1 is tried first. In JSON, \"mod1s6\" or \"mod2s6\" may replace \"sequences\"; other " +
+        "keys are ignored.",
     "A file or text with several arrangements (one sparse6 string per line, several sequences one after " +
-        "the other, or a JSON list of the objects) is loaded as a set, like an example set: < and > in the " +
-        "toolbar (or PageUp / PageDown) step through it, and Save file writes all of them.",
+        "the other, a JSON object with \"arrangements\": [...] as the example files, one JSON object per line, or a " +
+        "JSON list) is loaded as a set, like an example set: < and > in the toolbar (or PageUp / PageDown) step " +
+        "through it, and Save file writes all of them.",
 )
 
 /** The keyboard shortcuts page: key and action (doc/USER_GUIDE.md has the same list). */

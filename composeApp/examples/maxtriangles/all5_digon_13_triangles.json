@@ -1,0 +1,13 @@
+{
+  "name": "n5-intersecting-13-triangles",
+  "n": 5,
+  "group": "Maximum number of triangles",
+  "label": "n = 5, 13 triangles, with digons",
+  "description": "All intersecting arrangements of 5 pseudocircles with 13 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_maximal_triangles/all5_digon_13_triangles.enc",
+  "mod1s6": ":Uc@``babamHIJfKgL_NOdEKLPcDFHJKcEGIJL_ABMNO"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "n3-connected-chain",
+  "n": 3,
+  "group": "Krupp, NonKrupp, 3-Chain",
+  "label": "3-Chain",
+  "description": "The 3-Chain: circle 2 crosses circles 1 and 3, which do not cross.",
+  "links": [],
+  "source": null,
+  "sequences": [
+    [2, -2],
+    [1, -1, 3, -3],
+    [2, -2]
+  ]
+}

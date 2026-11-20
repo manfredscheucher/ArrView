@@ -1,0 +1,168 @@
+{
+  "categories": [
+    {
+      "id": "database",
+      "title": "Database",
+      "description": "All arrangements of n pseudocircles for small n: connected, intersecting, digon-free and great.",
+      "links": [
+        {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+        {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+      ],
+      "files": [
+        "connected/all3.json",
+        "connected/all4.json",
+        "connected/all5.json",
+        "intersecting/all2.json",
+        "intersecting/all3.json",
+        "intersecting/all4.json",
+        "intersecting/all5.json",
+        "digonfree/all3_digonfree.json",
+        "digonfree/all4_digonfree.json",
+        "digonfree/all5_digonfree.json",
+        "digonfree/all6_digonfree.json",
+        "great/all3.json",
+        "great/all4.json",
+        "great/all5.json",
+        "great/all6.json",
+        "great/all7.json",
+        "great/all8.json"
+      ]
+    },
+    {
+      "id": "min-triangles",
+      "title": "Minimum number of triangles",
+      "description": "Digon-free arrangements with the fewest triangles.",
+      "links": [
+        {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+        {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+      ],
+      "files": [
+        "mintriangles/all3_df_8_triangles.json",
+        "mintriangles/all4_df_8_triangles.json",
+        "mintriangles/all5_df_8_triangles.json",
+        "mintriangles/all6_df_8_triangles.json",
+        "mintriangles/all7_df_10_triangles.json",
+        "mintriangles/all8_df_11_triangles.json",
+        "mintriangles/all9_df_12_triangles.json",
+        "mintriangles/some10_df_14_triangles.json",
+        "mintriangles/some11_df_15_triangles.json",
+        "mintriangles/some12_df_16_triangles.json",
+        "mintriangles/some13_df_18_triangles.json",
+        "mintriangles/some14_df_19_triangles.json"
+      ]
+    },
+    {
+      "id": "max-triangles",
+      "title": "Maximum number of triangles",
+      "description": "Arrangements with the most triangles; the website's examples for n = 8, 9 are digon-free and not the maximum.",
+      "links": [
+        {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+        {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+      ],
+      "files": [
+        "maxtriangles/all5_df_12_triangles.json",
+        "maxtriangles/all5_digon_13_triangles.json",
+        "maxtriangles/all6_df_20_triangles.json",
+        "maxtriangles/all7_df_28_triangles.json",
+        "maxtriangles/all7_df_29_triangles.json",
+        "maxtriangles/some8_df_37_triangles.json",
+        "maxtriangles/some9_df_48_triangles.json",
+        "maxtriangles/max8_digon_38_triangles.json",
+        "maxtriangles/max9_df_50_triangles.json"
+      ]
+    },
+    {
+      "id": "furedi-palasti",
+      "title": "Füredi–Palásti construction",
+      "description": "Circle arrangements with about 2n²/3 triangles.",
+      "links": [
+        {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+        {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+      ],
+      "files": [
+        "fueredipalasti/fueredi_palasti_6.json",
+        "fueredipalasti/fueredi_palasti_12.json",
+        "fueredipalasti/fueredi_palasti_18.json",
+        "fueredipalasti/fueredi_palasti_24.json",
+        "fueredipalasti/fueredi_palasti_30.json",
+        "fueredipalasti/fueredi_palasti_36.json",
+        "fueredipalasti/fueredi_palasti_42.json"
+      ]
+    },
+    {
+      "id": "non-circularizable",
+      "title": "Non-circularizable arrangements",
+      "description": "Arrangements of pseudocircles that cannot be drawn with circles.",
+      "links": [
+        {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+        {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+      ],
+      "files": [
+        "named/n5_nonr_number1_intersecting.json",
+        "named/n5_nonr_number2.json",
+        "named/n5_nonr_number3.json",
+        "named/n5_nonr_number4.json",
+        "named/n6_nonr_number1_8triangles.json",
+        "named/n6_nonr_number2.json",
+        "named/n6_nonr_number3.json",
+        "named/n6_nonr_edelsbrunnerramos.json",
+        "named/n6_sym6_2.json",
+        "named/n6_sym6_3.json",
+        "named/n6_connected_digonfree_sym4_1.json",
+        "named/n6_connected_digonfree_sym4_2.json",
+        "named/n6_connected_digonfree_sym8_1.json",
+        "named/n6_connected_digonfree_sym8_2.json",
+        "named/n6_connected_digonfree_sym24.json",
+        "named/n6_nonr_all_triangles_krupp_number2.json",
+        "named/n9_nonr_pappus.json"
+      ]
+    },
+    {
+      "id": "colorings",
+      "title": "Triangle-saturated arrangements and colorings",
+      "description": "Every crossing is on a triangle; the crossings are shown in their 3 colours. Koester's arrangement needs 4.",
+      "links": [
+        {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},
+        {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
+      ],
+      "files": [
+        "colorings/n6_triangle_sat_no1_great.json",
+        "colorings/n6_triangle_sat_no2.json",
+        "colorings/n7_triangle_sat_no1.json",
+        "colorings/n9_triangle_sat_no1.json",
+        "colorings/n10_triangle_sat_no1_great.json",
+        "colorings/n16_triangle_sat_Simmons.json",
+        "colorings/n8_koester.json"
+      ]
+    },
+    {
+      "id": "digon-graphs",
+      "title": "Digongraphs",
+      "description": "Intersecting arrangements with every type of digongraph (circles as vertices, digons as edges).",
+      "links": [
+        {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+      ],
+      "files": [
+        "digongraphs/n4_all_types_of_digongraphs.json",
+        "digongraphs/n5_all_types_of_digongraphs.json",
+        "digongraphs/n6_all_types_of_digongraphs.json",
+        "digongraphs/n7_all_types_of_digongraphs.json",
+        "digongraphs/n7_all_types_of_trianglefree_digongraphs.json",
+        "digongraphs/n8_digongraph_trianglefree_nonplanar.json"
+      ]
+    },
+    {
+      "id": "three",
+      "title": "Krupp, NonKrupp, 3-Chain",
+      "description": "The named arrangements of 3 pseudocircles.",
+      "links": [
+        {"title": "Website: Some more information", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=information"}
+      ],
+      "files": [
+        "three/n3_krupp.json",
+        "three/n3_nonkrupp.json",
+        "three/n3_chain.json"
+      ]
+    }
+  ]
+}

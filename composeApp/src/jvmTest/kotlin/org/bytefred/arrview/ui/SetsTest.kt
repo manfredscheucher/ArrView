@@ -19,7 +19,7 @@ import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.Model1
 import org.bytefred.arrview.core.Model2
-import org.bytefred.arrview.core.NamedArrangement
+import org.bytefred.arrview.core.ArrangementFile
 import org.bytefred.arrview.core.TextFormat
 import org.bytefred.arrview.core.arrangementsFile
 import org.bytefred.arrview.core.readArrangements
@@ -87,12 +87,12 @@ class SetsTest {
         assertTrue(s.error!!.contains("arrangement 4 of 4"), s.error)
     }
 
-    private fun assertNotNullList(l: List<NamedArrangement>?) = l ?: error("not read")
+    private fun assertNotNullList(f: ArrangementFile?) = f ?: error("not read")
 
     @Test
     fun editsOfMembersAreKeptAndSavedTogether() {
         val s = state()
-        s.loadSet(n4.name, ArrangementSet(n4.size, n4::arrangement), 2)
+        s.loadSet(n4.name, ArrangementSet(n4.size, member = n4::arrangement), 2)
         assertEquals("n4-intersecting-all · set 3/8", s.title)
         assertFalse(s.unsavedChanges)
         s.flipFirstTriangle()
@@ -119,7 +119,7 @@ class SetsTest {
         assertTrue(left, "the pending action goes on after the save")
         assertFalse(s.unsavedChanges)
         // undo of the load brings the start example back
-        s.loadSet(n4.name, ArrangementSet(n4.size, n4::arrangement), 0)
+        s.loadSet(n4.name, ArrangementSet(n4.size, member = n4::arrangement), 0)
         s.undo()
         assertEquals(edited, s.arrangement)
     }
@@ -127,7 +127,7 @@ class SetsTest {
     @Test
     fun anUnappliedDraftAsksBeforeTheSwitch() {
         val s = state()
-        s.loadSet(n4.name, ArrangementSet(n4.size, n4::arrangement), 0)
+        s.loadSet(n4.name, ArrangementSet(n4.size, member = n4::arrangement), 0)
         s.editDraft(TextFormat.SEQUENCES, "{1: [2, -2], 2: [1, -1]}")
         s.showSet(1)
         assertEquals(0, s.setIndex)
@@ -206,7 +206,7 @@ class SetsTest {
     fun setNavigationByKeys() = runComposeUiTest {
         val s = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        runOnIdle { s.loadSet(n4.name, ArrangementSet(n4.size, n4::arrangement)) }
+        runOnIdle { s.loadSet(n4.name, ArrangementSet(n4.size, member = n4::arrangement)) }
         waitForIdle()
         onNodeWithText("8 arrangements loaded").assertExists()
         onNodeWithText("Showing the first of 8.", substring = true).assertExists()

@@ -71,7 +71,7 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
         val set = ex.selected ?: return
         val i = ex.indexOf(set)
         // the whole set, shown at member i (< > steps through it)
-        state.leave { state.loadSet(set.name, ArrangementSet(set.size, set::arrangement), i); close() }
+        state.leave { state.loadSet(set.name, ArrangementSet(set.size, set::colors, set::arrangement), i); close() }
     }
     BigDialog(
         "Examples",
@@ -90,11 +90,11 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
             )
             Spacer(Modifier.height(4.dp))
             // two levels: the groups by purpose, then their sets; an open group starts with what it is
-            for (group in ExampleGroup.entries) {
+            for (group in Examples.groups) {
                 val sets = Examples.inGroup(group)
-                TreeHeader(group.title, 0, group.name in open) { toggle(group.name) }
+                TreeHeader(group.title, 0, group.id in open) { toggle(group.id) }
                 HorizontalDivider()
-                if (group.name !in open) continue
+                if (group.id !in open) continue
                 GroupIntro(group)
                 for (set in sets) {
                     TreeLeaf(leafLabel(set), 1, ex.selected == set) {
@@ -125,8 +125,7 @@ private fun GroupIntro(group: ExampleGroup) {
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(group.description, style = MaterialTheme.typography.bodySmall)
-        group.page?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
-        group.paper?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        for (link in group.links) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
     }
 }
 
@@ -214,8 +213,7 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
         // links only where they differ from the group's (shown above the sets)
-        set.page?.takeIf { it != set.group.page }?.let { LinkText("Website: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
-        set.paper?.takeIf { it != set.group.paper }?.let { LinkText("Paper: ${it.title}", it.url, MaterialTheme.typography.labelSmall) }
+        for (link in set.links - set.group.links.toSet()) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
         Text(
             set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
             style = MaterialTheme.typography.labelSmall,

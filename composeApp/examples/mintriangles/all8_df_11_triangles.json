@@ -1,0 +1,17 @@
+{
+  "name": "n8-digonfree-11-triangles",
+  "n": 8,
+  "group": "Minimum number of triangles",
+  "label": "n = 8, 11 triangles",
+  "description": "All digon-free intersecting arrangements of 8 pseudocircles with the minimum of 11 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_minimal_triangles/all8_df_11_triangles.txt",
+  "arrangements": [
+    {"mod1s6": ":y`?WC[EEaQogYHGERpKGTQGpWc_[S_oat]CWgCRKgcYccydSzMNO@?yELOPpaEKadbC[OIchdCloyecfc{{}g_tdS?lBJjGx`ZEGeTskcnakIPLbZMKhGhf@FcEedStniusxn_TjFF"},
+    {"mod1s6": ":y`?WCSHFBPHOeJCDq@cABAFpiWUGRfOWPYMV`@bD?aXdCi\\OxHIrqs?PBEgG{XDPPqqPMu[QqcscwfmfdC_gTSrcAi?U``qyrAaUrTspCndguEPIpgceTgurdCEcc]tnFutTnMNjFF"},
+    {"mod1s6": ":y`?WgQMBBPHOeJCDq@cABAFpiKUGRj??KGlV`EI@eSQhtBccjMFdgCKZFEGWolDPPqqPLHZMHXQYQ[RvRqaOSIiXqA?BJprAqKXUsRQycnlEuCg_pcbuTw}rfDUehUtcGEstn_OjFF"}
+  ]
+}

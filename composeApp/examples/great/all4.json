@@ -1,0 +1,12 @@
+{
+  "name": "n4-great-all",
+  "n": 4,
+  "group": "Database",
+  "label": "Great, n = 4",
+  "description": "All arrangements of 4 great pseudocircles.",
+  "links": [
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/great/all4.enc.greatcircles.enc",
+  "mod1s6": ":MoOhboAG[PcJCPBOES{@EN"
+}

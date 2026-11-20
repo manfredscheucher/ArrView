@@ -7,6 +7,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** The bundled examples against the counts and properties known from the research data. */
+/** The group's or set's website page. */
+internal val ExampleGroup.page get() = links.firstOrNull { it.title.startsWith("Website: ") }
+
+internal val ExampleGroup.paper get() = links.firstOrNull { it.title.startsWith("Paper: ") }
+
+internal val ExampleSet.page get() = links.firstOrNull { it.title.startsWith("Website: ") }
+
+internal val ExampleSet.paper get() = links.firstOrNull { it.title.startsWith("Paper: ") }
+
 class ExamplesTest {
     private val expectedSizes = mapOf(
         "n3-great-all" to 1, "n4-great-all" to 1, "n5-great-all" to 1, "n6-great-all" to 4, "n7-great-all" to 11,
@@ -40,21 +49,36 @@ class ExamplesTest {
             val match = assertNotNull(scheme.matchEntire(s.name), s.name)
             assertEquals(s.n, match.groupValues[1].toInt(), s.name)
         }
-        assertTrue(ExampleGroup.entries.all { Examples.inGroup(it).isNotEmpty() })
+        assertTrue(Examples.groups.all { Examples.inGroup(it).isNotEmpty() })
     }
 
     @Test
     fun everyBundledFileIsInTheCatalogue() {
-        val paths = Examples.sets.mapNotNull { (it.data as? ExampleSet.Data.File)?.path } +
-            Examples.sets.mapNotNull { it.coloursPath }
+        val paths = Examples.sets.map { it.path } + Examples.INDEX
         assertEquals(GeneratedExamples.FILES.keys, paths.toSet())
         assertEquals(paths.size, paths.toSet().size)
+        // every file is JSON, in the folder of its group, named after its data (no data extension left)
+        for (p in paths) assertTrue(p.endsWith(".json") && p.substringBeforeLast(".json").none { it == '.' }, p)
+    }
+
+    @Test
+    fun theFilesCarryTheirMetadata() {
+        for (s in Examples.sets) {
+            val o = parseJson(GeneratedExamples.FILES.getValue(s.path).joinToString("")) as Map<*, *>
+            // PoCoView's key order: metadata first, then the data
+            assertEquals(listOf("name", "n", "group", "label", "description", "links", "source"), o.keys.take(7), s.path)
+            assertEquals(s.group.title, o["group"], s.path)
+            assertEquals(s.n.toLong(), o["n"], s.path)
+            val data = o.keys.drop(7)
+            assertTrue(data == listOf("arrangements") || data.first() in JsonEncoding.entries.map { it.key }, "${s.path}: $data")
+            assertEquals(s.size > 1, "arrangements" in o, s.path)
+        }
     }
 
     @Test
     fun listSizes() {
         for ((name, size) in expectedSizes) assertEquals(size, set(name).size, name)
-        val singles = listOf(ExampleGroup.FUREDI_PALASTI, ExampleGroup.NON_CIRCULARIZABLE, ExampleGroup.COLORINGS, ExampleGroup.THREE)
+        val singles = listOf("furedi-palasti", "non-circularizable", "colorings", "three").map(Examples::group)
         for (s in singles.flatMap(Examples::inGroup)) assertEquals(1, s.size, s.name)
         assertEquals(Examples.sets.size, (singles.flatMap(Examples::inGroup) + Examples.sets.filter { it.name in expectedSizes }).size)
     }
@@ -132,8 +156,8 @@ class ExamplesTest {
 
     @Test
     fun websitePagesAndPapers() {
-        assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles", WebPage.NO_MORE_CIRCLES.url)
-        assertEquals("https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings", WebPage.COLORINGS.url)
+        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=nomorecircles", Examples.group("non-circularizable").page?.url)
+        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=colorings", Examples.group("colorings").page?.url)
         val fromComputations = listOf(
             "n6-intersecting-nonr-edelsbrunner-ramos", "n6-intersecting-nonr-all-triangles-krupp", "n9-great-nonr-pappus",
             "n7-connected-koester",
@@ -152,22 +176,24 @@ class ExamplesTest {
     @Test
     fun everyGroupHasADescriptionAndWellFormedLinks() {
         val url = Regex("""https://[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9./?=_-]*""")
-        for (g in ExampleGroup.entries) {
-            assertTrue(g.title.isNotBlank() && g.description.endsWith("."), g.name)
+        for (g in Examples.groups) {
+            assertTrue(g.title.isNotBlank() && g.description.endsWith("."), g.id)
             // one or two short sentences
-            assertTrue(g.description.split(". ").size <= 2 && g.description.length <= 110, "${g.name}: ${g.description.length}")
-            assertTrue(g.page != null || g.paper != null, g.name)
-            for (link in listOfNotNull(g.page?.url, g.paper?.url)) assertNotNull(url.matchEntire(link), link)
+            assertTrue(g.description.split(". ").size <= 2 && g.description.length <= 110, "${g.id}: ${g.description.length}")
+            assertTrue(g.links.isNotEmpty(), g.id)
         }
-        for (s in Examples.sets) for (link in listOfNotNull(s.page?.url, s.paper?.url)) assertNotNull(url.matchEntire(link), link)
-        assertEquals("https://arxiv.org/abs/2205.08181", Paper.COLORING.url)
+        for (link in Examples.groups.flatMap { it.links } + Examples.sets.flatMap { it.links }) {
+            assertNotNull(url.matchEntire(link.url), link.url)
+            assertTrue(link.title.startsWith("Website: ") || link.title.startsWith("Paper: "), link.title)
+        }
+        assertEquals("https://arxiv.org/abs/2205.08181", Examples.group("colorings").paper?.url)
     }
 
     @Test
     fun labelsAreShortAndUniqueWithinTheirGroup() {
-        for (g in ExampleGroup.entries) {
+        for (g in Examples.groups) {
             val labels = Examples.inGroup(g).map { it.label }
-            assertEquals(labels.size, labels.toSet().size, g.name)
+            assertEquals(labels.size, labels.toSet().size, g.id)
             for (l in labels) assertTrue(l.length <= 45, l)
         }
         for (s in Examples.sets) assertTrue(s.description.endsWith(".") && s.description.length <= 130, s.name)

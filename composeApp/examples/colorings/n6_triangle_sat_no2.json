@@ -1,0 +1,28 @@
+{
+  "name": "n6-digonfree-triangle-saturated-2",
+  "n": 6,
+  "group": "Triangle-saturated arrangements and colorings",
+  "label": "n = 6, no. 2",
+  "description": "A triangle-saturated arrangement of 6 pseudocircles.",
+  "links": [
+    {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},
+    {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
+  ],
+  "source": "website/arrangements/colorings/triangle_sat/n6_triangle_sat_no2.enc_1_1tutte7.ipe",
+  "sequences": [
+    [5, -2, -6, -4, 2, -3, -5, 6, 3, 4],
+    [6, -5, 4, 3, 5, 1, -6, -4, -1, -3],
+    [-4, -6, 2, 1, -5, 6, -1, 4, -2, 5],
+    [3, -6, 1, 2, 6, -5, -1, -3, -2, 5],
+    [-1, -2, -3, -4, 2, -6, 1, 3, 6, 4],
+    [-2, 3, 4, 1, 2, -4, -5, -3, -1, 5]
+  ],
+  "crossingColors": [
+    ["B", "G", "R", "B", "R", "B", "G", "R", "B", "R"],
+    ["R", "G", "R", "B", "R", "G", "B", "G", "R", "G"],
+    ["R", "B", "G", "B", "R", "G", "B", "G", "B", "G"],
+    ["R", "G", "B", "G", "R", "G", "R", "G", "R", "B"],
+    ["B", "R", "G", "B", "G", "B", "G", "R", "B", "G"],
+    ["R", "B", "G", "R", "B", "R", "B", "G", "R", "B"]
+  ]
+}

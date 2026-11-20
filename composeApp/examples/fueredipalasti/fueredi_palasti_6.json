@@ -1,0 +1,13 @@
+{
+  "name": "n6-great-fueredi-palasti",
+  "n": 6,
+  "group": "Füredi–Palásti construction",
+  "label": "n = 6, 12 triangles",
+  "description": "The Füredi–Palásti arrangement of 6 circles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/fueredi_palasti_construction/fueredi_palasti_6.enc",
+  "mod1s6": ":_a?@c@bddf_B_BEgmKLcLcmjNOdKaIPeMRSh_@UgKLQdHcVjOUYaCPcLPfJUXdGK"
+}

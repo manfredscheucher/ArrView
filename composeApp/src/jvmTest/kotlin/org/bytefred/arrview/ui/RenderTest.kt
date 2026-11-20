@@ -8,7 +8,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.runBlocking
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.DrawModel
-import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.TextFormat
 import org.jetbrains.skia.EncodedImageFormat
@@ -67,6 +66,14 @@ class RenderTest {
     }
 
     @Test
+    fun colouredCrossings() {
+        val s = state()
+        val set = Examples.byName("n7-digonfree-triangle-saturated-1")!!
+        s.loadSet(set.name, ArrangementSet(set.size, set::colors, set::arrangement))
+        render(s, file = "coloured-crossings.png")
+    }
+
+    @Test
     fun twoCircles() {
         val s = state()
         s.load("two", Arrangement.two())
@@ -104,7 +111,7 @@ class RenderTest {
         for (kind in DialogKind.entries - DialogKind.NONE - DialogKind.HELP) {
             val s = state()
             if (kind == DialogKind.EXAMPLES) {
-                s.examples.expanded.addAll(listOf(ExampleGroup.DATABASE.name, ExampleGroup.COLORINGS.name))
+                s.examples.expanded.addAll(listOf("database", "colorings"))
                 s.examples.selected = Examples.byName("n5-intersecting-all")
                 s.examples.index["n5-intersecting-all"] = 16
             }

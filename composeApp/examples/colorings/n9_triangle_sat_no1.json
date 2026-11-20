@@ -1,0 +1,34 @@
+{
+  "name": "n9-digonfree-triangle-saturated-1",
+  "n": 9,
+  "group": "Triangle-saturated arrangements and colorings",
+  "label": "n = 9, no. 1",
+  "description": "A triangle-saturated arrangement of 9 pseudocircles.",
+  "links": [
+    {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},
+    {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
+  ],
+  "source": "website/arrangements/colorings/triangle_sat/n9_triangle_sat_no1.enc_1_1tutte7.ipe",
+  "sequences": [
+    [6, 5, -9, -4, 3, -6, -8, -5, -2, 4, -7, -3, 8, 9, 2, 7],
+    [-6, 7, -5, 1, 4, 9, -3, 8, -7, -1, -9, 6, 3, 5, -8, -4],
+    [-2, -6, -8, 1, 7, 9, 2, 8, -4, 5, -9, 6, -1, 4, -7, -5],
+    [8, 7, -3, 1, 9, -6, -5, 3, -8, -9, -2, -1, -7, 5, 6, 2],
+    [4, 6, -1, -9, -7, 3, -2, -8, -6, -4, 7, 2, 1, 8, 9, -3],
+    [-9, -2, 3, -8, 5, -4, 2, 7, 8, 1, -3, 9, 4, -5, -1, -7],
+    [-4, -8, -6, -2, -5, 4, 1, -3, 9, 8, 2, -1, 6, -9, 5, 3],
+    [-4, 7, -6, 1, -5, 9, 4, -3, -2, -7, -9, -1, 3, 6, 5, 2],
+    [6, 7, 5, 1, -4, -6, 3, -5, -8, 4, -2, -3, -7, 8, -1, 2]
+  ],
+  "crossingColors": [
+    ["R", "B", "R", "G", "B", "G", "B", "G", "R", "G", "R", "B", "R", "B", "R", "B"],
+    ["R", "G", "B", "R", "B", "R", "G", "R", "G", "R", "G", "B", "G", "R", "B", "G"],
+    ["G", "R", "G", "B", "G", "B", "G", "B", "G", "R", "B", "R", "B", "R", "G", "B"],
+    ["R", "B", "R", "G", "B", "R", "B", "G", "R", "G", "B", "G", "B", "G", "B", "G"],
+    ["B", "G", "B", "G", "R", "B", "R", "G", "R", "G", "R", "B", "G", "R", "G", "R"],
+    ["R", "B", "R", "B", "R", "B", "R", "B", "R", "G", "R", "G", "R", "G", "R", "G"],
+    ["B", "G", "B", "G", "R", "B", "R", "G", "R", "B", "G", "B", "G", "B", "R", "G"],
+    ["R", "G", "R", "B", "R", "B", "R", "B", "R", "B", "G", "R", "G", "B", "G", "B"],
+    ["R", "B", "G", "R", "B", "G", "B", "G", "B", "G", "R", "B", "R", "G", "B", "G"]
+  ]
+}

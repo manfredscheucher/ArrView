@@ -1,0 +1,22 @@
+{
+  "name": "n4-intersecting-all",
+  "n": 4,
+  "group": "Database",
+  "label": "Intersecting, n = 4",
+  "description": "All intersecting arrangements of 4 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/abstract/all4.enc",
+  "arrangements": [
+    {"mod1s6": ":MmOkrOMa@sQEPKQeTCOqDL"},
+    {"mod1s6": ":MeIKK@C]?boA]XBGeSqYDKj"},
+    {"mod1s6": ":MeI[kDNOsRG_\\IgaGXC@dMf"},
+    {"mod1s6": ":MeISWxGS{rGaHIgBG\\CAeMb"},
+    {"mod1s6": ":MmQPRpK]@COGeXRIVCOqeN"},
+    {"mod1s6": ":MgM[|AGSyGcK\\KAeOe?PFOf"},
+    {"mod1s6": ":MsK`RgRCPRGR?OrFP?HBFR"},
+    {"mod1s6": ":MoOhboAG[PcJCPBOES{@EN"}
+  ]
+}

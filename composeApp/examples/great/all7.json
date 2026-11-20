@@ -1,0 +1,24 @@
+{
+  "name": "n7-great-all",
+  "n": 7,
+  "group": "Database",
+  "label": "Great, n = 7",
+  "description": "All arrangements of 7 great pseudocircles.",
+  "links": [
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/great/all7.enc.greatcircles.enc",
+  "arrangements": [
+    {"mod1s6": ":kh?PsC\\?Fo@{O[PabaKK]O`BqCgcUdcq{ogWedRKWSQbaq[_WScbQkKKO`@qCOOPaaQKC{^PGwA@AcQp@?otDCbR[KKIMIGO[U\\S~"},
+    {"mod1s6": ":ki?QC?bAHOq[ghJIqApaQVKq`pQUNIq@`YQLJp_xGfCAcAK?AOGo_XGfA@fb{?A[Mp@?o_WaaPhCrEDBaPiMJFcr[OIKEhGo[[NQ~"},
+    {"mod1s6": ":ki@GkscSeCqkC_QIOAHKj@IOAkC`?Gq`pgxJFerkKQOHO`@CfDBdw_WlBBcGOWbKFFCQQYNMgskcULFch?gWMHo__WOILOog[QJL~"},
+    {"mod1s6": ":kiAAKcfIHRACk\\LFrak{hOJSQ|GpRKoOO[S[_?Ow_v?@@pHiEDBBBkOIEDfgWOKLNoP@Cm[`AaP_t?CcrHmELFdBkOUMIfwgo_UN^"},
+    {"mod1s6": ":kg?g[k`IGoQC?bCHPQ[C_U_CQ{KfAHOWC_WSMQPhSzFFewowtDBp?sGOSOGgWci`Pp?owo[a`pxczHDbQqMOIEDsSgWMLFHWs]ZM~"},
+    {"mod1s6": ":kfAXCiVKeoPo}AMGOPxA?PHOAHM?QHpPs[^EGPASKbAHpPXyKKMpph}GHLOp@mCIMOp@Os_aAQhpBADDbYIIJJfS[[YWNHGooq^Q~"},
+    {"mod1s6": ":kjCa\\OjMHRq\\?hPIqbCkrKLFHhkz@@?oo]?CAa@KKKIGFgO[UPNp@?o[[aaPg{z@@aapaAADdbK?GKJeg?SYVLp_x?aSIq@Gw]QH~"},
+    {"mod1s6": ":kh?_[CH?Ap`C[RIDsA\\ChNHRqT?fPIRQha[UKrQhi[ULrAxqWVMoOOsoY_?ppcvCAbB`uOHFgCKWSONGgwka^Pp_w_QIDo?GGECA~"},
+    {"mod1s6": ":kgBh|WGMabwpAMPdCAPYUPHdx_wgWebqheCBHCw?CgT`@a@IEFGcwGO[S_@PxUQIJQPX]OKKQ@heQIDca[_WLIDW?CGDQHWOKKFRH~"},
+    {"mod1s6": ":kib`{w`NGsATCfQISqcCCMFo_Ww`@ABqKKIOHP?pCf?Acac?KRIPpP_tGDeR[[OYLq``WpJEdrKcWTJQPhSnFCAPOkWL_?OOKGDB^"},
+    {"mod1s6": ":kh?pSGVCEPPl_KOJPqHYOMJqPx][Qfcy@QaTlEr`uoXNFwog_SbaqHUOKFCcScYNHgwGKKIJOOO[UU_@@?on?AaPh]AA@fBk?GDNF~"}
+  ]
+}

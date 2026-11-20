@@ -11,7 +11,7 @@ import kotlin.test.assertNotNull
 class ExampleColoursDataTest {
     @Test
     fun drawingsAreTheWebsiteArrangements() {
-        val sets = Examples.inGroup(ExampleGroup.COLORINGS).filter { it.hasColours }
+        val sets = Examples.inGroup(Examples.group("colorings")).filter { it.hasColors }
         assertEquals(6, sets.size)
         for (s in sets) {
             val stem = s.source!!.substringAfterLast('/').substringBefore(".enc")

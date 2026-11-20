@@ -162,10 +162,10 @@ class HelpClaimsTest {
 
     @Test
     fun savedFileFormat() {
-        assertSays(HelpPage.FORMATS, "Save file writes JSON {\"name\": ..., \"sequences\": [[...], ...]} (list i for circle i)")
+        assertSays(HelpPage.FORMATS, "Save file writes JSON {\"name\": ..., \"n\": ..., \"sequences\": [[...], ...]} (list i for circle i")
         val json = arrangementFile("x", Arrangement.krupp(), FileFormat.JSON)
         val root = parseJson(json) as Map<*, *>
-        assertEquals(setOf("name", "sequences"), root.keys)
+        assertEquals(listOf("name", "n", "sequences"), root.keys.toList())
         assertEquals(Arrangement.krupp().lists.map { l -> l.map { it.toLong() } }, root["sequences"])
         // the sequences example of the Formats page is a real arrangement (the NonKrupp)
         val example = "{1: [2, -2, 3, -3], 2: [...], ...}"

@@ -1,0 +1,12 @@
+{
+  "name": "n5-great-all",
+  "n": 5,
+  "group": "Database",
+  "label": "Great, n = 5",
+  "description": "All arrangements of 5 great pseudocircles.",
+  "links": [
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/great/all5.enc.greatcircles.enc",
+  "mod1s6": ":Ui@AaB`C_B_CdEIJdFIKeGJLfHKMgHLMdEFGH_@ABC"
+}

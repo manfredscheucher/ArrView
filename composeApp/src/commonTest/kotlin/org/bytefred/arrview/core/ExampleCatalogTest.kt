@@ -73,12 +73,12 @@ class ExampleCatalogTest {
         for (n in 3..6) {
             val all = members("n$n-digonfree-all")
             val min = all.minOf { it.triangleCount }
-            val set = Examples.inGroup(ExampleGroup.MIN_TRIANGLES).single { it.n == n }
+            val set = Examples.inGroup(Examples.group("min-triangles")).single { it.n == n }
             assertEquals("n$n-digonfree-$min-triangles", set.name)
             assertEquals(all.filter { it.triangleCount == min }.map { it.canonical }.toSet(), members(set.name).map { it.canonical }.toSet())
         }
         // "All" up to n = 9, "Some" from n = 10 on; the minimum grows with n
-        val sets = Examples.inGroup(ExampleGroup.MIN_TRIANGLES)
+        val sets = Examples.inGroup(Examples.group("min-triangles"))
         for (s in sets) assertTrue(s.description.startsWith(if (s.n <= 9) "All" else "Some"), s.description)
         val minima = sets.map { members(it.name).first().triangleCount }
         assertEquals(minima.sorted(), minima)
@@ -92,7 +92,7 @@ class ExampleCatalogTest {
         val digonFree6 = members("n6-digonfree-all")
         assertEquals(20, digonFree6.maxOf { it.triangleCount })
         // the website's sets ("All" up to n = 7), then the maxima for n = 8, 9 from the computer search
-        val website = Examples.inGroup(ExampleGroup.MAX_TRIANGLES).filter { it.page != null }
+        val website = Examples.inGroup(Examples.group("max-triangles")).filter { it.page != null }
         for (s in website) assertTrue(s.description.startsWith(if (s.n <= 7) "All" else "Some"), s.description)
         val max8 = members("n8-intersecting-38-triangles").single()
         assertEquals(38, max8.triangleCount)
@@ -103,12 +103,12 @@ class ExampleCatalogTest {
         // the website's n = 8, 9 sets stay below the maxima
         assertTrue(website.filter { it.n == 8 }.all { s -> members(s.name).all { it.triangleCount < 38 } })
         assertTrue(website.filter { it.n == 9 }.all { s -> members(s.name).all { it.triangleCount < 50 } })
-        assertEquals(website.size + 2, Examples.inGroup(ExampleGroup.MAX_TRIANGLES).size)
+        assertEquals(website.size + 2, Examples.inGroup(Examples.group("max-triangles")).size)
     }
 
     @Test
     fun furediPalastiTrianglesTendToTwoThirdsNSquared() {
-        val sets = Examples.inGroup(ExampleGroup.FUREDI_PALASTI)
+        val sets = Examples.inGroup(Examples.group("furedi-palasti"))
         assertEquals((6..42 step 6).toList(), sets.map { it.n })
         var last = 0.0
         for (s in sets) {
@@ -144,22 +144,22 @@ class ExampleCatalogTest {
     fun descriptionsNameTheirSize() {
         for (s in Examples.sets) {
             assertTrue(s.description.endsWith("."), s.name)
-            if (s.group != ExampleGroup.THREE) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
+            if (s.group != Examples.group("three")) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
             Regex("""-(\d+)-triangles$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} triangles" in s.description, s.description) }
         }
     }
 
     @Test
     fun triangleSaturatedColouringsAreProper() {
-        val coloured = Examples.inGroup(ExampleGroup.COLORINGS).filter { it.hasColours }
+        val coloured = Examples.inGroup(Examples.group("colorings")).filter { it.hasColors }
         assertEquals(6, coloured.size)
         for (s in coloured) {
             val arr = s.arrangement(0)
-            val colours = assertNotNull(s.colours(0), s.name)
+            val colours = assertNotNull(s.colors(0), s.name)
             assertEquals(arr.size, colours.size, s.name)
             assertTrue(arr.isDigonFree, s.name)
             for (k in 0 until arr.size) {
-                assertTrue(colours[k] in 0..2, s.name)
+                assertTrue(colours[k] in listOf("R", "G", "B"), s.name)
                 // one colour per crossing, neighbours along a circle differ
                 assertEquals(colours[k], colours[arr.partners[k]], "${s.name} crossing $k")
                 assertTrue(colours[k] != colours[arr.nextOnCircle(k)], "${s.name} crossing $k")
@@ -172,18 +172,15 @@ class ExampleCatalogTest {
             }
             assertTrue(onTriangle.all { it }, s.name)
             assertEquals(s.name.split("-")[1] == "great", arr.isGreat, s.name)
-            assertTrue(Examples.crossingColours(arr).contentEquals(colours), s.name)
         }
-        // only the stored arrangements: an edited one has no colours
-        val first = coloured.first().arrangement(0)
-        assertEquals(null, Examples.crossingColours(first.triangleFlip(first.faces.indexOfFirst { it.size == 3 })))
-        assertEquals(null, Examples.crossingColours(Examples.start.arrangement()))
+        // the coloured examples are exactly these 6: no other set has colours
+        assertEquals(coloured, Examples.sets.filter { it.hasColors })
     }
 
     @Test
     fun koesterHasSevenCirclesAndOneNonCrossingPair() {
         val koester = set("n7-connected-koester")
-        assertEquals(false, koester.hasColours)
+        assertEquals(false, koester.hasColors)
         val arr = koester.arrangement(0)
         assertEquals(7, arr.n)
         assertEquals(1, arr.nonIntersectingPairCount)

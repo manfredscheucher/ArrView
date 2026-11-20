@@ -1,0 +1,13 @@
+{
+  "name": "n6-connected-nonr-sym4-2",
+  "n": 6,
+  "group": "Non-circularizable arrangements",
+  "label": "n = 6 digon-free connected, additional no. 2",
+  "description": "A non-circularizable digon-free connected arrangement of 6 pseudocircles.",
+  "links": [
+    {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/nomorecircles/connected/additional/n6_connected_digonfree_sym4_2.mod2s6",
+  "mod2s6": ":~?AOf?A?oqfCB?wr_oG@OKCogf[F@GJ@gfDK|fSC@?sgCD@GtgSMDougcNDwvgs?A?ohC@AGphSUBwaEtKaw]CWvhs@BG_CdO_?WCGdiSBAWYCTS_OQBWbisCA_\\CdW_gTB_djSQB_gED[aW\\DGpjsSBOeDt_agZCwnkSUBoiETcaw^DWrksWC?kEdgbG`DgtlSJ@wjlcI@oilsKA?kmCLAGlmSWBG_CKUAw]B{QAgZBcRA_YBkA?oQDCB?wRDKC@?SCsD@GTC{I@oeDsJ@wfD{KA?gECLAGhEKABobESBBwaE[CC?cEcDCGdEkYCOmEsZCWnE{?B_dEC@BgcEKE@OiESF@WjE[G@_kEcH@glEkMAoiEsNAwjE{?A?WDc@AGXDn"
+}

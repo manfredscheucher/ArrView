@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.bytefred.arrview.core.Arrangement
+import org.bytefred.arrview.core.ArrangementFile
 import org.bytefred.arrview.core.ArrangementLayout
 import org.bytefred.arrview.core.CellActions
 import org.bytefred.arrview.core.DigonCreate
@@ -38,7 +39,7 @@ import org.bytefred.arrview.core.digonCreate
 import org.bytefred.arrview.core.faceKey
 import org.bytefred.arrview.core.faceWithKey
 import org.bytefred.arrview.core.hasModel1
-import org.bytefred.arrview.core.readArrangements
+import org.bytefred.arrview.core.readArrangementFile
 import org.bytefred.arrview.core.triangleFlip
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.TimeMark
@@ -85,13 +86,21 @@ class StatusMessage(val text: String, val transient: Boolean)
  * The arrangements of a loaded file or example set (PoCoView's sets), decoded when
  * first shown (an example set has up to 2131 members).
  */
-class ArrangementSet(val size: Int, private val member: (Int) -> Arrangement) {
+class ArrangementSet(
+    val size: Int,
+    /** The colours of the crossings of member i as stored (JSON `"crossingColors"`), or null. */
+    val colors: (Int) -> List<String>? = { null },
+    private val member: (Int) -> Arrangement,
+) {
     private val decoded = HashMap<Int, Arrangement>()
 
     operator fun get(i: Int): Arrangement = decoded.getOrPut(i) { member(i) }
 
     companion object {
         fun of(arrangements: List<Arrangement>) = ArrangementSet(arrangements.size) { arrangements[it] }
+
+        /** What a file or an import holds, with the crossing colours its JSON gives. */
+        fun read(read: List<NamedArrangement>) = ArrangementSet(read.size, { read[it].colors }) { read[it].arrangement }
     }
 }
 
@@ -152,6 +161,13 @@ class AppState(
 
     /** Member [i] of the set with its edits. */
     private fun member(i: Int): Arrangement = if (i == setIndex) arrangement else edits[i] ?: arrangementSet[i]
+
+    /**
+     * The colours of the crossings of the shown arrangement (one colour word per entry of its
+     * sequences): those stored with the set member while it is unedited, else null.
+     */
+    val crossingColors: List<String>?
+        get() = arrangementSet.colors(setIndex)?.takeIf { arrangement == arrangementSet[setIndex] }
 
     /** Member [i] as last saved. */
     private fun savedMember(i: Int): Arrangement = savedEdits[i] ?: arrangementSet[i]
@@ -661,8 +677,9 @@ class AppState(
     /** Opens a file: JSON, intersection sequences or sparse6 lines, every arrangement of it; errors go to the error dialog. */
     fun open(fileName: String, bytes: ByteArray) {
         try {
-            val read = readArrangements(bytes.decodeToString())
-            loadSet(read.singleOrNull()?.name ?: fileName.substringBeforeLast('.'), ArrangementSet.of(read.map { it.arrangement }))
+            val file = readArrangementFile(bytes.decodeToString())
+            val read = file.arrangements
+            loadSet(file.name ?: read.singleOrNull()?.name ?: fileName.substringBeforeLast('.'), ArrangementSet.read(read))
             showInfo("Opened $fileName" + if (read.size > 1) ": ${read.size} arrangements" else "")
         } catch (e: InvalidArrangementException) {
             error = "Cannot open $fileName: ${e.message}"
@@ -670,17 +687,17 @@ class AppState(
     }
 
     /** The arrangements in pasted [text] (Import, format detected), or null after setting [error]. */
-    fun parseImport(text: String): List<NamedArrangement>? =
+    fun parseImport(text: String): ArrangementFile? =
         try {
-            readArrangements(text)
+            readArrangementFile(text)
         } catch (e: InvalidArrangementException) {
             error = "Cannot import the text: ${e.message}"
             null
         }
 
     /** Loads what [parseImport] read (undoable). */
-    fun loadImport(read: List<NamedArrangement>) =
-        loadSet(read.singleOrNull()?.name ?: "imported", ArrangementSet.of(read.map { it.arrangement }))
+    fun loadImport(read: ArrangementFile) =
+        loadSet(read.name ?: read.arrangements.singleOrNull()?.name ?: "imported", ArrangementSet.read(read.arrangements))
 
     /** The file name for saving, without extension. */
     val fileName: String get() = name.replace(Regex("[^A-Za-z0-9._#-]+"), "_")
@@ -734,7 +751,7 @@ class AppState(
     fun beginSave(format: FileFormat): ByteArray {
         val all = (0 until arrangementSet.size).map(::member)
         saving = all
-        return arrangementsFile(name, all, format).encodeToByteArray()
+        return arrangementsFile(name, all, format) { i -> arrangementSet.colors(i)?.takeIf { all[i] == arrangementSet[i] } }.encodeToByteArray()
     }
 
     /**

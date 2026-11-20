@@ -1,0 +1,13 @@
+{
+  "name": "n14-digonfree-19-triangles",
+  "n": 14,
+  "group": "Minimum number of triangles",
+  "label": "n = 14, 19 triangles",
+  "description": "Some digon-free intersecting arrangements of 14 pseudocircles with the minimum of 19 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_minimal_triangles/some14_df_19_triangles.txt",
+  "mod1s6": ":~?Aw_W?_wB?sC`WD_cG@cN@KAa_C`?MAc@_SV_OWa?PBKIASHA[]Bk]`?M`g_`_`_sbccgC{gd_Ua{WDkPBGm`WQ_goaOpbWq`OraCid[ME{_DWw`[y`Wz_g{cofa_\\ag]F{MBx?f@@bwvGShEssEkIA@DbOZGsPAPFdwoFPG_CBHSFH[EHcbHkcHsdH{SCs}FxPbgfIS]D@RbwhIdBG`TeovIsiDXVjPXjSkdkmJknFP]fX^f`_fh`k_RK[[KcHKkNKtflDhjCjL[xLc_LlIJ\\iehhMCNGhgMKHE`qb_rM[REPseHt_gRMs|K`vkPbNCdCsCI@PNSKHxzcPMNdLNkaH`}cHJN{_HQ?lpnOLZLiAjPkO\\XLYC_@[jl]O|^PD_PL`PTaP\\xPdbPlcPtdP|eQDfQLgQThQ\\iQeTlQUmAV_HXapYRKkJYYj`nR\\IOq[_CBOy]_yGR{EPI_cYISKcPYaciKS\\yPiccqMSk}PyecyOS{gQIgdIQTLCQYieqST[iQikjAUTljQymoiWT|XUEWRIp_GAEhoUSUAyrd_lUd[JitoqFRqu"
+}

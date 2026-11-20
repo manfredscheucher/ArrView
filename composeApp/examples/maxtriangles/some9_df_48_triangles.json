@@ -1,0 +1,13 @@
+{
+  "name": "n9-digonfree-48-triangles",
+  "n": 9,
+  "group": "Maximum number of triangles",
+  "label": "n = 9, 48 triangles",
+  "description": "Some digon-free intersecting arrangements of 9 pseudocircles with 48 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_maximal_triangles/some9_df_48_triangles.enc",
+  "mod1s6": ":~?@Ik@o\\GQKnf@waHA}SD`{dJhOVGAWmdP_hIquTEQgkJWODIQglc`_YHqmREPkgJGwUEaSfbp[ZHaaEB@?\\Gw[LCPwca?c^GAyIAqCaJwOEC@GhIwSFCPKiJGGKB`?QHwKLBpCRIGCAA?w^HW?BAO{_HgCAA_o`Gw?BAosaHG?@A?cIAwOD@_[[FPySDPWVE@cYE~"
+}

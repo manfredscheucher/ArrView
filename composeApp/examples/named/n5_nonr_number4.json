@@ -1,0 +1,13 @@
+{
+  "name": "n5-connected-nonr-4",
+  "n": 5,
+  "group": "Non-circularizable arrangements",
+  "label": "n = 5, no. 4",
+  "description": "A non-circularizable connected arrangement of 5 pseudocircles.",
+  "links": [
+    {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/nomorecircles/connected/n5_nonr_number4.mod2s6",
+  "mod2s6": ":~?@]h?[GAOg`hG[TEPg^hgsMCp_biGGJFQEid`[WEpuka@AmaPCSEzADA`Iq`PKTFJQBB@gblgOKDzaNDji?EZqMDAI}c@CQFkACAo{_ogCAF{Q??OK_pgWLqGW[FaJI`PG[FgWLBaIPD@waaPk\\GW_HC@EA@p{`_OGJGGoVEAMEBPK[ao{UFWOND`]MD@_Z_?KXEg?@EP}RDPgb`O[IDW_IC@IB@?o_"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "n6-digonfree-nonr-3",
+  "n": 6,
+  "group": "Non-circularizable arrangements",
+  "label": "n = 6 digon-free intersecting, no. 3",
+  "description": "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles.",
+  "links": [
+    {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/nomorecircles/intersecting/digonfree/n6_nonr_number3.mod2s6",
+  "mod2s6": ":~?AYf_AAwzfc??WWfsOAGQaWjDopEd@a_kDwqElBaglE?rEtDgCL@oNhCF@OvhSH@WwhcG@_xhsOBwdDDOaG_CoiiSQCGfDLS_gXBgaisCBO[C\\W_oZBocjSLB_aDt[`o\\C_njsNBobED__w_D?jkSGBwhDdc`G`DOlksA@WeEdg_GICgtlSB@_fEtkbGpEwylsYEWwF\\o_?ZEOxmSEAgWmcCAWVmsDA_UnC@AoynS_CojEc^CgkEk`CwlEsXCOmEKYCWoE[ZC_nESCAW[DsDA_\\D{EAg]ECAAWVEc@A_UEkBAgWEsL@o\\CSL@w[C[M@w]CcOAG_DCOAO^DKPAO`DSF@OdDCH@WeDSG@_fDKFDWpE{GD_qFKHDgrFCDAoXFSCAwYF[??oWB[@@OvFSA@WwF[??WKFN"
+}

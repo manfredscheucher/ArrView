@@ -233,11 +233,11 @@ val generateLicenses = tasks.register<GenerateLicenses>("generateLicenses") {
 }
 
 // ── build-time example files (GeneratedExamples.kt) ─────────────────────────
-// The example arrangements live as text files in composeApp/examples/ (copied there by
-// scripts/import_examples.py, see doc/DEVELOPMENT.md). Every file is embedded as a string, so
-// the app has them at once (no resource reads, no fetches on the web). The catalogue (names,
-// groups, descriptions) is core/Examples.kt. Long files are split into chunks, since a JVM string
-// constant holds at most 65535 bytes.
+// The example arrangements live as JSON files in composeApp/examples/ (index.json lists the groups
+// and files; scripts/import_examples.py refreshes the data, see doc/DEVELOPMENT.md). Every file is
+// embedded as a string, so the app has them at once (no resource reads, no fetches on the web);
+// core/Examples.kt parses them. Long files are split into chunks, since a JVM string constant holds
+// at most 65535 bytes.
 @CacheableTask
 abstract class GenerateExamples : DefaultTask() {
     @get:InputDirectory @get:PathSensitive(PathSensitivity.RELATIVE) abstract val examplesDir: DirectoryProperty

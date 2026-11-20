@@ -1,0 +1,13 @@
+{
+  "name": "n5-intersecting-nonr-1",
+  "n": 5,
+  "group": "Non-circularizable arrangements",
+  "label": "n = 5, no. 1 (intersecting)",
+  "description": "The only non-circularizable intersecting arrangement of at most 5 pseudocircles.",
+  "links": [
+    {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/nomorecircles/connected/n5_nonr_number1_intersecting.mod2s6",
+  "mod2s6": ":~?@gi?OEBqIg`OWSE@c_ig_LC`[bHIqMDPWVjgc[kGg\\Ga]qaowRFjQPE`o\\F`}u_o{PmHGSmgCKEQQ{__oUnh?ToH_dog[RG{Q?@pk^pgGHA_kOG[a_Ha^I_QCdHkq?B[yCElAB@O_ZsgKPEp}CE`saaOg[FW[RF`}HApo]`O_QDGW_Ga]IGQWf_?[LGwoUDqQCBpCYaowODW?GBPmAC@SU_oSEBwCWEQUWGASec`OXHGwRDqM@?_o`"
+}

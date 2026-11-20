@@ -1,0 +1,13 @@
+{
+  "name": "n12-great-fueredi-palasti",
+  "n": 12,
+  "group": "Füredi–Palásti construction",
+  "label": "n = 12, 72 triangles",
+  "description": "The Füredi–Palásti arrangement of 12 circles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/fueredi_palasti_construction/fueredi_palasti_12.enc",
+  "mod1s6": ":~?AE_oB`gE`wH`SQ@{TAKV?kJAkVbWQ_wRboVB[_?kbBkZ_gSBsXBoacKaCcC@{F@_Rbcl?wjdw^_[UBcr@SPB?qbkvBS^ESY`WsEscD{ABSI@gke[B@c]COc`GQD{rc{CEgvexAfkSDK?AWmatHdgsEsUFCQA_h_?xFpAaG^F[A@?HDK~_kbGxQbPDHs[HCfFkKD_mGpPc?`CXQ_gSI[LGXUassF@NaowHSG@GnHSnF@If`HJ[B@gkIKMBGabgfJC@JSMAga_OGKCYKC\\G`DagaaOcD{jEPJHcPD?zLKGHP__GEJSIDo}GsOCw|__bEhF_GEECUB`jdOlEo~_?pFHTJXfaOSBs_CHBKcJ@oo_gXM{ADHC`WMAkOBgrGkJEo~_GMEDGHpn_GXM{JE?~dPGI{ABPCa?\\C{@@oX"
+}

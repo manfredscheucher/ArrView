@@ -1,0 +1,20 @@
+{
+  "name": "n5-digonfree-12-triangles",
+  "n": 5,
+  "group": "Maximum number of triangles",
+  "label": "n = 5, 12 triangles",
+  "description": "All digon-free intersecting arrangements of 5 pseudocircles with 12 triangles.",
+  "links": [
+    {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
+  "source": "website/arrangements/triangles/digonfree_maximal_triangles/all5_df_12_triangles.enc",
+  "arrangements": [
+    {"mod1s6": ":Ua?a``gFkDEIgHIcJabJNgHNfMOP`FKLM_EHIN_BCDEJ"},
+    {"mod1s6": ":UbAe@_kEHJfGIbDHaCGeJfIO`CGIO_DHJP`ACKM_BDLN"},
+    {"mod1s6": ":UkCDEF`GHbGIaHJ_IJlMNO`BCDG`ACEH_BDFI_AEFJ"},
+    {"mod1s6": ":Ua@_kACHbDHeFIJ`G_GiJNOcDEFHaCEINbDFJO_@GKL"},
+    {"mod1s6": ":U_cAbab`_kGJhIeIfJaMbNOcKNOdLMP`CEHIK_DFGJL"},
+    {"mod1s6": ":Ua@`__kGHIJbEaFcEdFgILNhJMO`GHLM_IJNOaBCDEF"}
+  ]
+}

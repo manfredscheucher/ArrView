@@ -1,0 +1,13 @@
+{
+  "name": "n3-digonfree-all",
+  "n": 3,
+  "group": "Database",
+  "label": "Digon-free intersecting, n = 3",
+  "description": "All digon-free intersecting arrangements of 3 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "computations/results/abstract/all3_digonfree.enc",
+  "mod1s6": ":GgXeBQAQAN"
+}
