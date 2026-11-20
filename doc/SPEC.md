@@ -2,6 +2,23 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-20: SVG export
+
+### Request (Manfred)
+
+After "Export SVG does not draw the crossing colours": "jo mach bitte svg export sinnvoll".
+Read as: the SVG shows the drawing as the canvas shows it, without UI marks (hover, highlights, "!").
+
+### Decisions
+
+- Export SVG draws the coloured crossings as the canvas does (disc radius 5 on a black rim of
+  radius 6.5, same positions via `coloredCrossings`), while they are shown (unedited member).
+- Compared canvas and SVG: faces, curves (scheme, line width), model, outer face, touching points
+  and labels already matched; the crossing colours were the only drawing difference. There is no
+  other picture export (no Ipe); the Export dialog's text formats (sequences, sparse6) carry no
+  colours, Save file does (`"crossingColors"`).
+- `ExportTest.svgShowsTheCrossingColours`: the 6 coloured examples, one disc per crossing in its colour.
+
 ## 2026-11-20: Refit on resize, sequences (i), examples as JSON, coloured crossings
 
 ### Request (Manfred)
@@ -64,7 +81,7 @@ attribute, maybe there are more".
   names files after the example. Rename?
 - PoCoView's `"reference"` and `"colors"` (count) keys are not used. Add `"colors": 3` to the
   coloured files?
-- Export SVG does not draw the crossing colours (it did not before either).
+- Export SVG does not draw the crossing colours (it did not before either). Done, see "SVG export".
 
 ## 2026-11-20: Maximum triangles for n = 8 and 9
 

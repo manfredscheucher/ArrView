@@ -37,9 +37,9 @@ fun Color.toHex(): String = "#" + (toArgb() and 0xFFFFFF).toString(16).padStart(
 
 /**
  * SVG of [d] as the canvas draws it (triangles and digons filled, the curves in their colours,
- * model 1 touching points, the labels), in a 1000 x 1000 box.
+ * model 1 touching points, the coloured crossings of [crossingColors], the labels), in a 1000 x 1000 box.
  */
-fun drawingSvg(d: Drawing, scheme: ColorScheme, lineWidth: Float): String {
+fun drawingSvg(d: Drawing, scheme: ColorScheme, lineWidth: Float, crossingColors: List<String>? = null): String {
     val fr = ExportFrame(d.bounds, SVG_SIZE, SVG_MARGIN)
     fun pt(p: Point) = "${fmt(fr.x(p))},${fmt(fr.y(p))}"
     fun path(pieces: List<Cubic>) = buildString {
@@ -67,6 +67,11 @@ fun drawingSvg(d: Drawing, scheme: ColorScheme, lineWidth: Float): String {
         }
         for (at in d.touchings.values) {
             append("<circle cx=\"${fmt(fr.x(at))}\" cy=\"${fmt(fr.y(at))}\" r=\"5\" fill=\"${DIGON_MARK.toHex()}\"/>\n")
+        }
+        for ((at, color) in crossingColors?.let { coloredCrossings(d, it) }.orEmpty()) {
+            val c = "cx=\"${fmt(fr.x(at))}\" cy=\"${fmt(fr.y(at))}\""
+            append("<circle $c r=\"${fmt(CROSSING_RIM.toDouble(), 2)}\" fill=\"black\"/>\n")
+            append("<circle $c r=\"${fmt(CROSSING_DISC.toDouble(), 2)}\" fill=\"${color.toHex()}\"/>\n")
         }
         for ((c, label) in d.labels.withIndex()) {
             val (at, outward) = label

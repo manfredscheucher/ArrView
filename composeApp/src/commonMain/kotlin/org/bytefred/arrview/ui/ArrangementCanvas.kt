@@ -404,18 +404,29 @@ fun tokenColor(token: String?): Color? = when (token?.uppercase()) {
 }
 
 /**
- * A filled disc with a dark rim at every crossing, in the colour of its word ([AppState.crossingColors],
- * one per entry of the sequences); a word without a colour ([tokenColor]) gives no disc.
+ * The coloured crossings of [d]: where each crossing lies and the colour of its word ([AppState.crossingColors],
+ * one per entry of the sequences); a word without a colour ([tokenColor]) gives none.
  */
-private fun DrawScope.drawCrossingColors(d: Drawing, view: ViewTransform, colors: List<String>) {
+internal fun coloredCrossings(d: Drawing, colors: List<String>): List<Pair<Point, Color>> {
     val arr = d.arrangement
-    for (k in 0 until arr.size) {
-        if (arr.partners[k] < k) continue
-        val color = tokenColor(colors.getOrNull(k)) ?: continue
-        val at = d.arcs.getOrNull(k)?.firstOrNull()?.p0 ?: continue
+    return (0 until arr.size).mapNotNull { k ->
+        if (arr.partners[k] < k) return@mapNotNull null
+        val color = tokenColor(colors.getOrNull(k)) ?: return@mapNotNull null
+        val at = d.arcs.getOrNull(k)?.firstOrNull()?.p0 ?: return@mapNotNull null
+        at to color
+    }
+}
+
+/** Radius of a coloured crossing's disc and of its dark rim. */
+internal const val CROSSING_DISC = 5f
+internal const val CROSSING_RIM = 6.5f
+
+/** A filled disc with a dark rim at every coloured crossing ([coloredCrossings]). */
+private fun DrawScope.drawCrossingColors(d: Drawing, view: ViewTransform, colors: List<String>) {
+    for ((at, color) in coloredCrossings(d, colors)) {
         val s = view.toScreen(at)
-        drawCircle(Color.Black, 6.5f, s)
-        drawCircle(color, 5f, s)
+        drawCircle(Color.Black, CROSSING_RIM, s)
+        drawCircle(color, CROSSING_DISC, s)
     }
 }
 
