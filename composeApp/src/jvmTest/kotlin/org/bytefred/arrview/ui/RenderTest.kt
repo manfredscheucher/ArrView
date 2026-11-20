@@ -55,7 +55,7 @@ class RenderTest {
 
     @Test
     fun examplesWithDigonsAndLargeN() {
-        for (name in listOf("n4-intersecting-all", "n5-connected-all", "n24-great-fueredi-palasti", "n9-great-nonr-pappus")) {
+        for (name in listOf("n4-intersecting-all", "n5-connected-all", "n24-great-fueredi-palasti", "n9-great-nonr-pappus", "n8-intersecting-38-triangles")) {
             val s = state()
             val set = assertNotNull(Examples.byName(name), name)
             // the member with the most digons

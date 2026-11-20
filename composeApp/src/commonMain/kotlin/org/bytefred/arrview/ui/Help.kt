@@ -146,7 +146,8 @@ private val VISUALIZATION_TEXT = listOf(
         "arc vertices. It works for every connected arrangement and draws digons as regions.",
     "Iterated: the first embedding has equal edge weights; then each edge weight grows with the edge's length " +
         "and the areas of its two faces, and the graph is embedded again, up to Max. iterations times (Settings). " +
-        "The outer face is a regular polygon; by default it is the face with the most symmetries.",
+        "The outer face is a regular polygon; by default it is the face with the most symmetries, of those the " +
+        "largest (a larger outer face gives a rounder drawing).",
     "References:",
 )
 

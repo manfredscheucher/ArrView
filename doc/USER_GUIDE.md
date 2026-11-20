@@ -15,6 +15,8 @@ https://manfredscheucher.github.io/ArrView/
 - Right-click a face (Ctrl+click on a Mac, long press on touch screens) for its menu: flip,
   collapse, "Create digon i j" per pair (several ways: a submenu), "Make outer face" (draws it
   outside).
+- By default the outer face is the one with the most symmetries, of those the largest (a larger outer
+  face gives a rounder drawing).
 - Several ways to create a digon of i and j are listed along circle i (the smaller number), in the
   order of its sequence, then along circle j.
 - Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu (also for Make outer face).

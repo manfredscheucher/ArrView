@@ -251,6 +251,11 @@ n = 3, 4, 5 and every single flip the app offers, valid by Linhart-Ortner and dr
   model 2: of the vertex-edge-face graph without the face vertex). Counted as map automorphisms;
   `SymmetryTest` checks them against a plain graph automorphism count (all n <= 4, every 25th of
   n = 5, the start example, n = 2).
+  Changed 2026-11-20 (Manfred: "2 kriterien in serie: zuerst kandidaten für outer cells die maximale
+  symmetrie, und dann davon den größten", since a larger outer cell gives a rounder drawing that uses
+  more of the area): among the most symmetric faces the one with the most sides, the first of those.
+  sage takes the first most symmetric face in its own face order; the draw7 comparison
+  (`Draw7ComparisonDump`) passes each most symmetric face explicitly, so it is unaffected.
 - The start example in model 2: its triangles have 3 symmetries, its quadrangles 1, so draw3.sage
   draws a triangle outside. Before, ArrView drew a quadrangle outside: in model 2 its polygon has 8
   corners (crossings and arc vertices alternate), `a0 = pi/8 + pi/2`, so the four crossings sit
