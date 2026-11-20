@@ -50,7 +50,7 @@ enum class ExampleGroup(val title: String, val description: String, val page: We
     ),
     MAX_TRIANGLES(
         "Maximum number of triangles",
-        "Arrangements with the most triangles; for n = 8, 9 maybe not the maximum.",
+        "Arrangements with the most triangles; the website's examples for n = 8, 9 are digon-free and not the maximum.",
         WebPage.TRIANGLES, Paper.TRIANGLES,
     ),
     FUREDI_PALASTI(
@@ -98,7 +98,10 @@ class ExampleSet internal constructor(
     val label: String,
     /** One or two short sentences. */
     val description: String,
-    /** Where the data comes from (a path below `~/github/research/pca/pseudocircles/`), null if typed in. */
+    /**
+     * Where the data comes from (a path below `~/github/research/pca/pseudocircles/`, `data/` below
+     * `~/github/research/pca/`), null if typed in.
+     */
     val source: String?,
     /** The members: a file below `composeApp/examples/` or inline sequences in the text format. */
     internal val data: Data,
@@ -207,12 +210,7 @@ object Examples {
         val (scope, n, kind, k) = Regex("""(all|some)(\d+)_(df|digon)_(\d+)_triangles""").matchEntire(stem)!!.destructured
         val what = if (kind == "df") "digon-free intersecting" else "intersecting"
         val which = if (scope == "all") "All" else "Some"
-        // as on the website: the minima are minimal; the maxima of n = 8, 9 "might be optimal"
-        val count = when {
-            group == ExampleGroup.MIN_TRIANGLES -> "the minimum of $k triangles"
-            scope == "some" -> "$k triangles (maybe the maximum)"
-            else -> "$k triangles"
-        }
+        val count = if (group == ExampleGroup.MIN_TRIANGLES) "the minimum of $k triangles" else "$k triangles"
         return file(
             name = "n$n-${if (kind == "df") "digonfree" else "intersecting"}-$k-triangles",
             group = group,
@@ -277,6 +275,23 @@ object Examples {
         ) {
             add(triangles(ExampleGroup.MAX_TRIANGLES, "maxtriangles", MAX_TRIANGLES, "${stem}_triangles", "enc"))
         }
+        // the maxima for n = 8, 9 by computer search (not on the website)
+        add(
+            file(
+                "n8-intersecting-38-triangles", ExampleGroup.MAX_TRIANGLES, 8, "n = 8, 38 triangles, with digons",
+                "The intersecting arrangement of 8 pseudocircles with the maximum of 38 triangles; " +
+                    "unique up to isomorphism, by computer search.",
+                "data/maxtri/n8_p3eq38.txt", "maxtriangles/max8_digon_38_triangles.seq", page = null, paper = null,
+            ),
+        )
+        add(
+            file(
+                "n9-digonfree-50-triangles", ExampleGroup.MAX_TRIANGLES, 9, "n = 9, 50 triangles",
+                "The arrangement of 9 pseudocircles with the maximum of 50 triangles, digon-free; " +
+                    "unique up to isomorphism, by computer search.",
+                "data/maxtri/n9_p3eq50.txt", "maxtriangles/max9_df_50_triangles.seq", page = null, paper = null,
+            ),
+        )
         for (n in 6..42 step 6) {
             add(
                 file(

@@ -20,7 +20,7 @@ class ExamplesTest {
         "n12-digonfree-16-triangles" to 2, "n13-digonfree-18-triangles" to 23, "n14-digonfree-19-triangles" to 1,
         "n5-digonfree-12-triangles" to 6, "n5-intersecting-13-triangles" to 1, "n6-digonfree-20-triangles" to 4,
         "n7-digonfree-28-triangles" to 19, "n7-digonfree-29-triangles" to 3, "n8-digonfree-37-triangles" to 7,
-        "n9-digonfree-48-triangles" to 1,
+        "n9-digonfree-48-triangles" to 1, "n8-intersecting-38-triangles" to 1, "n9-digonfree-50-triangles" to 1,
         "n4-intersecting-digongraphs" to 7, "n5-intersecting-digongraphs" to 27, "n6-intersecting-digongraphs" to 107,
         "n7-intersecting-digongraphs" to 485, "n7-intersecting-trianglefree-digongraphs" to 99,
         "n8-intersecting-nonplanar-digongraph" to 2,

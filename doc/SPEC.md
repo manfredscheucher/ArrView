@@ -2,6 +2,27 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-20: Maximum triangles for n = 8 and 9
+
+### Request (Manfred)
+
+"gib das 9er bitte bei arrview in die examples dazu, das 8er müsst eh scho drin sein" (add the n = 9
+maximum to the examples; the n = 8 one was thought to be in already, but it was not, so both were added).
+
+### Done
+
+- Group "Maximum number of triangles", after the website's sets: `n8-intersecting-38-triangles`
+  ("n = 8, 38 triangles, with digons", the unique intersecting arrangement of 8 pseudocircles with
+  the maximum number 38 of triangles) and `n9-digonfree-50-triangles` ("n = 9, 50 triangles", the
+  unique one of 9 with 50, digon-free), both by computer search. Data: `pca/data/maxtri/n8_p3eq38.txt`
+  and `n9_p3eq50.txt`, copied as `maxtriangles/max8_digon_38_triangles.seq` and
+  `max9_df_50_triangles.seq` (also by `scripts/import_examples.py`). Not on the website: no page,
+  no paper of their own.
+- The group description now says the website's examples for n = 8, 9 are digon-free and not the
+  maximum; the website's sets `some8_df_37` and `some9_df_48` no longer say "(maybe the maximum)".
+- `ExampleCatalogTest` checks 38 triangles with a digon, 50 triangles digon-free, and that the
+  website's n = 8, 9 sets stay below.
+
 ## 2026-11-19: UI overhaul
 
 ### Request (Manfred)

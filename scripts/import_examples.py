@@ -6,7 +6,8 @@ except the colour dictionaries of the old sage code (`*.txt`: the dual graph as
 `{(u, v): 'colour', ...}`), which are converted to model 1 sparse6 (`.mod1s6`), the coloured
 draw7 drawings of the triangle-saturated arrangements (`*_1_1tutte7.ipe`), which give the
 intersection sequences (`.seq`) and the colour class of every crossing (`.colours`), and Koester's
-crossing graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage). The Gradle task
+crossing graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage). The maxima of
+triangles for n = 8, 9 are intersection sequences from `../data/maxtri/` (copied verbatim). The Gradle task
 generateExamples embeds every file of composeApp/examples/ into the app; the catalogue (names,
 groups, descriptions) is in core/Examples.kt. Provenance: doc/DEVELOPMENT.md.
 
@@ -62,6 +63,13 @@ SOURCES = [
     ("named", "computations/results/n6_nonr_all_triangles_krupp_number2.enc"),
     ("named", "computations/results/n6_nonr_edelsbrunnerramos.enc"),
     ("named", "computations/results/n9_nonr_pappus.enc"),
+]
+
+# intersection sequences copied verbatim from the pca folder (the parent of the research folder):
+# (destination folder, source path relative to the pca folder, destination name)
+PCA_SEQUENCES = [
+    ("maxtriangles", "data/maxtri/n8_p3eq38.txt", "max8_digon_38_triangles.seq"),
+    ("maxtriangles", "data/maxtri/n9_p3eq50.txt", "max9_df_50_triangles.seq"),
 ]
 
 
@@ -206,6 +214,9 @@ def main():
             lines = [colour_dict_to_sparse6(line) for line in lines]
             name = name[:-len(".txt")] + ".mod1s6"
         total += write(target, folder, name, lines)
+    for folder, source, name in PCA_SEQUENCES:
+        with open(os.path.join(args.research, "..", source)) as f:
+            total += write(target, folder, name, [line.strip() for line in f if line.strip()])
     print(f"total: {total} bytes")
 
 

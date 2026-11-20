@@ -78,6 +78,7 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `connected/all{3,4,5}.mod2s6` | `website/arrangements/pseudocircles/connected/` (NEW model 2 encoding) |
 | `mintriangles/*.mod1s6` | `website/arrangements/triangles/digonfree_minimal_triangles/*.txt` (converted) |
 | `maxtriangles/*.enc` | `website/arrangements/triangles/digonfree_maximal_triangles/` |
+| `maxtriangles/max8_digon_38_triangles.seq`, `maxtriangles/max9_df_50_triangles.seq` | `~/github/research/pca/data/maxtri/n8_p3eq38.txt`, `n9_p3eq50.txt` (intersection sequences, copied verbatim; the maxima for n = 8, 9 by computer search, not on the website) |
 | `fueredipalasti/fueredi_palasti_{6..42}.enc` | `website/arrangements/triangles/fueredi_palasti_construction/` |
 | `named/n5_nonr_number*.mod2s6` | `website/arrangements/nomorecircles/connected/` |
 | `named/n6_nonr_number{1,2,3}*.mod2s6` | `website/arrangements/nomorecircles/intersecting/digonfree/` |
