@@ -130,8 +130,8 @@ internal fun Arrangement.planeDartOf(a: Int): Int = if (a % 2 == 0) a else 2 * p
 private fun vertexMap(g: PlaneGraph, phi: IntArray): IntArray = IntArray(g.vertexCount) { v -> g.tail(phi[g.rotation[v][0]]) }
 
 /**
- * The face drawn outside by default: the one whose drawing has the most symmetries, the first of
- * several (sage takes the first one in its own face order, which ArrView cannot reproduce).
+ * The face drawn outside by default: the one whose drawing has the most symmetries; among several,
+ * one with the most sides, the first of those (sage takes the first one in its own face order).
  *
  * Model 1 (draw7.sage lines 304-327): per face of the simple primal graph `G2` (digons are no
  * faces there) the order of the automorphism group of `G2` with a pendant edge at every vertex of
@@ -148,7 +148,7 @@ private fun vertexMap(g: PlaneGraph, phi: IntArray): IntArray = IntArray(g.verte
 fun Arrangement.defaultOuterFace(model: DrawModel): Int {
     val sym = outerFaceSymmetries(model)
     val max = sym.values.max()
-    return sym.keys.first { sym.getValue(it) == max }
+    return sym.keys.filter { sym.getValue(it) == max }.maxBy { faces[it].size }
 }
 
 /** The symmetry count of every face that can be outer in [model] (see [defaultOuterFace]). */

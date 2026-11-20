@@ -31,8 +31,9 @@ class SymmetryTest {
                 assertTrue(arr.canBeOuter(f, model), set.name)
                 val sym = arr.outerFaceSymmetries(model)
                 assertEquals(sym.values.max(), sym.getValue(f), set.name)
-                // the first of the most symmetric ones
-                assertEquals(sym.keys.first { sym.getValue(it) == sym.values.max() }, f, set.name)
+                // among the most symmetric ones the first with the most sides
+                val best = sym.keys.filter { sym.getValue(it) == sym.values.max() }
+                assertEquals(best.first { arr.faces[it].size == best.maxOf { g -> arr.faces[g].size } }, f, set.name)
             }
         }
     }

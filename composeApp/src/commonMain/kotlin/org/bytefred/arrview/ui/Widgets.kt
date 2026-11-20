@@ -188,9 +188,8 @@ private fun EncodingHeading(format: TextFormat, info: String) = Row(Modifier.pad
 }
 
 /** What the sequences encode (the (i) in the Encoding widget); the sign as in Arrangement and the Formats page. */
-internal const val SEQUENCES_INFO = "For each circle, the order of its crossings with the other circles along its " +
-    "orientation: +j where circle j crosses from the right of this circle to its left, -j the other way; so +j in " +
-    "list i and -i in list j are the same crossing."
+internal const val SEQUENCES_INFO = "List i gives the crossings along circle i in its orientation. " +
+    "+j: circle j crosses circle i from the right of i to its left; -j: the other way."
 
 internal const val MODEL1_INFO = "The dual graph of the arrangement: a vertex per cell, an edge per arc, encoded as sparse6 " +
     "(website format mod1s6 / enc, see the information page of the pseudocircles website)."
