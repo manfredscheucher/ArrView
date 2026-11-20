@@ -55,6 +55,8 @@ attribute, maybe there are more".
 
 - Set-level metadata (members of large sets carry only their encoding) is fine. Manfred: "so wie
   dus für sinnvoll empfindest passt scho".
+- RotSysView gets the whole outer-face handling too (Manfred: "glaub rotsysview braucht auch das
+  ganze outer face zeugs jo"); handed to the RotSysView session.
 
 ### Open questions
 
@@ -63,8 +65,6 @@ attribute, maybe there are more".
 - PoCoView's `"reference"` and `"colors"` (count) keys are not used. Add `"colors": 3` to the
   coloured files?
 - Export SVG does not draw the crossing colours (it did not before either).
-- Should other viewers (PoCoView, RotSysView) get the outer-face tie-break (largest of the most
-  symmetric)?
 
 ## 2026-11-20: Maximum triangles for n = 8 and 9
 
