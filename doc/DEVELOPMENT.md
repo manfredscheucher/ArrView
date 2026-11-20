@@ -126,7 +126,7 @@ user guide against the code.
 | Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |
 | Menus | `MenusAndDialogsUiTest` (every item clicked), `MenuBarTest` |
 | Dialogs | `ExamplesDialogUiTest` (a member of every set by clicks, member chooser), `DialogsUiTest`, `MenusAndDialogsUiTest` (Import, Export, Save file, Help, About, Welcome, error, "Save changes?" per trigger) |
-| Canvas | `CanvasUiTest`, `CanvasInteractionUiTest` (digon clicks in both models, refusal, face menus, hover, wheel, pinch, pan, dividers, clicks during a layout) |
+| Canvas | `CanvasUiTest`, `RefitOnResizeUiTest` (refit on resize until a zoom or pan), `CanvasInteractionUiTest` (digon clicks in both models, refusal, face menus, hover, wheel, pinch, pan, dividers, clicks during a layout) |
 | Keyboard | `CanvasInteractionUiTest` (every shortcut, off in menus and fields) |
 | Widgets and toolbar | `WidgetsUiTest`, `WidgetButtonsUiTest` (Properties values, chips, close buttons, Layout fields) |
 | Settings | `EditingSessionTest` (remembered and corrupt display settings), `AppStateTest`, `SplitPaneTest` |

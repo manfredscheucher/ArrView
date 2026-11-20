@@ -54,10 +54,18 @@ class ViewTransform {
     /** The [AppState.fitRequest] this view was last fitted for: a re-created canvas keeps the zoom. */
     var fittedRequest = -1
 
+    /**
+     * The user zoomed or panned since the last fit: a new canvas size keeps the view. Until then the
+     * view is refitted on every size change. Editing (flips, collapses, creates) does not count.
+     */
+    var userAdjusted = false
+        private set
+
     fun toScreen(p: Point) = Offset((ox + p.x * scale).toFloat(), (oy - p.y * scale).toFloat())
     fun toWorld(s: Offset) = Point((s.x - ox) / scale, (oy - s.y) / scale)
 
     fun zoomAt(anchor: Offset, factor: Double) {
+        userAdjusted = true
         val f = factor.coerceIn(0.02, 50.0)
         val newScale = (scale * f).coerceIn(1e-3, 1e7)
         val k = newScale / scale
@@ -66,15 +74,28 @@ class ViewTransform {
         scale = newScale
     }
 
-    /** New canvas size (e.g. a widget column opened or closed): the view keeps its centre. */
-    fun resize(newSize: IntSize) {
+    fun pan(dx: Double, dy: Double) {
+        userAdjusted = true
+        ox += dx
+        oy += dy
+    }
+
+    /**
+     * New canvas size (window resize, a widget opened or closed, a divider moved): refit to [bounds]
+     * (the shown drawing's, null while there is none) unless the user zoomed or panned since the last
+     * fit; then the view keeps its centre.
+     */
+    fun resize(newSize: IntSize, bounds: DoubleArray?) {
         // keep the last real size while the canvas is squeezed to nothing
         if (newSize.width == 0 || newSize.height == 0) return
-        if (size != IntSize.Zero) {
-            ox += (newSize.width - size.width) / 2.0
-            oy += (newSize.height - size.height) / 2.0
-        }
+        val old = size
         size = newSize
+        if (old == IntSize.Zero || newSize == old) return
+        if (!userAdjusted && bounds != null) fit(bounds)
+        else {
+            ox += (newSize.width - old.width) / 2.0
+            oy += (newSize.height - old.height) / 2.0
+        }
     }
 
     fun zoomCenter(factor: Double) = zoomAt(Offset(size.width / 2f, size.height / 2f), factor)
@@ -82,6 +103,7 @@ class ViewTransform {
     /** Shows the box (minX, minY, maxX, maxY) in the middle, with room for the labels around it. */
     fun fit(bounds: DoubleArray) {
         if (size.width == 0 || size.height == 0) return
+        userAdjusted = false
         val (minX, minY, maxX, maxY) = bounds.toList()
         val w = maxOf(1e-9, maxX - minX)
         val h = maxOf(1e-9, maxY - minY)
@@ -124,7 +146,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
     val drawing = state.drawing
 
     // fit on request once the canvas has a size and the drawing of the current arrangement (not the
-    // previous one while the new layout is computed); a later resize keeps the zoom
+    // previous one while the new layout is computed); a later resize refits until the user zooms or pans
     val ready = view.size.width > 0 && view.size.height > 0 && state.currentDrawing != null
     LaunchedEffect(state.fitRequest, ready) {
         val d = st.currentDrawing
@@ -155,7 +177,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                 .testTag("canvas")
                 .clipToBounds()
                 .background(MaterialTheme.colorScheme.surface)
-                .onSizeChanged { view.resize(it) }
+                .onSizeChanged { view.resize(it, st.drawing?.bounds) }
                 .pointerInput(gestures) {
                     awaitPointerEventScope {
                         var down: Offset? = null
@@ -217,8 +239,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                     if (pressed.size >= 2) {
                                         val d = (pressed[0].position - pressed[1].position).getDistance()
                                         val center = (pressed[0].position + pressed[1].position) / 2f
-                                        view.ox += (center.x - pinchCenter.x).toDouble()
-                                        view.oy += (center.y - pinchCenter.y).toDouble()
+                                        view.pan((center.x - pinchCenter.x).toDouble(), (center.y - pinchCenter.y).toDouble())
                                         if (pinchDist > 0f && d > 0f) view.zoomAt(center, (d / pinchDist).toDouble())
                                         pinchDist = d
                                         pinchCenter = center
@@ -226,8 +247,7 @@ fun ArrangementCanvas(state: AppState, view: ViewTransform, modifier: Modifier =
                                         val pos = pressed[0].position
                                         if (!moved && (pos - down).getDistance() > TOUCH_SLOP) moved = true
                                         if (moved) {
-                                            view.ox += (pos.x - last.x).toDouble()
-                                            view.oy += (pos.y - last.y).toDouble()
+                                            view.pan((pos.x - last.x).toDouble(), (pos.y - last.y).toDouble())
                                         }
                                         last = pos
                                     } else if (pressed.isEmpty()) {

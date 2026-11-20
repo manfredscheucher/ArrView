@@ -35,7 +35,7 @@ fun ToolBar(state: AppState) {
         ToolbarLabel("Widgets")
         for (w in Widget.entries) FilterChip(
             selected = w in state.openWidgets, onClick = { state.toggleWidget(w) },
-            label = { Text(w.label) },
+            label = { Text(w.label) }, modifier = Modifier.testTag("widget-chip-${w.name}"),
         )
         // the members of a loaded file or example set (PoCoView's)
         if (state.arrangementSet.size > 1) {

@@ -364,9 +364,11 @@ class CanvasInteractionUiTest {
         onNodeWithTag("max-iterations").performClick()
         waitForIdle()
         assertTrue(s.textFieldsFocused > 0)
+        // (opening the widget refitted the view)
+        val fitted = view.scale
         onNodeWithTag("max-iterations").performKeyInput { pressKey(Key.Minus); pressKey(Key.Zero) }
         waitForIdle()
-        assertEquals(scale, view.scale)
+        assertEquals(fitted, view.scale)
         assertEquals(flipped, s.arrangement)
         assertNotNull(s.currentDrawing)
     }
