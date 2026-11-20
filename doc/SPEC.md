@@ -2,6 +2,67 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-20: Refit on resize, sequences (i), examples as JSON, coloured crossings
+
+### Request (Manfred)
+
+Refit on resize "sounds reasonable"; the sequences (i) text: yes (sign from the circles'
+orientation, +j: circle j crosses circle i from the right of i to its left); colours only for the 6
+coloured examples, compare PoCoView's coloured point sets; "json should become standard ... every
+arrangement a json string, analogous to PoCoView with metadata, the json string is just one
+attribute, maybe there are more".
+
+### Decisions
+
+1. Refit on resize, PoCoView's semantics (its commit 08889e1): every canvas size change (window,
+   widget opened or closed, divider, portrait) refits the drawing, unless the user zoomed or panned
+   since the last fit (wheel, pinch, two-finger pan, dragging, +/- keys, View zoom; all through
+   `ViewTransform.zoomAt` / `pan`); then the view keeps its centre. Every fit turns it back on: Fit
+   (menu, Home, 0), loading (example, file, Import), switching set members, and Apply in the
+   Encoding widget, which now fits like PoCoView's Apply. Flips, collapses, creates, undo and redo
+   never count and never refit. `RefitOnResizeUiTest`.
+2. Sequences (i): "List i gives the crossings along circle i in its orientation. +j: circle j
+   crosses circle i from the right of i to its left; -j: the other way." (Confirms the open point of
+   2026-11-19.)
+3. Examples as JSON (PoCoView's example format): `composeApp/examples/index.json` lists the groups
+   (id, title, description, links, files); one JSON file per set, metadata first (name, n, group,
+   label, description, links, source), then the data. The encoding is one attribute: `"mod1s6"`,
+   `"mod2s6"` (sparse6 strings as on the website) or `"sequences"`; a set with several arrangements
+   has `"arrangements": [{"mod1s6": ...}, ...]`, one object per line. The catalogue moved from
+   `Examples.kt` into these files. Folders and file stems stay (`connected/all5.json`,
+   `colorings/n6_triangle_sat_no2.json`, ...; Krupp, NonKrupp, 3-Chain in `three/`).
+   `scripts/import_examples.py` rewrites the data and keeps the metadata of each file; it
+   reproduces the converted files byte for byte.
+4. App files: Save writes `{"name", "n", "sequences"}` (plus `"crossingColors"`), a set as the
+   example files do. Open file and Import read that, `"mod1s6"` / `"mod2s6"` instead of
+   `"sequences"`, one JSON object per line (PoCoView's set format), the older JSON list, and all
+   plain formats as before. Other keys are ignored; a wrong `"n"` is an error.
+5. Coloured crossings: `"crossingColors"`, one colour word per entry of the sequences, PoCoView's
+   tokens R, G, B with PoCoView's colours (`tokenColor`; other words draw nothing). Only the 6
+   triangle-saturated examples have them. They are drawn while the shown member is as loaded (an
+   edit removes them, undo brings them back), also for files and imports that carry them. No
+   toggle, as PoCoView has none for coloured point sets.
+
+### Claude's choices
+
+- Singletons are flat objects (as PoCoView's examples), sets wrap the members in `"arrangements"`
+  instead of PoCoView's one object per line, so the set's metadata is not repeated per member.
+- Link titles carry the kind ("Website: ...", "Paper: ..."); a set shows only links its group
+  does not show.
+- `"crossingColors"` (not `"colors"`, which is PoCoView's number of colours).
+
+### Open questions
+
+- Members of large sets carry only their encoding; the metadata is at set level. Is that what
+  "every arrangement a JSON with metadata" meant, or should every member repeat name/n?
+- File names keep the old stems (`colorings/n8_koester.json` holds `n7-connected-koester`); PoCoView
+  names files after the example. Rename?
+- PoCoView's `"reference"` and `"colors"` (count) keys are not used. Add `"colors": 3` to the
+  coloured files?
+- Export SVG does not draw the crossing colours (it did not before either).
+- Should other viewers (PoCoView, RotSysView) get the outer-face tie-break (largest of the most
+  symmetric)?
+
 ## 2026-11-20: Maximum triangles for n = 8 and 9
 
 ### Request (Manfred)

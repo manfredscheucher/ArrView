@@ -20,9 +20,8 @@ https://manfredscheucher.github.io/ArrView/
 - Several ways to create a digon of i and j are listed along circle i (the smaller number), in the
   order of its sequence, then along circle j.
 - Drag to pan, wheel or pinch to zoom. Undo and Redo are in the Edit menu (also for Make outer face).
-- While you have not zoomed or panned, the drawing is fitted again whenever the canvas changes size
-  (window, widgets, dividers). After a zoom or pan it stays; Fit (Home or 0), loading or Apply brings
-  the automatic fit back.
+- The drawing refits when the canvas changes size (window, widgets, dividers), until you zoom or pan;
+  Fit (Home or 0), loading or Apply turn it back on.
 - Drawing: model 2 (primal-dual graph, digons as regions) by default; model 1 (primal graph, legacy,
   intersecting arrangements only, a digon's circles touch) in Settings > Visualization, after a
   dialog. If the arrangement stops being intersecting, ArrView switches to model 2 with a notice.
@@ -71,12 +70,11 @@ https://manfredscheucher.github.io/ArrView/
   crosses from the right of i to its left, -j the other way.
 - Model 1 sparse6: the dual graph (intersecting only). Model 2 sparse6: the vertex-edge-face graph
   with a leaf at every face vertex.
-- Files: JSON `{"name": ..., "n": ..., "sequences": [[...], ...]}` or the sequences as text. In JSON,
-  `"mod1s6"` or `"mod2s6"` may replace `"sequences"`, `"crossingColors"` (R, G, B per entry) colours
-  the crossings, other keys are ignored. Import and Open file detect the format.
-- Several arrangements (one sparse6 string per line, several sequences one after the other, a JSON
-  object with `"arrangements": [...]`, one JSON object per line, or a JSON list) are loaded as a set,
-  like an example set; Save file writes all of them.
+- Files: JSON `{"name": ..., "n": ..., "sequences": [[...], ...]}` (`"mod1s6"` or `"mod2s6"` instead of
+  `"sequences"` works too; `"crossingColors"`, a colour word per entry, colours the crossings) or the
+  sequences as text. Import and Open file detect the format.
+- Several arrangements (e.g. one sparse6 string per line, or a JSON set like the example files) are
+  loaded as a set, like an example set; Save file writes all of them.
 - Coloured crossings: drawn as coloured dots while the arrangement is as loaded (the six
   triangle-saturated examples); an edit removes them, undo brings them back.
 
