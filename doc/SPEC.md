@@ -2,6 +2,42 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-21: Fixes from the manual walkthrough
+
+### Request (Manfred)
+
+"ja bitte" to the list of issues found while writing the manual; item 9 for consistency with PoCoView.
+
+### Done
+
+1. Example groups are ordered by n: "Maximum number of triangles" had n = 8, 38 after n = 9, 48;
+   "Triangle-saturated ..." had Koester (n = 7) last. The database stays ordered by class, then n.
+   `ExampleCatalogTest.groupsAreOrderedByN`.
+2. "n = 5, 13 triangles, with digons", triple 2 4 5: not a bug. It is drawn, but each of its sides is
+   also a side of another triple (2-4 of 1 2 4, 4-5 of 1 4 5, 2-5 of 2 3 5), so it only shows as a
+   darker fill; pointing at the list entry outlines it.
+3. Opening or closing a dialog clears the canvas hover (and the outer face's "!"). Not reproduced in
+   headless Chrome or the JVM (a dialog opening already sent the canvas an Exit there); the clear on
+   close covers a hover left over while a dialog is open. `CanvasInteractionUiTest.aDialogClearsTheHover`.
+4. The model 1 editor of the Encoding widget is hidden while the arrangement is not intersecting (the
+   note stays), as model 1 elsewhere (drawing falls back to model 2, Export disables the chip).
+5. "Don't show again" in every dialog (was "Do not show again" in the model dialogs).
+6. Links: https://scheucher.dev/ArrView/ (README, user guide, DEVELOPMENT.md, deploy script).
+7. Help General: "The Edit menu has Undo and Redo; Make outer face can be undone like a flip."
+8. Help Visualization: the dual and primal-dual figures draw the outer cell's vertex outside the
+   drawing, with its edges routed around it without crossings (each on its own circle, the farther
+   from the vertex the larger), instead of stubs. Captions say so. `HelpFiguresTest`.
+9. Examples dialog: collapsing the group that holds the selection clears it, so Load is off;
+   collapsing another group keeps it (PoCoView's `ExamplesState.toggle` / `treeKeys`).
+   `ExamplesDialogUiTest.collapsingTheSelectionsGroupDisablesLoad`.
+
+### Claude's choices
+
+- 4: a model 1 edit made while intersecting is kept but hidden, does not count as unsaved while hidden,
+  and comes back when the arrangement is intersecting again (undo). Dropping it instead would lose the
+  typed text. Confirm?
+- 8: the outer vertex sits in the widest angular gap between the outer arcs; edges have rounded corners.
+
 ## 2026-11-21: Keyboard shortcuts, line width 5 px
 
 ### Request (Manfred)
@@ -197,11 +233,12 @@ arrangements; a note instead of a crash when the browser has no WebGL.
 - The WebGL probe accepts webgl as well as webgl2 (as asked); Skiko asks for webgl2 only, so a
   browser with WebGL 1 only still crashes, then the error handler shows the note.
 - Checkbox labels: "Do not show again" in the model dialogs (Manfred's wording), "Don't show again" in
-  the Welcome dialog and the sets notice (as before / as in PoCoView). Unify?
+  the Welcome dialog and the sets notice (as before / as in PoCoView). Unify? Done 2026-11-21: "Don't
+  show again" everywhere.
 - Not done (reviewer suggestions, not asked for): clickable links for the papers and the information
   page on Help > Visualization; merging the duplicate digon-create paragraphs of Help General.
 - The figures leave out the outer cell's vertex (dual and primal-dual: stubs), as the model 2
-  drawing does.
+  drawing does. Changed 2026-11-21: the vertex is drawn outside, its edges go around.
 
 ## 2026-11-19: Examples by purpose
 
