@@ -174,8 +174,8 @@ private fun EncodingWidget(state: AppState) {
             style = MaterialTheme.typography.bodySmall,
         )
     }
-    // an edit made while it was intersecting stays until applied or reverted
-    if (arr.isIntersecting || TextFormat.MODEL1 in state.drafts) DraftEditor(state, TextFormat.MODEL1, wrap = true, copy = true)
+    // hidden while not intersecting, as model 1 everywhere else; an edit made before comes back with it (undo)
+    if (arr.isIntersecting) DraftEditor(state, TextFormat.MODEL1, wrap = true, copy = true)
     EncodingHeading(TextFormat.MODEL2, MODEL2_INFO)
     DraftEditor(state, TextFormat.MODEL2, wrap = true, copy = true)
 }

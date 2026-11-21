@@ -712,11 +712,12 @@ class AppState(
         get() = (edits.keys + savedEdits.keys + setIndex).any { member(it) != savedMember(it) }
 
     /**
-     * The Encoding widget holds an edit that differs from the current arrangement's text (compared
-     * live, as in PoCoView: after an undo a draft may equal it again).
+     * The Encoding widget shows an edit that differs from the current arrangement's text (compared
+     * live, as in PoCoView: after an undo a draft may equal it again). A model 1 edit is hidden, and
+     * does not count, while the arrangement is not intersecting.
      */
     val unappliedDraft: Boolean
-        get() = drafts.any { (format, text) -> !format.availableFor(arrangement) || text != text(format) }
+        get() = drafts.any { (format, text) -> format.availableFor(arrangement) && text != text(format) }
 
     /** The arrangement is unsaved or a widget has an unapplied edit. */
     val unsavedChanges: Boolean get() = arrangementUnsaved || unappliedDraft

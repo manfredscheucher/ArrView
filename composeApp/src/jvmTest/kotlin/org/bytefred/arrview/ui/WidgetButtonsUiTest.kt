@@ -163,17 +163,23 @@ class WidgetButtonsUiTest {
         onNodeWithText("Encoding").performClick()
         waitForIdle()
         assertEquals("{1: [2, -2], 2: [1, -1]}", onNodeWithTag("editor-SEQUENCES").text())
-        // a digon collapse makes it non-intersecting: the model 1 edit stays, with the note
+        // a digon collapse makes it non-intersecting: the model 1 editor goes, as model 1 everywhere
+        // else; its edit no longer counts and comes back with an undo
         val digon = nonKrupp.faces.indices.first { nonKrupp.faces[it].size == 2 }
         runOnIdle { s.collapseDigon(digon) }
         assertEquals(nonKrupp.digonCollapse(digon), s.arrangement)
         val (c, d) = (0 until 3).flatMap { c -> (c + 1 until 3).map { c to it } }.first { (c, d) -> !s.arrangement.crosses(c, d) }
         onNodeWithText("Only for intersecting arrangements; circles ${c + 1} and ${d + 1} do not cross.").assertExists()
-        assertEquals("$model1 ", onNodeWithTag("editor-MODEL1").text())
-        onNodeWithTag("revert-MODEL1").performClick()
-        waitForIdle()
         onNodeWithTag("editor-MODEL1").assertDoesNotExist()
-        // the stale sequences edit still applies (undoable)
+        onNodeWithTag("revert-SEQUENCES").performClick()
+        waitForIdle()
+        assertFalse(s.unappliedDraft)
+        runOnIdle { s.undo() }
+        assertEquals("$model1 ", onNodeWithTag("editor-MODEL1").text())
+        assertTrue(s.unappliedDraft)
+        // a stale sequences edit still applies (undoable)
+        runOnIdle { s.collapseDigon(digon) }
+        onNodeWithTag("editor-SEQUENCES").performTextReplacement("{1: [2, -2], 2: [1, -1]}")
         onNodeWithTag("apply-SEQUENCES").performClick()
         waitForIdle()
         assertEquals(Arrangement.two(), s.arrangement)
