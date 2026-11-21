@@ -6,10 +6,14 @@ import org.bytefred.arrview.core.Examples
 import org.bytefred.arrview.core.FileFormat
 import org.bytefred.arrview.core.LayoutSettings
 import org.bytefred.arrview.core.arrangementFile
+import org.bytefred.arrview.core.canBeOuter
 import org.bytefred.arrview.core.cellDescription
 import org.bytefred.arrview.core.digonCreates
 import org.bytefred.arrview.core.hasModel1
 import org.bytefred.arrview.core.parseJson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,6 +56,21 @@ class HelpClaimsTest {
     fun modelNames() {
         assertSays(HelpPage.WIDGETS, "Visualization (default ${DrawModel.MODEL2.option};")
         assertSays(HelpPage.GENERAL, "The drawing is model 2 by default")
+    }
+
+    @Test
+    fun makeOuterFaceCanBeUndone() {
+        assertSays(HelpPage.GENERAL, "The Edit menu has Undo and Redo; Make outer face can be undone like a flip.")
+        val s = AppState(CoroutineScope(Dispatchers.Default))
+        fun outer(): Int? = runBlocking { s.awaitLayout() }.let { s.outerFace }
+        val before = outer()
+        val other = s.arrangement.faces.indices.first { it != before && s.arrangement.canBeOuter(it, s.model) }
+        s.makeOuterFace(other)
+        assertEquals(other, outer())
+        s.undo()
+        assertEquals(before, outer())
+        s.redo()
+        assertEquals(other, outer())
     }
 
     @Test

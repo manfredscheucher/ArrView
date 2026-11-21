@@ -111,7 +111,7 @@ private val GENERAL_TEXT = listOf(
         "pair with several ways opens a submenu: " +
         "the face with a star after the two sides that are pushed together. The outer face works the same. " +
         "A \"!\" appears in the face under the mouse when a click does something there (for the outer face " +
-        "in a corner of the canvas). Undo and Redo are in the Edit menu (also for Make outer face).",
+        "in a corner of the canvas). The Edit menu has Undo and Redo; Make outer face can be undone like a flip.",
     "In menus a face is written as the circles of its sides in order around it, for example 1 2 1 3. " +
         "Pointing at a menu entry highlights its face in yellow (the outer face: its boundary, and the entry " +
         "says (outer face)), the two sides of a digon create in orange.",
