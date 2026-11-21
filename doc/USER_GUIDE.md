@@ -2,7 +2,7 @@
 
 ArrView is a viewer for arrangements of pseudocircles. You change an arrangement by flipping
 triangles, collapsing and creating digons, and look at its combinatorial properties. It runs in the
-browser (https://manfredscheucher.github.io/ArrView/) and as a desktop app; both work the same,
+browser (https://scheucher.dev/ArrView/) and as a desktop app; both work the same,
 except where this manual says otherwise.
 
 ![ArrView with the Intersections and Triangles widgets](img/overview.png)
@@ -246,10 +246,10 @@ The Settings widget has three groups and one "Reset to defaults" for all of them
 - Model 1 (primal graph, legacy): only for intersecting arrangements of at least 3 circles; a
   digon's two circles touch at a point (blue dot).
 
-Choosing model 1 asks first ("Model 1 is the legacy view…", OK or Cancel, "Do not show again"). If
+Choosing model 1 asks first ("Model 1 is the legacy view…", OK or Cancel, "Don't show again"). If
 the arrangement is not intersecting, it says so and stays on model 2. If any change (a collapse, a load, an
 undo, ...) leads to an arrangement that is not intersecting while model 1 is chosen, a notice says
-"Switching to model 2"; after OK it switches ("Do not show again" turns it off).
+"Switching to model 2"; after OK it switches ("Don't show again" turns it off).
 
 Help → Visualization shows the primal, dual and primal-dual graph of the start example and explains
 the two models and the iteration.
@@ -257,7 +257,7 @@ the two models and the iteration.
 ![Help, Visualization](img/visualization.png)
 
 Remembered for the next start (in the browser: per browser): the settings, the open widgets, the
-divider positions, the layout and the "Don't show again" / "Do not show again" choices. Not
+divider positions, the layout and the "Don't show again" choices. Not
 remembered: the arrangement and the Examples choices.
 
 ## Save and export
