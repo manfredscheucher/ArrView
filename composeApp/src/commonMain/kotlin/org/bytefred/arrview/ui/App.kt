@@ -84,6 +84,9 @@ fun App(
         var dialog by remember {
             mutableStateOf(initialDialog ?: if (loadPref(WELCOME_PREF) == "off") DialogKind.NONE else DialogKind.WELCOME)
         }
+        // a dialog opening or closing drops the canvas hover (and the outer face's "!"): the
+        // pointer may have left the canvas meanwhile without an Exit; the next move sets it again
+        LaunchedEffect(dialog) { state.hoverFace = null }
         val opener = rememberFileOpener(onError = { state.error = it }) { name, bytes -> state.open(name, bytes) }
         val files = FileKeys(open = { state.leave { opener() } }, save = { dialog = DialogKind.SAVE })
         Surface(Modifier.fillMaxSize().onKeyEvent { closeMenuOnEscape(it, state) || handleFileKey(it, files) || state.shortcutsActive && handleKey(it, state, view) }) {

@@ -193,6 +193,27 @@ class CanvasInteractionUiTest {
     }
 
     @Test
+    fun aDialogClearsTheHover() = runComposeUiTest {
+        val s = state()
+        val view = ViewTransform()
+        runOnIdle { s.openWidgets.add(Widget.SETTINGS) }
+        show(s, view)
+        // the mouse rests on the outer face (its "!" is in a canvas corner)
+        onNodeWithTag("canvas").performMouseInput { moveTo(Offset(4f, 4f)); moveTo(Offset(5f, 5f)) }
+        waitForIdle()
+        assertEquals(s.outerFace, s.hoverFace)
+        // a tap (no mouse move) opens Help; the canvas gets no Exit
+        onNodeWithTag("info-visualization").performTouchInput { click() }
+        waitForIdle()
+        assertNull(s.hoverFace)
+        // a hover left over while the dialog is open is dropped when it closes
+        runOnIdle { s.hoverFace = s.outerFace }
+        onNodeWithText("OK").performTouchInput { click() }
+        waitForIdle()
+        assertNull(s.hoverFace)
+    }
+
+    @Test
     fun wheelZoomsAndDragPansWithoutClicking() = runComposeUiTest {
         val s = state()
         val view = ViewTransform()
