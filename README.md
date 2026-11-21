@@ -2,7 +2,7 @@
 
 View and explore arrangements of pseudocircles, right in the browser.
 
-**Web app:** https://manfredscheucher.github.io/ArrView/
+**Web app:** https://scheucher.dev/ArrView/
 
 ArrView reads the intersection sequences and the sparse6 encodings (model 1 and model 2) of the
 pseudocircles website, checks validity (Linhart–Ortner), and computes faces, p-vector, the
