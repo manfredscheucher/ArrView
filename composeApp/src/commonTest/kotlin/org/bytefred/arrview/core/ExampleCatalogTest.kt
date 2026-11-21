@@ -186,4 +186,14 @@ class ExampleCatalogTest {
         assertEquals(1, arr.nonIntersectingPairCount)
         assertEquals(40, arr.crossingCount)
     }
+
+    @Test
+    fun groupsAreOrderedByN() {
+        // the database lists each class by n; the other groups list all their sets by n
+        for (g in Examples.groups) {
+            val sets = Examples.inGroup(g)
+            val runs = if (g.id == "database") sets.groupBy { it.name.split("-")[1] }.values else listOf(sets)
+            for (run in runs) assertEquals(run.map { it.n }.sorted(), run.map { it.n }, g.id)
+        }
+    }
 }

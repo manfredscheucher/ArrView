@@ -66,8 +66,8 @@
         "maxtriangles/all7_df_28_triangles.json",
         "maxtriangles/all7_df_29_triangles.json",
         "maxtriangles/some8_df_37_triangles.json",
-        "maxtriangles/some9_df_48_triangles.json",
         "maxtriangles/max8_digon_38_triangles.json",
+        "maxtriangles/some9_df_48_triangles.json",
         "maxtriangles/max9_df_50_triangles.json"
       ]
     },
@@ -129,10 +129,10 @@
         "colorings/n6_triangle_sat_no1_great.json",
         "colorings/n6_triangle_sat_no2.json",
         "colorings/n7_triangle_sat_no1.json",
+        "colorings/n8_koester.json",
         "colorings/n9_triangle_sat_no1.json",
         "colorings/n10_triangle_sat_no1_great.json",
-        "colorings/n16_triangle_sat_Simmons.json",
-        "colorings/n8_koester.json"
+        "colorings/n16_triangle_sat_Simmons.json"
       ]
     },
     {
