@@ -52,7 +52,19 @@ class ExamplesState {
     val scroll = ScrollState(0)
 
     fun indexOf(set: ExampleSet): Int = index[set.name] ?: 0
+
+    /** Expands or collapses the node [key]; collapsing a node that holds the selection clears it (as PoCoView). */
+    fun toggle(key: String) {
+        if (key !in expanded) expanded.add(key)
+        else {
+            expanded.remove(key)
+            if (selected?.let { key in treeKeys(it) } == true) selected = null
+        }
+    }
 }
+
+/** The keys of the tree nodes that hold [set]: collapsing one of them hides it. */
+private fun treeKeys(set: ExampleSet): List<String> = listOf(set.group.id)
 
 /**
  * The groups of bundled examples ([Examples]) by purpose, each with its description and links, and
@@ -64,7 +76,6 @@ class ExamplesState {
 fun ExamplesDialog(state: AppState, close: () -> Unit) {
     val ex = state.examples
     val open = ex.expanded
-    fun toggle(key: String) { if (key in open) open.remove(key) else open.add(key) }
     // a typed member number out of range: Load waits until it is fixed
     var indexError by remember { mutableStateOf(false) }
     fun load() {
@@ -92,7 +103,7 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
             // two levels: the groups by purpose, then their sets; an open group starts with what it is
             for (group in Examples.groups) {
                 val sets = Examples.inGroup(group)
-                TreeHeader(group.title, 0, group.id in open) { toggle(group.id) }
+                TreeHeader(group.title, 0, group.id in open) { ex.toggle(group.id) }
                 HorizontalDivider()
                 if (group.id !in open) continue
                 GroupIntro(group)

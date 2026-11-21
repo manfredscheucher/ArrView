@@ -23,6 +23,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** The Examples dialog driven by clicks: a member of every set, the member chooser, Cancel. */
@@ -200,6 +201,26 @@ class ExamplesDialogUiTest {
         // an uncoloured example has none
         s.loadSet("x", ArrangementSet(1, Examples.start.set::colors) { Examples.start.arrangement() })
         assertEquals(null, s.crossingColors)
+    }
+
+    @Test
+    fun collapsingTheSelectionsGroupDisablesLoad() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.EXAMPLES) }
+        val group = Examples.group("three")
+        val other = Examples.group("min-triangles")
+        val load = onNodeWithText("Load")
+        load.assertIsNotEnabled()
+        click(header(group))
+        click(leafLabel(Examples.inGroup(group).first()))
+        load.assertIsEnabled()
+        // collapsing another group keeps the selection
+        click(header(other))
+        click(header(other))
+        load.assertIsEnabled()
+        click(header(group))
+        load.assertIsNotEnabled()
+        assertNull(s.examples.selected)
     }
 
     @Test
