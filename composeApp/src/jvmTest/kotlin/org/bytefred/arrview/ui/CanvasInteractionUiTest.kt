@@ -202,13 +202,18 @@ class CanvasInteractionUiTest {
         onNodeWithTag("canvas").performMouseInput { moveTo(Offset(4f, 4f)); moveTo(Offset(5f, 5f)) }
         waitForIdle()
         assertEquals(s.outerFace, s.hoverFace)
-        // a tap (no mouse move) opens Help; the canvas gets no Exit
+        // a tap (no mouse move) opens Help (here the opening dialog also sends the canvas an Exit)
         onNodeWithTag("info-visualization").performTouchInput { click() }
         waitForIdle()
         assertNull(s.hoverFace)
         // a hover left over while the dialog is open is dropped when it closes
         runOnIdle { s.hoverFace = s.outerFace }
         onNodeWithText("OK").performTouchInput { click() }
+        waitForIdle()
+        assertNull(s.hoverFace)
+        // the dialogs outside DialogKind too, e.g. the error dialog
+        runOnIdle { s.hoverFace = s.outerFace }
+        runOnIdle { s.error = "test" }
         waitForIdle()
         assertNull(s.hoverFace)
     }

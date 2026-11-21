@@ -45,7 +45,7 @@ enum class GraphKind(val title: String, val caption: String) {
     PRIMAL_DUAL(
         "Primal-dual graph",
         "A vertex per crossing (black), arc (green) and cell (blue), an edge for every incidence of a crossing or a cell " +
-            "with an arc. The outer cell's vertex is outside, as in the dual graph (the model 2 drawing leaves it out).",
+            "with an arc. The outer cell's vertex is outside, as in the dual graph.",
     ),
 }
 

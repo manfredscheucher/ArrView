@@ -16,7 +16,8 @@ Requests and decisions. Newest first.
 2. "n = 5, 13 triangles, with digons", triple 2 4 5: not a bug. It is drawn, but each of its sides is
    also a side of another triple (2-4 of 1 2 4, 4-5 of 1 4 5, 2-5 of 2 3 5), so it only shows as a
    darker fill; pointing at the list entry outlines it.
-3. Opening or closing a dialog clears the canvas hover (and the outer face's "!"). Not reproduced in
+3. Opening or closing any dialog (also the model 1 / model 2 notices, "Save changes?", the sets
+   notice and the error dialog) clears the canvas hover (and the outer face's "!"). Not reproduced in
    headless Chrome or the JVM (a dialog opening already sent the canvas an Exit there); the clear on
    close covers a hover left over while a dialog is open. `CanvasInteractionUiTest.aDialogClearsTheHover`.
 4. The model 1 editor of the Encoding widget is hidden while the arrangement is not intersecting (the
@@ -34,8 +35,9 @@ Requests and decisions. Newest first.
 ### Claude's choices
 
 - 4: a model 1 edit made while intersecting is kept but hidden, does not count as unsaved while hidden,
-  and comes back when the arrangement is intersecting again (undo). Dropping it instead would lose the
-  typed text. Confirm?
+  and comes back when the arrangement is intersecting again (undo, but also any other change to an
+  intersecting arrangement, e.g. an applied sequences edit). Load and set switches drop it without
+  "Save changes?". Dropping it as soon as it is hidden would lose the typed text. Confirm?
 - 8: the outer vertex sits in the widest angular gap between the outer arcs; edges have rounded corners.
 
 ## 2026-11-21: Keyboard shortcuts, line width 5 px
