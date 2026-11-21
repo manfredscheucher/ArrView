@@ -2,6 +2,22 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-21: Keyboard shortcuts, line width 5 px
+
+### Request (Manfred)
+
+"shortcuts vlt bei allen? ctrl+z undo und so standard zeugs? ctrl s speichern" (all apps, done
+first in RotSysView) and "denk bei arrview sind auch 5 px default, oder sollten zumindest sein".
+
+### Decisions
+
+- Ctrl+O = Arrangement > Open file... (with the unsaved-changes question, as the menu), Ctrl+S =
+  Save file...; Cmd works like Ctrl. Both also work while a text field has focus, so the browser
+  does not open its own Open or Save page. Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y existed.
+- Menu entries show their key on the right (Ctrl+O, Ctrl+S, Ctrl+Z, Ctrl+Shift+Z, 0, +, −).
+- Ported literally from RotSysView (FileKeys / handleFileKey in App.kt, MenuItem(shortcut)).
+- Line width default 5 px (was 4).
+
 ## 2026-11-20: SVG export
 
 ### Request (Manfred)

@@ -3,7 +3,7 @@ output and exceptions, dispatch mouse/key events and take screenshots.
 
 Usage: python3 web_cdp.py <port> <out-dir> <steps.json>
 Steps: [{"wait": s}, {"shot": "name"}, {"click": [x, y], "button": "left|right", "mods": 0}, {"move": [x, y]}, {"text": "typed"},
-        {"wheel": [x, y, dy]}, {"key": "Escape"}, {"eval": "js"}, {"reload": true}]
+        {"wheel": [x, y, dy]}, {"key": "Escape"} or {"key": "s", "mods": 2}, {"eval": "js"}, {"reload": true}]
 Chrome must run with --remote-debugging-port=<port>.
 """
 import base64, json, os, socket, struct, sys, time, urllib.request
@@ -127,8 +127,11 @@ def main():
         elif "key" in st:
             k = st["key"]
             codes = {"Escape": 27}
+            # {"key": "s", "mods": 2}: CDP modifiers (1 Alt, 2 Ctrl, 4 Meta, 8 Shift); letters as code KeyS
+            code = "Key" + k.upper() if len(k) == 1 and k.isalpha() else k
+            vk = codes.get(k, ord(k.upper()) if len(k) == 1 else 0)
             for t in ("rawKeyDown", "keyUp"):
-                c.call("Input.dispatchKeyEvent", type=t, key=k, code=k, windowsVirtualKeyCode=codes.get(k, 0))
+                c.call("Input.dispatchKeyEvent", type=t, key=k, code=code, windowsVirtualKeyCode=vk, modifiers=st.get("mods", 0))
             c.pump(0.4)
         elif "eval" in st:
             r = c.call("Runtime.evaluate", expression=st["eval"], returnByValue=True, awaitPromise=True)

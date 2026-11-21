@@ -232,7 +232,7 @@ more triangle faces is twice as strong. Above it: "k triangles on m triples".
 The Settings widget has three groups and one "Reset to defaults" for all of them.
 
 - Display: Colour scheme (Standard, the default, a fixed list of 12 colours; rainbow and rainbow2,
-  computed from n) and Line width (0.5 to 8 px, default 4). The scheme colours the curves, their
+  computed from n) and Line width (0.5 to 8 px, default 5). The scheme colours the curves, their
   numbers and the vertices of the graph views; both are used in Export SVG.
 - Widgets: Max. widgets (default 2).
 - Layout, for the drawing only: Visualization (model 2, the default, or model 1) and Max. iterations
@@ -281,6 +281,8 @@ About ArrView (links to GitHub and the pseudocircles website, literature, build,
 | Key or gesture | Action |
 |---|---|
 | Esc | close the open menu |
+| Ctrl+O | open a file |
+| Ctrl+S | save to a file |
 | Ctrl+Z | undo |
 | Ctrl+Shift+Z or Ctrl+Y | redo |
 | + / - | zoom in / out |
@@ -296,7 +298,7 @@ About ArrView (links to GitHub and the pseudocircles website, literature, build,
 | Two fingers | pan and zoom |
 
 On a Mac, Cmd works like Ctrl and Ctrl+click like a right-click. The keys do nothing while you type
-in a field or a menu is open (except Esc).
+in a field or a menu is open (except Esc, Ctrl+O and Ctrl+S).
 
 ## File formats
 

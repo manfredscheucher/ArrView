@@ -101,8 +101,13 @@ internal val MENU_CLICK_GUARD = 500.milliseconds
 
 /** A menu entry: closes the menu, then runs [onClick]. */
 @Composable
-fun MenuItem(state: AppState, text: String, enabled: Boolean = true, onClick: () -> Unit) =
-    DropdownMenuItem(text = { Text(text) }, enabled = enabled, onClick = { state.openMenu = null; onClick() })
+fun MenuItem(state: AppState, text: String, enabled: Boolean = true, shortcut: String? = null, onClick: () -> Unit) =
+    DropdownMenuItem(
+        text = { Text(text) },
+        trailingIcon = shortcut?.let { { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
+        enabled = enabled,
+        onClick = { state.openMenu = null; onClick() },
+    )
 
 /** A menu toggle with a drawn checkmark; a click keeps the menu open (to toggle several). */
 @Composable
@@ -141,8 +146,7 @@ fun MenuHeading(text: String) = Text(
 
 /** Arrangement / Edit / View / Help on the left, the app name (and on the web a subtitle) on the right. */
 @Composable
-fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Unit) {
-    val opener = rememberFileOpener(onError = { state.error = it }) { name, bytes -> state.open(name, bytes) }
+fun MenuBar(state: AppState, view: ViewTransform, openFile: () -> Unit, openDialog: (DialogKind) -> Unit) {
     val saver = rememberFileSaver(onError = { state.error = it }) { name -> if (name != null) state.showInfo("Saved $name") }
     // the popups are not focusable (see MenuButton), so the bar takes the focus while a menu
     // is open; Escape bubbles up from here to the app's key handler, which closes the menu
@@ -167,21 +171,21 @@ fun MenuBar(state: AppState, view: ViewTransform, openDialog: (DialogKind) -> Un
                 MenuItem(state, "Import...") { openDialog(DialogKind.IMPORT) }
                 MenuItem(state, "Export...") { openDialog(DialogKind.EXPORT) }
                 HorizontalDivider()
-                MenuItem(state, "Open file...") { state.leave { opener() } }
-                MenuItem(state, "Save file...") { openDialog(DialogKind.SAVE) }
+                MenuItem(state, "Open file...", shortcut = "Ctrl+O") { openFile() }
+                MenuItem(state, "Save file...", shortcut = "Ctrl+S") { openDialog(DialogKind.SAVE) }
                 HorizontalDivider()
                 MenuItem(state, "Export SVG", enabled = state.currentDrawing != null) {
                     state.currentDrawing?.let { saver("${state.fileName}.svg", drawingSvg(it, state.colorScheme, state.lineWidth, state.crossingColors).encodeToByteArray()) }
                 }
             }
             MenuButton(state, "Edit") {
-                MenuItem(state, "Undo", enabled = state.canUndo) { state.undo() }
-                MenuItem(state, "Redo", enabled = state.canRedo) { state.redo() }
+                MenuItem(state, "Undo", enabled = state.canUndo, shortcut = "Ctrl+Z") { state.undo() }
+                MenuItem(state, "Redo", enabled = state.canRedo, shortcut = "Ctrl+Shift+Z") { state.redo() }
             }
             MenuButton(state, "View") {
-                MenuItem(state, "Fit") { state.requestFit() }
-                MenuItem(state, "Zoom in") { view.zoomCenter(ZOOM_STEP) }
-                MenuItem(state, "Zoom out") { view.zoomCenter(1 / ZOOM_STEP) }
+                MenuItem(state, "Fit", shortcut = "0") { state.requestFit() }
+                MenuItem(state, "Zoom in", shortcut = "+") { view.zoomCenter(ZOOM_STEP) }
+                MenuItem(state, "Zoom out", shortcut = "−") { view.zoomCenter(1 / ZOOM_STEP) }
                 HorizontalDivider()
                 for (w in Widget.entries) CheckMenuItem(w.label, w in state.openWidgets) { state.toggleWidget(w) }
                 HorizontalDivider()

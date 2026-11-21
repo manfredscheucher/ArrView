@@ -872,7 +872,7 @@ class AppState(
 
         private const val MAX_UNDO = 500
 
-        const val DEFAULT_LINE_WIDTH = 4f
+        const val DEFAULT_LINE_WIDTH = 5f
         val LINE_WIDTH_RANGE = 0.5f..8f
 
         /** Widgets open at a time by default (PoCoView's). */

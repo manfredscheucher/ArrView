@@ -130,9 +130,9 @@ class HelpClaimsTest {
     fun userGuideLayoutDefaults() {
         val d = LayoutSettings()
         assertTrue("Visualization (model 2, the default, or model 1) and Max. iterations (at least 1, default ${d.maxIterations})" in flatGuide)
-        assertTrue("Line width (0.5 to 8 px, default 4)" in flatGuide)
+        assertTrue("Line width (0.5 to 8 px, default 5)" in flatGuide)
         assertEquals(0.5f..8f, AppState.LINE_WIDTH_RANGE)
-        assertEquals(4f, AppState.DEFAULT_LINE_WIDTH)
+        assertEquals(5f, AppState.DEFAULT_LINE_WIDTH)
         assertEquals(listOf("Standard", "rainbow", "rainbow2"), ColorScheme.entries.map { it.label })
         assertTrue("Colour scheme (Standard, the default, a fixed list of 12 colours; rainbow and rainbow2, computed from n)" in flatGuide)
     }
@@ -166,7 +166,7 @@ class HelpClaimsTest {
     fun settingsWidget() {
         assertSays(HelpPage.WIDGETS, "colour scheme of the circles (Standard (default), rainbow, rainbow2;")
         assertEquals("Standard", ColorScheme.DEFAULT.label)
-        assertSays(HelpPage.WIDGETS, "line width (default 4 px, also in Export SVG)")
+        assertSays(HelpPage.WIDGETS, "line width (default 5 px, also in Export SVG)")
         assertSays(HelpPage.WIDGETS, "Reset to defaults resets everything in the widget.")
     }
 

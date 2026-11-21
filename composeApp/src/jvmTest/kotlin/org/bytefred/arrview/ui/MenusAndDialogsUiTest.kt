@@ -9,6 +9,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
@@ -26,6 +27,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.test.runDesktopComposeUiTest
+import androidx.compose.ui.test.withKeyDown
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -291,6 +293,29 @@ class MenusAndDialogsUiTest {
         onNodeWithText("Save file").assertDoesNotExist()
         assertEquals("n6-digonfree-nonr-8-triangles.json", s.saveName(FileFormat.JSON))
         assertEquals("n6-digonfree-nonr-8-triangles.txt", s.saveName(FileFormat.TXT))
+    }
+
+    @Test
+    fun ctrlOAndCtrlSOnTheCanvasAndInATextField() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        awaitDrawing(s)
+        onNodeWithTag("canvas").performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
+        onNodeWithText("Save JSON").assertIsDisplayed()
+        onNodeWithText("Cancel").performClick()
+        waitForIdle()
+        // Ctrl+O asks first when there are unsaved changes, as the menu does
+        runOnIdle { s.flipSomeTriangle() }
+        onNodeWithTag("canvas").performKeyInput { withKeyDown(Key.MetaLeft) { pressKey(Key.O) } }
+        onNodeWithText("Save changes?").assertExists()
+        onNodeWithText("Cancel").performClick()
+        waitForIdle()
+        assertNull(s.pendingLeave)
+        // also while a text field has focus
+        onNodeWithText("Encoding").performClick()
+        onNodeWithTag("editor-SEQUENCES").performClick()
+        onNodeWithTag("editor-SEQUENCES").performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.S) } }
+        onNodeWithText("Save JSON").assertIsDisplayed()
     }
 
     @Test
