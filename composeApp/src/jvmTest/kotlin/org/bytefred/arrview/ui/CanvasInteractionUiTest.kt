@@ -90,7 +90,7 @@ class CanvasInteractionUiTest {
         waitForIdle()
         // no longer intersecting: the notice, then the collapse in model 2
         onNodeWithText(modelDialogText(ModelDialog.Fallback {})).assertExists()
-        onNodeWithText("Do not show again").assertExists()
+        onNodeWithText("Don't show again").assertExists()
         assertEquals(nonKrupp, s.arrangement)
         onNodeWithTag("model-dialog-ok").performClick()
         waitForIdle()

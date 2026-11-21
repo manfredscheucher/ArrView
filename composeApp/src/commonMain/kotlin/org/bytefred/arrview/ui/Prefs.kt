@@ -28,7 +28,7 @@ const val WELCOME_PREF = "welcome"
 /** "off" once "Don't show again" was ticked in the notice after loading several arrangements (PoCoView's). */
 internal const val SETS_NOTICE_PREF = "setsNotice"
 
-/** "off" once "Do not show again" was ticked in the model 1 dialog / the switch to model 2 notice. */
+/** "off" once "Don't show again" was ticked in the model 1 dialog / the switch to model 2 notice. */
 internal const val MODEL1_CONFIRM_PREF = "model1Confirm"
 internal const val MODEL1_FALLBACK_PREF = "model1Fallback"
 

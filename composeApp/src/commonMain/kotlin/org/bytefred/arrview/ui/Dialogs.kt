@@ -87,7 +87,7 @@ fun Dialogs(state: AppState, kind: DialogKind, open: (DialogKind) -> Unit, close
 }
 
 /**
- * The model dialogs (see [ModelDialog]): a short text, "Do not show again" where the dialog can be
+ * The model dialogs (see [ModelDialog]): a short text, "Don't show again" where the dialog can be
  * turned off, OK, and Cancel for the model 1 choice. Closing the dialog otherwise counts as OK
  * (Cancel for the model 1 choice).
  */
@@ -117,15 +117,15 @@ internal fun modelDialogText(dialog: ModelDialog): String = when (dialog) {
     is ModelDialog.Fallback -> "The arrangement is no longer intersecting. Switching to model 2."
 }
 
-/** The "Do not show again" checkbox of a dialog ([label]: its wording there); the label toggles too. */
+/** The "Don't show again" checkbox of a dialog; the label toggles too. */
 @Composable
-private fun DontShowAgain(checked: Boolean, label: String = "Do not show again", onChange: (Boolean) -> Unit) {
+private fun DontShowAgain(checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
         Modifier.padding(top = 8.dp).toggleable(checked, role = Role.Checkbox, onValueChange = onChange),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked, onCheckedChange = null)
-        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Text("Don't show again", style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -278,7 +278,7 @@ private fun WelcomeDialog(close: () -> Unit, showExamples: () -> Unit) {
                 )
                 Spacer(Modifier.height(10.dp))
                 FeedbackBox("Interesting arrangements, ideas or general feedback?")
-                DontShowAgain(dontShow, "Don't show again") { dontShow = it }
+                DontShowAgain(dontShow) { dontShow = it }
             }
         },
     )
@@ -299,7 +299,7 @@ private fun SetsLoadedDialog(state: AppState, count: Int) {
                     "Showing ${if (state.setIndex == 0) "the first" else "arrangement ${state.setIndex + 1}"} of $count. Switch between them with the arrows < > at the top (or PageUp / PageDown).",
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                DontShowAgain(dontShow, "Don't show again") { dontShow = it }
+                DontShowAgain(dontShow) { dontShow = it }
             }
         },
     )

@@ -186,10 +186,10 @@ class AppState(
     var modelDialog by mutableStateOf<ModelDialog?>(null)
         private set
 
-    /** "Do not show again" of the model 1 dialog ([ModelDialog.Confirm]). */
+    /** "Don't show again" of the model 1 dialog ([ModelDialog.Confirm]). */
     var model1ConfirmOff by mutableStateOf(false)
 
-    /** "Do not show again" of the switch to model 2 ([ModelDialog.Fallback]). */
+    /** "Don't show again" of the switch to model 2 ([ModelDialog.Fallback]). */
     var model1FallbackOff by mutableStateOf(false)
 
     /** The model drawn. */
@@ -377,7 +377,7 @@ class AppState(
         LINE_WIDTH_PREF to lineWidth.toString(),
     )
 
-    /** A "Do not show again" flag as stored: "off" once ticked (as the Welcome dialog's), else "on". */
+    /** A "Don't show again" flag as stored: "off" once ticked (as the Welcome dialog's), else "on". */
     private fun onOff(off: Boolean) = if (off) "off" else "on"
 
     /** What [displayPrefs] was at the last load or save: only changed settings are written. */
