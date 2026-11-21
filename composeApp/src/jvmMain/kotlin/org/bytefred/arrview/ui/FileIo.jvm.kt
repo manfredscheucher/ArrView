@@ -5,6 +5,7 @@ import org.bytefred.arrview.core.LOAD_EXTENSIONS
 import java.io.File
 import java.io.IOException
 import javax.swing.JFileChooser
+import javax.swing.JOptionPane
 import javax.swing.filechooser.FileNameExtensionFilter
 
 private var lastDir: File? = null
@@ -37,14 +38,36 @@ actual fun rememberFileSaver(
         dialogTitle = "Save"
         selectedFile = File(lastDir, fileName)
     }
-    if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-        var f = chooser.selectedFile
-        val ext = fileName.substringAfterLast('.', "")
-        if (ext.isNotEmpty() && !f.name.contains('.')) f = File(f.path + "." + ext)
+    val ext = fileName.substringAfterLast('.', "")
+    val f = chooseSaveFile(
+        choose = {
+            if (chooser.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) null
+            else chooser.selectedFile.let { if (ext.isNotEmpty() && !it.name.contains('.')) File(it.path + "." + ext) else it }
+        },
+        exists = File::exists,
+        confirmReplace = { file ->
+            JOptionPane.showConfirmDialog(null, replaceQuestion(file.name), "Save", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION
+        },
+    )
+    if (f != null) {
         lastDir = f.parentFile
         writeFile(f, bytes, onError, onSaved)
     } else {
         onSaved(null)
+    }
+}
+
+/** The question before a save replaces the existing file [name]. */
+internal fun replaceQuestion(name: String) = "$name already exists. Replace it?"
+
+/**
+ * The file to save to (Save file and Export SVG): [choose] shows the save dialog (null: cancelled);
+ * an existing file is only taken if [confirmReplace] says yes, else the dialog shows again.
+ */
+internal fun chooseSaveFile(choose: () -> File?, exists: (File) -> Boolean, confirmReplace: (File) -> Boolean): File? {
+    while (true) {
+        val f = choose() ?: return null
+        if (!exists(f) || confirmReplace(f)) return f
     }
 }
 
