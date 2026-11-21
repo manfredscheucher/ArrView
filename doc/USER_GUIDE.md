@@ -263,11 +263,12 @@ remembered: the arrangement and the Examples choices.
 ## Save and export
 
 - **Save file...** (Arrangement menu): Save JSON or Save text writes all arrangements of the file or
-  set, including your edits. The desktop app opens a file chooser; the web app downloads the file.
+  set, including your edits. The desktop app opens a file chooser and asks before it replaces an
+  existing file; the web app downloads the file.
   After saving, the arrangement counts as saved.
 - **Export...**: the shown arrangement as Sequences, Model 1 sparse6 (only if intersecting) or Model 2
   sparse6 in a text field, with Copy. This does not count as saving.
-- **Export SVG** saves the drawing as shown (colour scheme, line width, model, outer face, and the
+- **Export SVG...** saves the drawing as shown (colour scheme, line width, model, outer face, and the
   coloured crossings while the example is unedited). It always contains the whole drawing, not the
   current zoom. It does not count as saving either.
 

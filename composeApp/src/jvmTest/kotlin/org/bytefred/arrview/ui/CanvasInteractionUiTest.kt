@@ -289,11 +289,11 @@ class CanvasInteractionUiTest {
         waitForIdle()
         assertEquals(flipped, s.arrangement)
         onNodeWithTag("menu-Arrangement").performClick()
-        menuItem("Export SVG").assertIsNotEnabled()
+        menuItem("Export SVG...").assertIsNotEnabled()
         hold.set(false)
         while (held.isNotEmpty()) pool.execute(held.poll())
         waitUntil(timeoutMillis = 10_000) { s.currentDrawing != null }
-        menuItem("Export SVG").assertIsEnabled()
+        menuItem("Export SVG...").assertIsEnabled()
     }
 
     @Test

@@ -85,7 +85,7 @@ class MenusAndDialogsUiTest {
             "Edit" to listOf("Undo", "Redo"),
             "View" to listOf("Fit", "Zoom in", "Zoom out") + Widget.entries.map { it.label } +
                 LayoutMode.entries.map { it.name.lowercase() },
-            "Help" to HelpPage.entries.map { it.title } + "About ArrView",
+            "Help" to HelpPage.entries.map { "${it.title}..." } + "About ArrView...",
         )
         for ((title, entries) in items) {
             onNodeWithTag("menu-$title").performClick()
@@ -194,7 +194,7 @@ class MenusAndDialogsUiTest {
         setContent { App(s, initialDialog = DialogKind.NONE) }
         awaitDrawing(s)
         onNodeWithTag("menu-Arrangement").performClick()
-        menuItem("Export SVG").assertIsEnabled()
+        menuItem("Export SVG...").assertIsEnabled()
     }
 
     @Test
@@ -383,7 +383,7 @@ class MenusAndDialogsUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         for (page in HelpPage.entries) {
-            menu("Help", page.title)
+            menu("Help", "${page.title}...")
             assertEquals(page, s.helpPage)
             onNode(hasText(page.title) and hasAnyAncestor(isDialog())).assertExists()
             onNodeWithText(helpText(page).first().take(30), substring = true).assertExists()
@@ -397,7 +397,7 @@ class MenusAndDialogsUiTest {
     fun aboutShowsLinksAndLicenseTexts() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
-        menu("Help", "About ArrView")
+        menu("Help", "About ArrView...")
         onNodeWithText("ArrView on GitHub").assertExists()
         onNodeWithText("Linhart and Ortner at EJC").assertExists()
         onNodeWithText("Literature").assertExists()

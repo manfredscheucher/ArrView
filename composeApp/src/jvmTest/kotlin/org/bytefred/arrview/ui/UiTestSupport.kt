@@ -66,4 +66,4 @@ class FakeClipboard : ClipboardManager {
 }
 
 /** The items of the Arrangement menu, in menu order (checked in the app and against the Help texts). */
-val ARRANGEMENT_MENU = listOf("Examples...", "Import...", "Export...", "Open file...", "Save file...", "Export SVG")
+val ARRANGEMENT_MENU = listOf("Examples...", "Import...", "Export...", "Open file...", "Save file...", "Export SVG...")

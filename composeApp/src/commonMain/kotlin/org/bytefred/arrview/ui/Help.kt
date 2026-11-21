@@ -127,7 +127,7 @@ private val GENERAL_TEXT = listOf(
         "website; an open group says what it is, a selected set shows its description. Loading a member of a " +
         "set opens the whole set: < and > in the toolbar (or PageUp / PageDown) step through it. " +
         "Import... reads pasted text and " +
-        "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG " +
+        "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG... " +
         "saves the picture.",
     "If the arrangement has changed since it was loaded or saved, ArrView asks whether to save it before " +
         "it replaces it. On the desktop, closing the app asks too. An unapplied edit in a widget is never " +

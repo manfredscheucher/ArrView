@@ -6,7 +6,8 @@ Requests and decisions. Newest first.
 
 ### Request (Manfred)
 
-"ja bitte" to the list of issues found while writing the manual; item 9 for consistency with PoCoView.
+"ja bitte" to the list of issues found while writing the manual; item 9 for consistency with PoCoView;
+items 10 and 11 ("jo"), also in PoCoView and RotSysView.
 
 ### Done
 
@@ -31,6 +32,10 @@ Requests and decisions. Newest first.
 9. Examples dialog: collapsing the group that holds the selection clears it, so Load is off;
    collapsing another group keeps it (PoCoView's `ExamplesState.toggle` / `treeKeys`).
    `ExamplesDialogUiTest.collapsingTheSelectionsGroupDisablesLoad`.
+10. Desktop save (Save file and Export SVG): an existing file is replaced only after "<name> already
+    exists. Replace it?" (Yes / No); No shows the file chooser again (`chooseSaveFile`, `SaveFileTest`).
+11. Menu items that open a dialog end in "...": Export SVG..., the Help pages (General..., ...) and
+    About ArrView... (as in RotSysView); Help, user guide and tests follow.
 
 ### Claude's choices
 

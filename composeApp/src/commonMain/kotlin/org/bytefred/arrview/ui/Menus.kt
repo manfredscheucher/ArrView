@@ -174,7 +174,7 @@ fun MenuBar(state: AppState, view: ViewTransform, openFile: () -> Unit, openDial
                 MenuItem(state, "Open file...", shortcut = "Ctrl+O") { openFile() }
                 MenuItem(state, "Save file...", shortcut = "Ctrl+S") { openDialog(DialogKind.SAVE) }
                 HorizontalDivider()
-                MenuItem(state, "Export SVG", enabled = state.currentDrawing != null) {
+                MenuItem(state, "Export SVG...", enabled = state.currentDrawing != null) {
                     state.currentDrawing?.let { saver("${state.fileName}.svg", drawingSvg(it, state.colorScheme, state.lineWidth, state.crossingColors).encodeToByteArray()) }
                 }
             }
@@ -193,8 +193,8 @@ fun MenuBar(state: AppState, view: ViewTransform, openFile: () -> Unit, openDial
                 for (m in LayoutMode.entries) CheckMenuItem(m.name.lowercase(), state.layoutMode == m) { state.layoutMode = m }
             }
             MenuButton(state, "Help") {
-                for (page in HelpPage.entries) MenuItem(state, page.title) { state.helpPage = page; openDialog(DialogKind.HELP) }
-                MenuItem(state, "About ArrView") { openDialog(DialogKind.ABOUT) }
+                for (page in HelpPage.entries) MenuItem(state, "${page.title}...") { state.helpPage = page; openDialog(DialogKind.HELP) }
+                MenuItem(state, "About ArrView...") { openDialog(DialogKind.ABOUT) }
             }
         }
         // one line + ellipsis, shrinking (weight), so the header cannot push the menus off-screen
