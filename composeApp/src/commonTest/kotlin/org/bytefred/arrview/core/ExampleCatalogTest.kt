@@ -91,7 +91,7 @@ class ExampleCatalogTest {
         assertEquals(13, members("n5-intersecting-all").maxOf { it.triangleCount })
         val digonFree6 = members("n6-digonfree-all")
         assertEquals(20, digonFree6.maxOf { it.triangleCount })
-        // the website's sets ("All" up to n = 7), then the maxima for n = 8, 9 from the computer search
+        // the website's sets ("All" up to n = 7), then the maxima for n = 8, 9, 10 from the computer search
         val website = Examples.inGroup(Examples.group("max-triangles")).filter { it.page != null }
         for (s in website) assertTrue(s.description.startsWith(if (s.n <= 7) "All" else "Some"), s.description)
         val max8 = members("n8-intersecting-38-triangles").single()
@@ -100,10 +100,13 @@ class ExampleCatalogTest {
         val max9 = members("n9-digonfree-50-triangles").single()
         assertEquals(50, max9.triangleCount)
         assertTrue(max9.isDigonFree)
+        val max10 = members("n10-digonfree-61-triangles").single()
+        assertEquals(61, max10.triangleCount)
+        assertTrue(max10.isDigonFree)
         // the website's n = 8, 9 sets stay below the maxima
         assertTrue(website.filter { it.n == 8 }.all { s -> members(s.name).all { it.triangleCount < 38 } })
         assertTrue(website.filter { it.n == 9 }.all { s -> members(s.name).all { it.triangleCount < 50 } })
-        assertEquals(website.size + 2, Examples.inGroup(Examples.group("max-triangles")).size)
+        assertEquals(website.size + 3, Examples.inGroup(Examples.group("max-triangles")).size)
     }
 
     @Test

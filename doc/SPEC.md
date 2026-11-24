@@ -158,9 +158,13 @@ maximum to the examples; the n = 8 one was thought to be in already, but it was 
   and `n9_p3eq50.txt`, copied as `maxtriangles/max8_digon_38_triangles.seq` and
   `max9_df_50_triangles.seq` (also by `scripts/import_examples.py`). Not on the website: no page,
   no paper of their own.
+- `n10-digonfree-61-triangles` ("n = 10, 61 triangles"): an arrangement of 10 pseudocircles with the
+  maximum 61 (complete search for p_3 >= 62 found none, 2026-11-21); not known whether it is unique,
+  hence `some10_`. Data: `pca/data/maxtri/n10_p3ge61_partial.txt`, copied as
+  `maxtriangles/some10_df_61_triangles.json` by `scripts/import_examples.py`.
 - The group description now says the website's examples for n = 8, 9 are digon-free and not the
   maximum; the website's sets `some8_df_37` and `some9_df_48` no longer say "(maybe the maximum)".
-- `ExampleCatalogTest` checks 38 triangles with a digon, 50 triangles digon-free, and that the
+- `ExampleCatalogTest` checks 38 triangles with a digon, 50 and 61 triangles digon-free, and that the
   website's n = 8, 9 sets stay below.
 
 ## 2026-11-19: UI overhaul

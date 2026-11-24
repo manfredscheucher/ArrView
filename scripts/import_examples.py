@@ -78,6 +78,7 @@ SOURCES = [
 PCA_SEQUENCES = [
     ("maxtriangles", "data/maxtri/n8_p3eq38.txt", "max8_digon_38_triangles"),
     ("maxtriangles", "data/maxtri/n9_p3eq50.txt", "max9_df_50_triangles"),
+    ("maxtriangles", "data/maxtri/n10_p3ge61_partial.txt", "some10_df_61_triangles"),
 ]
 
 # the metadata keys of an example file, in this order (PoCoView's), then the data
