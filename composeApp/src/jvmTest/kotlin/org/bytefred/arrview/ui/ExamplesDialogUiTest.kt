@@ -19,6 +19,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
+import org.bytefred.arrview.core.ExampleLink
+import org.bytefred.arrview.core.ExampleSet
+import org.bytefred.arrview.core.ExampleSupergroup
 import org.bytefred.arrview.core.Examples
 import kotlin.test.assertNotNull
 import kotlin.test.BeforeTest
@@ -308,5 +311,25 @@ class ExamplesDialogUiTest {
         // the selection is kept for the next opening
         openExamples()
         onNodeWithText("Connected, n = 3 (3)").assertIsSelected()
+    }
+
+    @Test
+    fun linksAreLeftOutByUrlNotByTitle() {
+        val web = ExampleLink("Website: pseudocircles", "https://example.org/web")
+        val paper = ExampleLink("Paper: A", "https://example.org/a")
+        val sg = ExampleSupergroup("sg", "SG", null, listOf(web, paper))
+        // the same URLs under other titles, in another order: the group shows none of them
+        val same = ExampleGroup(sg, "same", "Same", null, listOf(paper.copy(title = "Paper: a"), web.copy(title = "Website")))
+        assertEquals(emptyList(), shownLinks(same))
+        // one URL more: the group shows all its own links
+        val more = ExampleGroup(sg, "more", "More", null, listOf(paper, ExampleLink("Paper: B", "https://example.org/b")))
+        assertEquals(more.links, shownLinks(more))
+        // a set leaves out what its group or supergroup shows, by URL
+        val own = ExampleLink("Website: page", "https://example.org/page")
+        val set = ExampleSet(
+            "f.json", "n3-great-x", more, 3, "x", "d",
+            listOf(web.copy(title = "Website: other title"), ExampleLink("Paper: b", "https://example.org/b"), own), null, emptyList(),
+        )
+        assertEquals(listOf(own), shownLinks(set))
     }
 }

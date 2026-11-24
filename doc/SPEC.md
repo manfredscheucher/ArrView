@@ -29,9 +29,9 @@ groups.
 ### Schema
 
 PoCoView's `index.json`: `{"supergroups": [{id, title, description?, links?, groups: [{id, title,
-description?, links?, files}]}], "links"?}`. Supergroup ids unique, group ids unique within their
-supergroup (today also among all groups: `Examples.group(id)`); the loader rejects duplicates and
-files that are not bundled. Kept group ids: min-triangles, max-triangles, digon-graphs,
+description?, links?, files}]}], "links"?}`. Supergroup ids unique, group ids unique among all
+groups, not only within their supergroup (`Examples.group(id)` looks a group up by its id alone); the
+loader rejects duplicates and files that are not bundled. Kept group ids: min-triangles, max-triangles, digon-graphs,
 furedi-palasti, colorings; new: great, intersecting-digonfree, intersecting, connected-digonfree,
 connected, nonr-5, nonr-6-digonfree, nonr-6-intersecting, nonr-6-connected, nonr-9-great; supergroups
 database, combinatorial, non-circularizable, constructions. Details in DEVELOPMENT.md.
@@ -41,8 +41,9 @@ database, combinatorial, non-circularizable, constructions. Details in DEVELOPME
 - Two-level tree: supergroup headers at depth 0, groups at depth 1, sets at depth 2, 16 dp per level.
 - Supergroup header: drawn arrow, SemiBold, titleLarge, title only; when open its description
   (bodySmall) and links, then its groups.
-- Group header: bodyLarge SemiBold, title only, no count (795b004); when open its description and the
-  links that differ from its supergroup's, then its sets.
+- Group header: bodyLarge SemiBold, title only, no count (795b004); when open its description and its
+  links, unless their URLs are exactly the supergroup's (compared as sets of URLs), then its sets. A
+  set shows only the links whose URL its group and supergroup do not show already.
 - Leaves unchanged: label, plus " (size)" for more than one member.
 - Everything collapsed at first; open nodes, selection and scroll position kept while the app runs.
   Collapsing the supergroup or group that holds the selection clears it (Load disabled); collapsing

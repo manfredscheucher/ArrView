@@ -23,7 +23,7 @@ class ExampleSupergroup(
 
 /**
  * A group of bundled examples inside its [supergroup] (in display order, as in the index). [id] is
- * unique within the supergroup (and today among all groups, see [Examples.group]).
+ * unique among all groups (the loader checks it, see [Examples.group]).
  */
 class ExampleGroup(
     val supergroup: ExampleSupergroup,
@@ -141,18 +141,16 @@ object Examples {
             val sg = ExampleSupergroup(so.string("id", INDEX), so.string("title", INDEX), so.optString("description", INDEX), links(so, INDEX))
             require(supergroups.none { it.id == sg.id }) { "$INDEX: supergroup id '${sg.id}' twice" }
             supergroups += sg
-            val own = ArrayList<ExampleGroup>()
             for (g in so.list("groups", INDEX)) {
                 val go = jsonObject(g, INDEX)
                 val group = ExampleGroup(sg, go.string("id", INDEX), go.string("title", INDEX), go.optString("description", INDEX), links(go, INDEX))
-                require(own.none { it.id == group.id }) { "$INDEX: group id '${group.id}' twice in '${sg.id}'" }
-                own += group
+                groups += group
                 val paths = go.list("files", INDEX).map { it as? String ?: error("$INDEX: file names must be strings") }
                 require(paths.size == paths.toSet().size) { "$INDEX: a file twice in '$group'" }
                 for (p in paths) files += group to p
             }
-            groups += own
         }
+        checkGroupIds(groups)
         // a file listed twice is parsed once; its "group" names one of the groups or supergroups listing it
         val parsed = HashMap<String, Map<*, *>>()
         val listings = files.map { (group, path) ->
@@ -204,7 +202,13 @@ object Examples {
     /** The supergroup with the given [id]. */
     fun supergroup(id: String): ExampleSupergroup = supergroups.first { it.id == id }
 
-    /** The group with the given [id] (group ids are unique among all groups today). */
+    /** Group ids are unique among all groups, not only within a supergroup ([group] looks a group up by its id alone). */
+    internal fun checkGroupIds(groups: List<ExampleGroup>) {
+        val twice = groups.groupBy { it.id }.values.firstOrNull { it.size > 1 } ?: return
+        error("$INDEX: group id '${twice[0].id}' twice (in ${twice.joinToString { "'${it.supergroup.id}'" }})")
+    }
+
+    /** The group with the given [id] (group ids are unique among all groups, see [checkGroupIds]). */
     fun group(id: String): ExampleGroup = groups.single { it.id == id }
 
     /** The groups of [supergroup], in display order. */

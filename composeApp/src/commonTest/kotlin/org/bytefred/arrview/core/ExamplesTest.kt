@@ -2,6 +2,7 @@ package org.bytefred.arrview.core
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -253,6 +254,19 @@ class ExamplesTest {
                 "nonr-9-great" -> assertTrue(arr.isGreat, s.name)
             }
         }
+    }
+
+    @Test
+    fun groupIdsAreUniqueAmongAllGroups() {
+        assertEquals(Examples.groups.size, Examples.groups.map { it.id }.toSet().size)
+        Examples.checkGroupIds(Examples.groups)
+        // the same id in two supergroups is refused, not only within one
+        val a = ExampleSupergroup("a", "A", null, emptyList())
+        val b = ExampleSupergroup("b", "B", null, emptyList())
+        val e = assertFailsWith<IllegalStateException> {
+            Examples.checkGroupIds(listOf(ExampleGroup(a, "x", "X", null, emptyList()), ExampleGroup(b, "x", "X", null, emptyList())))
+        }
+        assertEquals("index.json: group id 'x' twice (in 'a', 'b')", e.message)
     }
 
     @Test

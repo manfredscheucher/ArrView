@@ -119,8 +119,7 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
                     TreeHeader(group.title, 1, gKey in open) { ex.toggle(gKey) }
                     HorizontalDivider(Modifier.padding(start = INDENT))
                     if (gKey !in open) continue
-                    // its own links, unless they are exactly the supergroup's (shown above)
-                    NodeIntro(group.description, if (group.links.toSet() == sg.links.toSet()) emptyList() else group.links, 1, "group-info")
+                    NodeIntro(group.description, shownLinks(group), 1, "group-info")
                     for (set in Examples.inGroup(group)) {
                         TreeLeaf(leafLabel(set), 2, ex.selected == set) {
                             // the same leaf again keeps its (maybe invalid) number field
@@ -138,6 +137,16 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
             }
         }
     }
+}
+
+/** The links an open group shows: its own, unless their URLs are exactly the supergroup's (shown above it). */
+internal fun shownLinks(group: ExampleGroup): List<ExampleLink> =
+    if (group.links.map { it.url }.toSet() == group.supergroup.links.map { it.url }.toSet()) emptyList() else group.links
+
+/** The links a selected set shows: those whose URL its group and supergroup do not show already. */
+internal fun shownLinks(set: ExampleSet): List<ExampleLink> {
+    val above = set.group.allLinks.map { it.url }.toSet()
+    return set.links.filter { it.url !in above }
 }
 
 /** The text of a leaf: the label and, for a list, how many arrangements it has. */
@@ -243,8 +252,7 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
             ) { i -> onIndex(i?.minus(1)) }
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
-        // links only where they differ from the group's and supergroup's (shown above the sets)
-        for (link in set.links - set.group.allLinks.toSet()) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
+        for (link in shownLinks(set)) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
         Text(
             set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
             style = MaterialTheme.typography.labelSmall,

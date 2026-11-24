@@ -82,7 +82,7 @@ if a file is not in the index or vice versa.
 
 `id`, `title` and `groups` / `files` are required; `description` (one or two sentences, at most 110
 characters) and `links` are optional, the top-level `links` too (ArrView has none). Supergroup ids are
-unique, group ids unique within their supergroup (today among all groups, so `Examples.group(id)`
+unique, group ids unique among all groups (`Examples.checkGroupIds`, so `Examples.group(id)`
 works); the loader rejects duplicates and files that are not bundled. The dialog's tree keys are
 `SG/<supergroup id>` and `G/<supergroup id>/<group id>`. Links go on the supergroup when all its groups
 share them; a group has its own links only where they differ (`ExamplesTest` checks that every group
