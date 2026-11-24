@@ -15,7 +15,8 @@ converted to model 1 sparse6; the coloured draw7 drawings of the triangle-satura
 (`*_1_1tutte7.ipe`), which give the sequences and the colour of every crossing; Koester's crossing
 graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage); the maxima of triangles for
 n = 8, 9, intersection sequences from `../data/maxtri/`. The Gradle task generateExamples embeds
-the files into the app. Provenance: doc/DEVELOPMENT.md.
+the files into the app. The connected digon-free sets are the digon-free members of the connected
+ones (DIGON_FREE_MEMBERS). Provenance: doc/DEVELOPMENT.md.
 
     python3 scripts/import_examples.py [--research ~/github/research/pca/pseudocircles]
 """
@@ -81,6 +82,12 @@ PCA_SEQUENCES = [
     ("maxtriangles", "data/maxtri/n10_p3ge61_partial.txt", "some10_df_61_triangles"),
 ]
 
+# the digon-free members of these files (model 2 sparse6 lines, verbatim and in their order):
+# (destination folder, source path relative to the research folder, destination stem)
+DIGON_FREE_MEMBERS = [
+    ("connected", f"website/arrangements/pseudocircles/connected/all{n}.mod2s6", f"all{n}_digonfree") for n in range(3, 6)
+]
+
 # the metadata keys of an example file, in this order (PoCoView's), then the data
 METADATA = ["name", "n", "group", "label", "description", "links", "source"]
 
@@ -123,6 +130,47 @@ def sparse6(n, edges):
         head = "~~" + "".join(chr(((n >> s) & 63) + 63) for s in (30, 24, 18, 12, 6, 0))
     body = "".join(chr(int("".join(map(str, bits[i:i + 6])), 2) + 63) for i in range(0, len(bits), 6))
     return ":" + head + body
+
+
+def sparse6_decode(text):
+    """The vertex count and the edges of a sparse6 string (the inverse of `sparse6`)."""
+    data = [ord(c) - 63 for c in text.strip()[1:]]
+    if data[0] < 63:
+        n, data = data[0], data[1:]
+    elif data[1] < 63:
+        n, data = (data[1] << 12) | (data[2] << 6) | data[3], data[4:]
+    else:
+        n, data = sum(data[2 + i] << (6 * (5 - i)) for i in range(6)), data[8:]
+    k = max(1, (n - 1).bit_length()) if n > 1 else 0
+    bits = [(d >> i) & 1 for d in data for i in range(5, -1, -1)]
+    edges = []
+    v = 0
+    pos = 0
+    while pos + 1 + k <= len(bits):
+        b = bits[pos]
+        x = int("".join(map(str, bits[pos + 1:pos + 1 + k])) or "0", 2)
+        pos += 1 + k
+        if b:
+            v += 1
+        if x >= n or v >= n:
+            break
+        if x > v:
+            v = x
+        else:
+            edges.append((x, v))
+    return n, edges
+
+
+def model2_is_digon_free(line):
+    """Whether a model 2 sparse6 line (NEW encoding) has no digon: a face vertex (the neighbour of a
+    marker leaf) is adjacent to the arcs around it, so a digon is a face vertex with 2 arcs."""
+    n, edges = sparse6_decode(line)
+    adj = [set() for _ in range(n)]
+    for u, v in edges:
+        adj[u].add(v)
+        adj[v].add(u)
+    faces = [next(iter(adj[leaf])) for leaf in range(n) if len(adj[leaf]) == 1]
+    return all(len(adj[f]) - 1 != 2 for f in faces)
 
 
 def colour_dict_to_sparse6(line):
@@ -275,6 +323,10 @@ def main():
     for folder, source, stem in PCA_SEQUENCES:
         with open(os.path.join(args.research, "..", source)) as f:
             total += write(target, folder, stem, [{"sequences": parse_sequences(line)} for line in f if line.strip()])
+    for folder, source, stem in DIGON_FREE_MEMBERS:
+        with open(os.path.join(args.research, source)) as f:
+            lines = [line.strip() for line in f if line.strip()]
+        total += write(target, folder, stem, [{"mod2s6": line} for line in lines if model2_is_digon_free(line)])
     print(f"total: {total} bytes")
 
 

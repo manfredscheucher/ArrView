@@ -1,7 +1,7 @@
 {
   "name": "n6-connected-nonr-sym24",
   "n": 6,
-  "group": "Non-circularizable arrangements",
+  "group": "Non-circularizable",
   "label": "n = 6, connected digon-free, symmetry 24",
   "description": "A non-circularizable digon-free connected arrangement of 6 pseudocircles.",
   "links": [

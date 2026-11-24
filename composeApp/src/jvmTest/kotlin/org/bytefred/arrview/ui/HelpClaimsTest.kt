@@ -178,8 +178,12 @@ class HelpClaimsTest {
     }
 
     @Test
-    fun examplesByPurpose() {
-        assertSays(HelpPage.GENERAL, "Examples... lists the bundled arrangements by purpose, as on the pseudocircles website; an open group says what it is, a selected set shows its description.")
+    fun examplesInSupergroups() {
+        val titles = Examples.supergroups.joinToString(", ") { it.title }
+        assertSays(
+            HelpPage.GENERAL,
+            "Examples... lists the bundled arrangements in supergroups ($titles) and their groups; an open supergroup or group says what it is, a selected set shows its description.",
+        )
     }
 
     @Test

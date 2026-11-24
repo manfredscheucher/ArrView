@@ -1,7 +1,7 @@
 {
   "name": "n5-intersecting-nonr-1",
   "n": 5,
-  "group": "Non-circularizable arrangements",
+  "group": "Non-circularizable",
   "label": "n = 5, intersecting, no. 1",
   "description": "The only non-circularizable intersecting arrangement of at most 5 pseudocircles.",
   "links": [

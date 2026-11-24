@@ -170,8 +170,9 @@ class SetsTest {
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
         onNodeWithText("Database").performClick()
+        onNodeWithText("Intersecting").performScrollTo().performClick()
         onNodeWithText("Intersecting, n = 4 (8)").performScrollTo().performClick()
-        // below the database's other sets: scrolled into view first
+        // below the group's other sets: scrolled into view first
         onNodeWithText("+").performScrollTo().performClick()
         onNodeWithText("+").performClick()
         onNodeWithText("Load").performClick()

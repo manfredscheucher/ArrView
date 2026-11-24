@@ -123,8 +123,9 @@ private val GENERAL_TEXT = listOf(
         "(the smaller number), in the order of its sequence, then along circle j.",
     "The drawing is model 2 by default; model 1 (legacy) is chosen in the Settings widget (Visualization) " +
         "and shows intersecting arrangements only. The Help page Visualization explains both.",
-    "In the Arrangement menu, Examples... lists the bundled arrangements by purpose, as on the pseudocircles " +
-        "website; an open group says what it is, a selected set shows its description. Loading a member of a " +
+    "In the Arrangement menu, Examples... lists the bundled arrangements in supergroups (Database, " +
+        "Combinatorial properties, Non-circularizable, Constructions) and their groups; an open supergroup or " +
+        "group says what it is, a selected set shows its description. Loading a member of a " +
         "set opens the whole set: < and > in the toolbar (or PageUp / PageDown) step through it. " +
         "Import... reads pasted text and " +
         "Export... gives the text to copy. Open file... and Save file... read and write files, Export SVG... " +

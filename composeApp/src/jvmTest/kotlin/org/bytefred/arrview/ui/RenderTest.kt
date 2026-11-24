@@ -111,12 +111,16 @@ class RenderTest {
         for (kind in DialogKind.entries - DialogKind.NONE - DialogKind.HELP) {
             val s = state()
             if (kind == DialogKind.EXAMPLES) {
-                s.examples.expanded.addAll(listOf("database", "colorings"))
+                s.examples.expanded.addAll(listOf("SG/database", "G/database/intersecting", "SG/constructions", "G/constructions/colorings"))
                 s.examples.selected = Examples.byName("n5-intersecting-all")
                 s.examples.index["n5-intersecting-all"] = 16
             }
             render(s, file = "dialog-${kind.name.lowercase()}.png", dialog = kind)
         }
+        // the examples tree (doc/img/examples.png): every supergroup open, the groups collapsed
+        val tree = state()
+        for (sg in Examples.supergroups) tree.examples.toggle(treeKey(sg))
+        render(tree, w = 900, h = 1380, file = "dialog-examples-tree.png", dialog = DialogKind.EXAMPLES)
         for (page in HelpPage.entries) {
             val s = state()
             s.helpPage = page

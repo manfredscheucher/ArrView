@@ -65,25 +65,27 @@ browser.
 
 All of these are in the Arrangement menu.
 
-**Examples...** lists the bundled arrangements by purpose, in the order of the menu of the
-pseudocircles website. Each group can be opened; an open group starts with what it is and links to
-the website page (and the paper, where there is one).
+**Examples...** lists the bundled arrangements as a tree: supergroups, their groups, then the sets.
+Everything starts collapsed. An open supergroup or group starts with what it is and its links (the
+website page and the paper); a group shows only the links that differ from its supergroup's.
 
-- Database: all arrangements of n pseudocircles for small n (connected n = 3 to 5, intersecting 2 to
-  5, digon-free 3 to 6, great 3 to 8).
-- Minimum number of triangles, Maximum number of triangles.
-- Füredi–Palásti construction: great pseudocircle arrangements with 2n(n-3)/3 triangles.
-- Non-circularizable arrangements: cannot be drawn with circles.
-- Triangle-saturated arrangements and colourings: every edge lies on exactly one
-  triangle; in six of them the crossings are drawn in their colours.
-- Digongraphs, and Krupp, NonKrupp, 3-Chain (the named arrangements of 3 pseudocircles).
+- Database (all arrangements of n pseudocircles for small n, as in Table 1 of On Circularizability):
+  Great pseudocircles (n = 3 to 8), Intersecting, digon-free (3 to 6), Intersecting (2 to 5),
+  Connected, digon-free (3 to 5), Connected (3 to 5).
+- Combinatorial properties: Minimum number of triangles, Maximum number of triangles, Digongraphs.
+- Non-circularizable (cannot be drawn with circles): n = 5 (connected, intersecting); n = 6,
+  digon-free intersecting; n = 6, intersecting with digons; n = 6, connected digon-free; n = 9, great.
+- Constructions: Füredi–Palásti (great pseudocircle arrangements with 2n(n-3)/3 triangles),
+  Triangle-saturated arrangements and colourings (every edge lies on exactly one triangle; in six of
+  them the crossings are drawn in their colours).
 
 The selected entry shows its description, n, the number of arrangements, links and where the data is
 from. An entry with several arrangements has "(k)" after its name and a number field with `−` and
 `+` to choose one ("1 of 4"; a number out of range disables Load). Load opens the whole set at the
-chosen arrangement, so you can step through the others with `<` `>`. The dialog remembers its state while the app
-runs. The yellow box has a mail address for sending interesting arrangements or feedback (as in the
-Welcome and About dialogs).
+chosen arrangement, so you can step through the others with `<` `>`. The dialog remembers its state
+(open nodes, selection, scroll position) while the app runs; collapsing the supergroup or group of the
+selected entry clears the selection. The yellow box has a mail address for sending interesting
+arrangements or feedback (as in the Welcome and About dialogs).
 
 ![Examples dialog](img/examples.png)
 

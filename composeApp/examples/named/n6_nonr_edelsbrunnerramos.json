@@ -1,7 +1,7 @@
 {
   "name": "n6-intersecting-nonr-edelsbrunner-ramos",
   "n": 6,
-  "group": "Non-circularizable arrangements",
+  "group": "Non-circularizable",
   "label": "n = 6, intersecting, Edelsbrunner–Ramos",
   "description": "A non-circularizable intersecting arrangement of 6 pseudocircles (Edelsbrunner and Ramos).",
   "links": [

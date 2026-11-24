@@ -2,6 +2,71 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-24: Examples in supergroups
+
+### Request (Manfred, via the coordinator; the same in PoCoView and RotSysView)
+
+Restructure the examples into a two-level tree of supergroups and groups, uniform with PoCoView
+(bab3601) and RotSysView (9d12683). The database after Table 1 of Felsner, Scheucher, "Arrangements
+of Pseudocircles: On Circularizability" (https://arxiv.org/abs/1712.02149), with the connected
+digon-free arrangements n = 3..5 as a new group (Table 1: 1, 3, 30). Examples may appear in several
+groups.
+
+### Tree
+
+- Database (links: the website's database page, On Circularizability): Great pseudocircles
+  (n = 3..8), Intersecting, digon-free (3..6), Intersecting (2..5), Connected, digon-free (3..5, new),
+  Connected (3..5).
+- Combinatorial properties: Minimum number of triangles, Maximum number of triangles, Digongraphs
+  (Maximum number of digons follows later: one more group in `index.json`).
+- Non-circularizable (links: No more circle representations, On Circularizability): n = 5 (connected,
+  intersecting) with the four N_5; n = 6, digon-free intersecting (no. 1 = N_6^Delta, 2, 3); n = 6,
+  intersecting with digons (every-triangle-Krupp, Edelsbrunner–Ramos, symmetry 6 no. 2, 3); n = 6,
+  connected digon-free (symmetry 24, 8 no. 1, 8 no. 2, 4 no. 1, 4 no. 2; the file `..._sym8_2` is
+  no. 1); n = 9, great (non-Pappus).
+- Constructions: Füredi–Palásti, Triangle-saturated arrangements and colourings.
+
+### Schema
+
+PoCoView's `index.json`: `{"supergroups": [{id, title, description?, links?, groups: [{id, title,
+description?, links?, files}]}], "links"?}`. Supergroup ids unique, group ids unique within their
+supergroup (today also among all groups: `Examples.group(id)`); the loader rejects duplicates and
+files that are not bundled. Kept group ids: min-triangles, max-triangles, digon-graphs,
+furedi-palasti, colorings; new: great, intersecting-digonfree, intersecting, connected-digonfree,
+connected, nonr-5, nonr-6-digonfree, nonr-6-intersecting, nonr-6-connected, nonr-9-great; supergroups
+database, combinatorial, non-circularizable, constructions. Details in DEVELOPMENT.md.
+
+### UI decisions (uniform for the three apps)
+
+- Two-level tree: supergroup headers at depth 0, groups at depth 1, sets at depth 2, 16 dp per level.
+- Supergroup header: drawn arrow, SemiBold, titleLarge, title only; when open its description
+  (bodySmall) and links, then its groups.
+- Group header: bodyLarge SemiBold, title only, no count (795b004); when open its description and the
+  links that differ from its supergroup's, then its sets.
+- Leaves unchanged: label, plus " (size)" for more than one member.
+- Everything collapsed at first; open nodes, selection and scroll position kept while the app runs.
+  Collapsing the supergroup or group that holds the selection clears it (Load disabled); collapsing
+  others keeps it.
+
+### Decisions and interpretations
+
+- Links: on the supergroup when all its groups share them (Database, Non-circularizable); Combinatorial
+  properties and Constructions have none, their groups keep their own. A group's links never repeat
+  its supergroup's (`ExamplesTest`); a set shows only links its group and supergroup do not show.
+- Descriptions are optional. Database groups got one short definition each; the Non-circularizable
+  groups none (the title says it); Combinatorial properties and Constructions none.
+- Group titles are the tree's names: "Füredi–Palásti" (was "Füredi–Palásti construction"). The
+  supergroup is "Non-circularizable" (was the group "Non-circularizable arrangements"). The ranges
+  n = 3-8 etc. are not in the titles (the leaves say n).
+- A file's `"group"` key now names a group or supergroup that lists it: database files keep
+  "Database", the non-circularizable ones say "Non-circularizable", Füredi–Palásti "Füredi–Palásti".
+- A file in several groups is one leaf per group (its own selection); `Examples.sets` has each file once.
+- Connected, digon-free: `connected/all{3,4,5}_digonfree.json` (`n<N>-connected-digonfree-all`),
+  the digon-free lines of the connected files, written by `scripts/import_examples.py`
+  (`DIGON_FREE_MEMBERS`). Sizes 1, 3, 30 as in Table 1; `subclassesAgree` checks they are exactly the
+  digon-free connected ones.
+- `doc/img/examples.png` is RenderTest's `dialog-examples-tree.png` (every supergroup open).
+
 ## 2026-11-24: Examples cleanup
 
 ### Request (Manfred, via the coordinator)

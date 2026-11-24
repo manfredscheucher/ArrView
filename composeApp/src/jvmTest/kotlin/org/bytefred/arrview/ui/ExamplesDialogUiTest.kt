@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
 import org.bytefred.arrview.core.Examples
+import kotlin.test.assertNotNull
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,7 +28,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** The Examples dialog driven by clicks: a member of every set, the member chooser, Cancel. */
+/** The Examples dialog driven by clicks: the tree, a member of every set, the member chooser, Cancel. */
 @OptIn(ExperimentalTestApi::class)
 class ExamplesDialogUiTest {
     private fun state() = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
@@ -48,7 +49,11 @@ class ExamplesDialogUiTest {
 
     private fun ComposeUiTest.click(text: String) = onNodeWithText(text).performScrollTo().performClick()
 
-    private fun header(group: ExampleGroup) = group.title
+    /** Opens the supergroup of [group] and then [group] (both collapsed before). */
+    private fun ComposeUiTest.openGroup(group: ExampleGroup) {
+        click(group.supergroup.title)
+        click(group.title)
+    }
 
     @Test
     // loads all sets (16 s on an idle machine); the default 1 min limit is too tight under load
@@ -59,8 +64,9 @@ class ExamplesDialogUiTest {
             val sets = Examples.inGroup(group)
             for ((k, set) in sets.withIndex()) {
                 openExamples()
-                // the groups stay expanded between openings
-                if (k == 0) click(header(group))
+                // supergroups and groups stay expanded between openings
+                if (group == Examples.groupsIn(group.supergroup).first() && k == 0) click(group.supergroup.title)
+                if (k == 0) click(group.title)
                 click(leafLabel(set))
                 onNodeWithText(leafLabel(set)).assertIsSelected()
                 onNodeWithText(set.description).assertExists()
@@ -109,9 +115,9 @@ class ExamplesDialogUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         val set = Examples.byName("n5-intersecting-all")!!
-        val group = header(Examples.group("database"))
+        val group = Examples.group("intersecting").title
         openExamples()
-        click(group)
+        openGroup(Examples.group("intersecting"))
         click(leafLabel(set))
         val field = onNodeWithTag("example-index")
         for (bad in listOf("0", "-3", "abc", "")) {
@@ -133,41 +139,60 @@ class ExamplesDialogUiTest {
     }
 
     @Test
-    fun groupsByPurposeWithDescriptionsLinksAndTheInfoArea() = runComposeUiTest {
+    fun supergroupsAndGroupsWithDescriptionsLinksAndTheInfoArea() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
         onNodeWithText("Most of the data is from the pseudocircles website").assertExists()
-        // the groups, all collapsed: no descriptions, no leaves
-        for (group in Examples.groups) onNodeWithText(header(group)).assertExists()
+        // the supergroups, all collapsed: no groups, no descriptions, no leaves
+        for (sg in Examples.supergroups) onNodeWithText(sg.title).assertExists()
+        for (g in Examples.groups) onNodeWithText(g.title).assertDoesNotExist()
+        onNodeWithTag("supergroup-info").assertDoesNotExist()
         onNodeWithTag("group-info").assertDoesNotExist()
-        // an open group shows what it is and where it comes from, then its sets
-        for (group in Examples.groups) {
-            click(header(group))
-            onNodeWithText(group.description).assertExists()
-            for (link in group.links) onNodeWithText(link.title).assertExists()
-            for (set in Examples.inGroup(group)) onNodeWithText(leafLabel(set)).assertExists()
-            click(header(group))
-            onNodeWithText(group.description).assertDoesNotExist()
+        // an open supergroup shows what it is and its links, then its groups (collapsed)
+        for (sg in Examples.supergroups) {
+            click(sg.title)
+            sg.description?.let { onNodeWithText(it).assertExists() }
+            for (link in sg.links) onAllNodesWithText(link.title).assertCountEquals(1)
+            for (g in Examples.groupsIn(sg)) {
+                onNodeWithText(g.title).assertExists()
+                // an open group: its description, only the links that differ from the supergroup's, its sets
+                click(g.title)
+                g.description?.let { onNodeWithText(it).assertExists() }
+                for (link in g.links) onAllNodesWithText(link.title).assertCountEquals(1)
+                for (link in sg.links) onAllNodesWithText(link.title).assertCountEquals(1)
+                for (set in Examples.inGroup(g)) onNodeWithText(leafLabel(set)).assertExists()
+                click(g.title)
+                for (set in Examples.inGroup(g)) onNodeWithText(leafLabel(set)).assertDoesNotExist()
+            }
+            click(sg.title)
+            for (g in Examples.groupsIn(sg)) onNodeWithText(g.title).assertDoesNotExist()
         }
         // a single arrangement: the note "1 arrangement", no number selection, where its data is from
-        click(header(Examples.group("non-circularizable")))
+        openGroup(Examples.group("nonr-5"))
         val nonr = Examples.byName("n5-intersecting-nonr-1")!!
         click(nonr.label)
         onNodeWithText(nonr.description).assertExists()
         onNodeWithText("n = 5, 1 arrangement").assertExists()
         onNodeWithTag("example-index").assertDoesNotExist()
         onNodeWithText("Data: website/arrangements/nomorecircles/connected/n5_nonr_number1_intersecting.mod2s6").assertExists()
+        // the links of the supergroup are not repeated by the set
+        for (link in Examples.supergroup("non-circularizable").links) onAllNodesWithText(link.title).assertCountEquals(1)
         // from the computations: the Pappus one has no website page
+        click(Examples.group("nonr-9-great").title)
         click("n = 9, great, non-Pappus")
         onNodeWithText("Data: computations/results/n9_nonr_pappus.enc").assertExists()
         // a list of the database: the count in the label, the chooser
-        click(header(Examples.group("database")))
+        openGroup(Examples.group("intersecting"))
         click("Intersecting, n = 4 (8)")
         onNodeWithText("n = 4, 8 arrangements").assertExists()
         onNodeWithTag("example-index").assertExists()
+        // the new connected digon-free sets (Table 1 of On Circularizability: 1, 3, 30)
+        click(Examples.group("connected-digonfree").title)
+        click("Connected digon-free, n = 5 (30)")
+        onNodeWithText("n = 5, 30 arrangements").assertExists()
         // a coloured one; Koester's arrangement is with them
-        click(header(Examples.group("colorings")))
+        openGroup(Examples.group("colorings"))
         click("n = 6, no. 2")
         // the links of the group are not repeated
         for (link in Examples.group("colorings").links) onAllNodesWithText(link.title).assertCountEquals(1)
@@ -177,11 +202,59 @@ class ExamplesDialogUiTest {
     }
 
     @Test
+    fun expandSelectCollapseAndLoadInTheTree() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        val load = onNodeWithText("Load")
+        openExamples()
+        load.assertIsNotEnabled()
+        val database = Examples.supergroup("database")
+        val group = Examples.group("connected-digonfree")
+        val set = assertNotNull(Examples.byName("n4-connected-digonfree-all"))
+        // expand the supergroup, then the group, select a set
+        click(database.title)
+        click(group.title)
+        click(leafLabel(set))
+        onNodeWithText(leafLabel(set)).assertIsSelected()
+        load.assertIsEnabled()
+        // collapsing another group or supergroup keeps the selection
+        click(Examples.group("great").title)
+        click(Examples.group("great").title)
+        click(Examples.supergroup("constructions").title)
+        click(Examples.supergroup("constructions").title)
+        load.assertIsEnabled()
+        // collapsing the supergroup that holds it clears it; the group stays open inside
+        click(database.title)
+        onNodeWithText(group.title).assertDoesNotExist()
+        load.assertIsNotEnabled()
+        assertNull(s.examples.selected)
+        click(database.title)
+        onNodeWithText(leafLabel(set)).assertIsNotSelected()
+        // select again, collapse the group: cleared too
+        click(leafLabel(set))
+        load.assertIsEnabled()
+        click(group.title)
+        load.assertIsNotEnabled()
+        // select once more and load: the whole set
+        click(group.title)
+        click(leafLabel(set))
+        load.performClick()
+        waitForIdle()
+        assertEquals(set.name, s.name)
+        assertEquals(3, s.arrangementSet.size)
+        assertEquals(set.arrangement(0), s.arrangement)
+        onNodeWithTag("big-dialog").assertDoesNotExist()
+        // reopened: the tree and the selection as left
+        openExamples()
+        onNodeWithText(leafLabel(set)).assertIsSelected()
+    }
+
+    @Test
     fun aColouredExampleLoadsWithItsColours() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click(header(Examples.group("colorings")))
+        openGroup(Examples.group("colorings"))
         click("n = 6, no. 2")
         onNodeWithText("Load").performClick()
         waitForIdle()
@@ -207,14 +280,14 @@ class ExamplesDialogUiTest {
         val other = Examples.group("min-triangles")
         val load = onNodeWithText("Load")
         load.assertIsNotEnabled()
-        click(header(group))
+        openGroup(group)
         click(leafLabel(Examples.inGroup(group).first()))
         load.assertIsEnabled()
-        // collapsing another group keeps the selection
-        click(header(other))
-        click(header(other))
+        // collapsing another group (in another supergroup) keeps the selection
+        openGroup(other)
+        click(other.title)
         load.assertIsEnabled()
-        click(header(group))
+        click(group.title)
         load.assertIsNotEnabled()
         assertNull(s.examples.selected)
     }
@@ -225,7 +298,7 @@ class ExamplesDialogUiTest {
         val start = s.arrangement
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click(header(Examples.group("database")))
+        openGroup(Examples.group("connected"))
         click("Connected, n = 3 (3)")
         onNodeWithText("Cancel").performClick()
         waitForIdle()

@@ -56,10 +56,41 @@ an entry of `Widget` plus a branch in `WidgetContent`.
 ## Example data
 
 The examples are compiled into the app: `composeApp/examples/` holds one JSON file per set
-(PoCoView's example format), `index.json` lists the groups in order (id, title, description, links,
-files), the Gradle task `generateExamples` embeds all of them into `GeneratedExamples.kt`, and
+(PoCoView's example format), `index.json` lists them as a two-level tree (supergroups, groups) in
+display order, the Gradle task `generateExamples` embeds all of them into `GeneratedExamples.kt`, and
 `core/Examples.kt` parses them at first use (members are decoded when shown). `ExamplesTest` fails
 if a file is not in the index or vice versa.
+
+`index.json` (PoCoView's schema; RotSysView has the same tree in code):
+
+```json
+{
+  "supergroups": [
+    {
+      "id": "database",
+      "title": "Database",
+      "description": "All arrangements of n pseudocircles for small n, ...",
+      "links": [{"title": "Website: ...", "url": "..."}, {"title": "Paper: ...", "url": "..."}],
+      "groups": [
+        {"id": "great", "title": "Great pseudocircles", "description": "...", "files": ["great/all3.json", "..."]}
+      ]
+    }
+  ],
+  "links": []
+}
+```
+
+`id`, `title` and `groups` / `files` are required; `description` (one or two sentences, at most 110
+characters) and `links` are optional, the top-level `links` too (ArrView has none). Supergroup ids are
+unique, group ids unique within their supergroup (today among all groups, so `Examples.group(id)`
+works); the loader rejects duplicates and files that are not bundled. The dialog's tree keys are
+`SG/<supergroup id>` and `G/<supergroup id>/<group id>`. Links go on the supergroup when all its groups
+share them; a group has its own links only where they differ (`ExamplesTest` checks that every group
+has links, its own or its supergroup's, and repeats none). A set shows only links that its group and
+supergroup do not show. A file may be listed in several groups (e.g. a subset of the database); it
+is parsed once, each listing is its own leaf. A new group (e.g. Maximum number of digons) is one more
+entry in `groups` plus its files. A file's `"group"` is the title of a group or supergroup that lists
+it (Database files say `Database`).
 
 A file is the metadata, then the data:
 
@@ -82,12 +113,15 @@ The encoding is one attribute: `"mod1s6"` or `"mod2s6"` (a sparse6 string, as on
 several arrangements has `"arrangements": [{"mod1s6": "..."}, ...]` (one object per line) instead.
 The app reads the same objects in Open file and Import (`readArrangementFile` in `core/Formats.kt`).
 Names: `n<N>-<class>-<description>`; the dialog
-shows a set's links only where they differ from its group's.
+shows a set's links only where they differ from its group's and supergroup's.
 
 To refresh the data, run `python3 scripts/import_examples.py` (reads
 `~/github/research/pca/pseudocircles/`, `--research` for another place; Koester's file needs
 `sage`). It rewrites only the data of each file and keeps its metadata (a new file gets placeholders
-and must be added to `index.json`). It takes the sparse6 lines verbatim, except the colour
+and must be added to `index.json`). The connected digon-free sets are the digon-free members of the
+connected ones (`DIGON_FREE_MEMBERS`: a face vertex of model 2 with two arcs is a digon);
+`ExamplesTest.subclassesAgree` checks them against the decoded arrangements, `listSizes` the counts
+1, 3, 30 of Table 1 of On Circularizability. It takes the sparse6 lines verbatim, except the colour
 dictionaries of the old sage code (`*.txt`, the dual graph with edges coloured by circle), which it
 converts to model 1 sparse6, and the conversions to sequences below. The JSON files were converted
 from the former plain files by `scripts/probe/ConvertExamplesProbe.kt` (one-off); the importer
@@ -102,6 +136,7 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `intersecting/all{2..5}` | `computations/results/abstract/` (same as website `pseudocircles/intersecting/all{n}.mod1s6`) |
 | `digonfree/all{3..6}_digonfree` | `computations/results/abstract/` (same as website `intersecting/digonfree/`) |
 | `connected/all{3,4,5}` | `website/arrangements/pseudocircles/connected/` (NEW model 2 encoding) |
+| `connected/all{3,4,5}_digonfree` | the digon-free lines of `website/arrangements/pseudocircles/connected/all{n}.mod2s6`, verbatim and in their order |
 | `mintriangles/*` | `website/arrangements/triangles/digonfree_minimal_triangles/*.txt` (converted) |
 | `maxtriangles/all*`, `some*` | `website/arrangements/triangles/digonfree_maximal_triangles/` |
 | `maxtriangles/max8_digon_38_triangles`, `maxtriangles/max9_df_50_triangles`, `maxtriangles/some10_df_61_triangles` | `~/github/research/pca/data/maxtri/n8_p3eq38.txt`, `n9_p3eq50.txt`, `n10_p3ge61_partial.txt` (intersection sequences; the maxima for n = 8, 9, 10 by computer search, not on the website) |
@@ -134,7 +169,8 @@ further research files in `composeApp/src/jvmTest/resources/data/` (`DataFilesTe
 
 `RenderTest` renders the app offscreen and writes screenshots to `composeApp/build/screenshots/`
 (start example in both models and portrait, examples with digons, n = 24, n = 2, every widget, every
-dialog and Help page): look at them after changing the UI. UI tests with real clicks:
+dialog and Help page): look at them after changing the UI. `doc/img/examples.png` is its
+`dialog-examples-tree.png`. UI tests with real clicks:
 `CanvasUiTest`, `CanvasInteractionUiTest`, `ActionsUiTest`, `WidgetsUiTest`, `WidgetButtonsUiTest`, `DialogsUiTest`,
 `MenusAndDialogsUiTest`, `ExamplesDialogUiTest`; `HelpClaimsTest` checks the Help texts and this
 user guide against the code.
@@ -149,7 +185,7 @@ user guide against the code.
 | Flips, collapses, undo | `DigonCreateTest`, `ActionsUiTest` (digon create, graph view clicks, "!"), `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
 | Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |
 | Menus | `MenusAndDialogsUiTest` (every item clicked), `MenuBarTest` |
-| Dialogs | `ExamplesDialogUiTest` (a member of every set by clicks, member chooser), `DialogsUiTest`, `MenusAndDialogsUiTest` (Import, Export, Save file, Help, About, Welcome, error, "Save changes?" per trigger) |
+| Dialogs | `ExamplesDialogUiTest` (the tree: expand, select, collapse clears, load; a member of every set by clicks, member chooser), `DialogsUiTest`, `MenusAndDialogsUiTest` (Import, Export, Save file, Help, About, Welcome, error, "Save changes?" per trigger) |
 | Canvas | `CanvasUiTest`, `RefitOnResizeUiTest` (refit on resize until a zoom or pan), `CanvasInteractionUiTest` (digon clicks in both models, refusal, face menus, hover, wheel, pinch, pan, dividers, clicks during a layout) |
 | Keyboard | `CanvasInteractionUiTest` (every shortcut, off in menus and fields) |
 | Widgets and toolbar | `WidgetsUiTest`, `WidgetButtonsUiTest` (Properties values, chips, close buttons, Layout fields) |

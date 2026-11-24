@@ -1,7 +1,7 @@
 {
   "name": "n6-digonfree-nonr-2",
   "n": 6,
-  "group": "Non-circularizable arrangements",
+  "group": "Non-circularizable",
   "label": "n = 6, digon-free intersecting, no. 2",
   "description": "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles; every triangle is a Krupp.",
   "links": [

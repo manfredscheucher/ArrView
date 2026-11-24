@@ -1,0 +1,17 @@
+{
+  "name": "n4-connected-digonfree-all",
+  "n": 4,
+  "group": "Database",
+  "label": "Connected digon-free, n = 4",
+  "description": "All connected digon-free arrangements of 4 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/pseudocircles/connected/all4.mod2s6 (digon-free members)",
+  "arrangements": [
+    {"mod2s6": ":~?@?k?`?qpFECa\\iIEGvHH?aUnQPhR@MIDQ}IEDHXGGs^e`@@xVP?AC|S?ABJZHOw`mcAq~AKFDA}SgUMJoohClEDCAKGOTJpp?kX??`@{s]SIo__of?@ca[c[OIOPGslDB@qV"},
+    {"mod2s6": ":~?@?k?OwknWbAqLiGDGVH?{_TnQ@`N@LHdAuICBAC[c?WMHXgGwhg`ca}i?AIzHGs^mbaavAIECamScSLJO_`?jDCbqCCMSJP_wgVBDcQ{o[RIO?OKd@FCa{_YNHo@?ojCA`aN"},
+    {"mod2s6": ":ui@@_uhA@aysWSJGUGo_\\YfBqLq?AEVh?cf__aP}IADEckc?_QHxgg[SPsOo_^T?@AqCKMIDp?g[Z@AbqKCQQHq@Gw^?EBQSWSMGp`@?fA@`@f"}
+  ]
+}

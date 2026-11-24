@@ -1,7 +1,7 @@
 {
   "name": "n5-connected-nonr-4",
   "n": 5,
-  "group": "Non-circularizable arrangements",
+  "group": "Non-circularizable",
   "label": "n = 5, connected, no. 4",
   "description": "A non-circularizable connected arrangement of 5 pseudocircles.",
   "links": [

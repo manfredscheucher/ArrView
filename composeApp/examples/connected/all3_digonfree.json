@@ -1,0 +1,13 @@
+{
+  "name": "n3-connected-digonfree-all",
+  "n": 3,
+  "group": "Database",
+  "label": "Connected digon-free, n = 3",
+  "description": "All connected digon-free arrangements of 3 pseudocircles.",
+  "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
+    {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
+  ],
+  "source": "website/arrangements/pseudocircles/connected/all3.mod2s6 (digon-free members)",
+  "mod2s6": ":ae?`GmX?Baxs?GGgOOOadBBAYcWMIjP?gip@@`ZSCGDCO?O_VBA``SWMHDo?_[T@@?pN"
+}
