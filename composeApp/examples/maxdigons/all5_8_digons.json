@@ -1,0 +1,18 @@
+{
+  "name": "n5-intersecting-8-digons",
+  "n": 5,
+  "group": "Maximum number of digons",
+  "label": "n = 5, 8 digons (maximum)",
+  "description": "All intersecting arrangements of 5 pseudocircles with the maximum of 8 digons.",
+  "links": [
+    {"title": "Paper: The maximum number of digons formed by pairwise intersecting pseudocircles (Ackerman et al.)", "url": "https://doi.org/10.4230/LIPIcs.SoCG.2025.2"}
+  ],
+  "source": "data/maxdigons/n5_p2eq8.txt",
+  "sequences": [
+    [2, -2, 3, -3, 4, -4, 5, -5],
+    [-1, 5, -5, 4, -4, 3, -3, 1],
+    [-1, 2, 5, -5, -2, 4, -4, 1],
+    [-1, 3, -3, 2, -2, 5, -5, 1],
+    [-1, 4, -4, 2, 3, -3, -2, 1]
+  ]
+}

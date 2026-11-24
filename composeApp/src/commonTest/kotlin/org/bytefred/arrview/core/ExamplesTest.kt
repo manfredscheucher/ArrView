@@ -37,6 +37,9 @@ class ExamplesTest {
         "n5-digonfree-12-triangles" to 6, "n5-intersecting-13-triangles" to 1, "n6-digonfree-20-triangles" to 4,
         "n7-digonfree-29-triangles" to 3, "n8-digonfree-37-triangles" to 7,
         "n8-intersecting-38-triangles" to 1, "n9-digonfree-50-triangles" to 1, "n10-digonfree-61-triangles" to 1,
+        // all intersecting arrangements with the maximum 2n - 2 digons
+        "n4-intersecting-6-digons" to 1, "n5-intersecting-8-digons" to 1, "n6-intersecting-10-digons" to 13,
+        "n7-intersecting-12-digons" to 1743,
         "n4-intersecting-digongraphs" to 7, "n5-intersecting-digongraphs" to 27, "n6-intersecting-digongraphs" to 107,
         "n7-intersecting-digongraphs" to 485, "n7-intersecting-trianglefree-digongraphs" to 99,
         "n8-intersecting-nonplanar-digongraph" to 2,
@@ -108,6 +111,9 @@ class ExamplesTest {
                 }
                 Regex("""-(\d+)-triangles$""").find(s.name)?.let {
                     assertEquals(it.groupValues[1].toInt(), arr.triangleCount, what)
+                }
+                Regex("""-(\d+)-digons$""").find(s.name)?.let {
+                    assertEquals(it.groupValues[1].toInt(), arr.digonCount, what)
                 }
             }
         }
@@ -214,7 +220,7 @@ class ExamplesTest {
         assertEquals(
             listOf(
                 "database" to listOf("great", "intersecting-digonfree", "intersecting", "connected-digonfree", "connected"),
-                "combinatorial" to listOf("min-triangles", "max-triangles", "digon-graphs"),
+                "combinatorial" to listOf("min-triangles", "max-triangles", "max-digons", "digon-graphs"),
                 "non-circularizable" to listOf("nonr-5", "nonr-6-digonfree", "nonr-6-intersecting", "nonr-6-connected", "nonr-9-great"),
                 "constructions" to listOf("furedi-palasti", "colorings"),
             ),

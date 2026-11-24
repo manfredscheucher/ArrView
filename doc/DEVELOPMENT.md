@@ -140,6 +140,7 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `mintriangles/*` | `website/arrangements/triangles/digonfree_minimal_triangles/*.txt` (converted) |
 | `maxtriangles/all*`, `some*` | `website/arrangements/triangles/digonfree_maximal_triangles/` |
 | `maxtriangles/max8_digon_38_triangles`, `maxtriangles/max9_df_50_triangles`, `maxtriangles/some10_df_61_triangles` | `~/github/research/pca/data/maxtri/n8_p3eq38.txt`, `n9_p3eq50.txt`, `n10_p3ge61_partial.txt` (intersection sequences; the maxima for n = 8, 9, 10 by computer search, not on the website) |
+| `maxdigons/all{4,5,6,7}_{6,8,10,12}_digons` | `~/github/research/pca/data/maxdigons/n{n}_p2eq{2n-2}.txt` (intersection sequences, one per line: all intersecting arrangements with the maximum 2n - 2 digons, 1, 1, 13, 1743, by full reverse search of rusty-arrangements; see the README there) |
 | `fueredipalasti/fueredi_palasti_{6..42}` | `website/arrangements/triangles/fueredi_palasti_construction/` |
 | `named/n5_nonr_number*` | `website/arrangements/nomorecircles/connected/` |
 | `named/n6_nonr_number{1,2,3}*` | `website/arrangements/nomorecircles/intersecting/digonfree/` |
@@ -180,7 +181,7 @@ user guide against the code.
 | Area | Tests |
 |---|---|
 | Core combinatorics | `ArrangementTest`, `OperationsTest`, `LinhartOrtnerTest` (every rejection reason), `SymmetryTest`, `FormatsTest`, `FilesTest`, `DataFilesTest` |
-| Examples | `ExamplesTest` (sizes, valid, distinct, class), `ExampleCatalogTest` (every member through sequences, JSON, text, model 1 / 2 sparse6; group claims: Krupp triples, digon-free, min / max triangles, Füredi–Palásti, named ones) |
+| Examples | `ExamplesTest` (sizes, valid, distinct, class), `ExampleCatalogTest` (every member through sequences, JSON, text, model 1 / 2 sparse6; group claims: Krupp triples, digon-free, min / max triangles, max digons, Füredi–Palásti, named ones) |
 | Drawing | `LayoutTest` (every example with n <= 5, both models; control points, weights, B-spline as in sage), `TutteSolveTest`, `SymmetryTest`, `ExampleDrawingTest` (n >= 6, long lists sampled, both models, SVG), `DrawingSweepTest` (flips of n <= 5, geometry checked by `CurveCheck`) |
 | Flips, collapses, undo | `DigonCreateTest`, `ActionsUiTest` (digon create, graph view clicks, "!"), `RoundTripTest`, `AppStateTest`, `EditingSessionTest` (random walks with undo / redo on 7 examples, model after edits, drawing cache) |
 | Editors and drafts | `EditingStateTest`, `EditingSessionTest` (invalid input with its reason), `WidgetsUiTest`, `WidgetButtonsUiTest` (Apply, Revert, Copy, stale drafts) |

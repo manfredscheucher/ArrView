@@ -111,6 +111,20 @@
           ]
         },
         {
+          "id": "max-digons",
+          "title": "Maximum number of digons",
+          "description": "Intersecting arrangements with 2n - 2 digons, the maximum (Grünbaum's conjecture, proved by Ackerman et al.).",
+          "links": [
+            {"title": "Paper: The maximum number of digons formed by pairwise intersecting pseudocircles (Ackerman et al.)", "url": "https://doi.org/10.4230/LIPIcs.SoCG.2025.2"}
+          ],
+          "files": [
+            "maxdigons/all4_6_digons.json",
+            "maxdigons/all5_8_digons.json",
+            "maxdigons/all6_10_digons.json",
+            "maxdigons/all7_12_digons.json"
+          ]
+        },
+        {
           "id": "digon-graphs",
           "title": "Digongraphs",
           "description": "Intersecting arrangements with every type of digongraph (circles as vertices, digons as edges).",

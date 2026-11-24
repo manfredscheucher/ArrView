@@ -14,7 +14,8 @@ the colour dictionaries of the old sage code (`*.txt`: the dual graph as `{(u, v
 converted to model 1 sparse6; the coloured draw7 drawings of the triangle-saturated arrangements
 (`*_1_1tutte7.ipe`), which give the sequences and the colour of every crossing; Koester's crossing
 graph, converted by `scripts/crossing_graph_sequences.sage` (needs sage); the maxima of triangles for
-n = 8, 9, intersection sequences from `../data/maxtri/`. The Gradle task generateExamples embeds
+n = 8, 9, intersection sequences from `../data/maxtri/`, and all arrangements with the maximum of
+digons, from `../data/maxdigons/` (several lines make a set). The Gradle task generateExamples embeds
 the files into the app. The connected digon-free sets are the digon-free members of the connected
 ones (DIGON_FREE_MEMBERS). Provenance: doc/DEVELOPMENT.md.
 
@@ -80,6 +81,8 @@ PCA_SEQUENCES = [
     ("maxtriangles", "data/maxtri/n8_p3eq38.txt", "max8_digon_38_triangles"),
     ("maxtriangles", "data/maxtri/n9_p3eq50.txt", "max9_df_50_triangles"),
     ("maxtriangles", "data/maxtri/n10_p3ge61_partial.txt", "some10_df_61_triangles"),
+    # all intersecting arrangements with the maximum 2n - 2 digons, one per line
+    *[("maxdigons", f"data/maxdigons/n{n}_p2eq{2 * n - 2}.txt", f"all{n}_{2 * n - 2}_digons") for n in range(4, 8)],
 ]
 
 # the digon-free members of these files (model 2 sparse6 lines, verbatim and in their order):

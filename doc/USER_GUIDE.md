@@ -72,7 +72,8 @@ website page and the paper); a group shows only the links that differ from its s
 - Database (all arrangements of n pseudocircles for small n, as in Table 1 of On Circularizability):
   Great pseudocircles (n = 3 to 8), Intersecting, digon-free (3 to 6), Intersecting (2 to 5),
   Connected, digon-free (3 to 5), Connected (3 to 5).
-- Combinatorial properties: Minimum number of triangles, Maximum number of triangles, Digongraphs.
+- Combinatorial properties: Minimum number of triangles, Maximum number of triangles, Maximum number
+  of digons (n = 4 to 7), Digongraphs.
 - Non-circularizable (cannot be drawn with circles): n = 5 (connected, intersecting); n = 6,
   digon-free intersecting; n = 6, intersecting with digons; n = 6, connected digon-free; n = 9, great.
 - Constructions: Füredi–Palásti (great pseudocircle arrangements with 2n(n-3)/3 triangles),

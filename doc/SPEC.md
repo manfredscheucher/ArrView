@@ -2,6 +2,28 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-24: Maximum number of digons
+
+### Request (Manfred, via the coordinator)
+
+New group "Maximum number of digons" in Combinatorial properties, after Maximum number of triangles
+and before Digongraphs: all simple intersecting arrangements of n = 4..7 pseudocircles with the
+maximum p_2 = 2n - 2 of digons (Grünbaum's conjecture, proved by Ackerman, Damásdi, Keszegh,
+Pinchasi, Raffay, SoCG 2025, https://doi.org/10.4230/LIPIcs.SoCG.2025.2). Data:
+`pca/data/maxdigons/n{n}_p2eq{2n-2}.txt`. n = 7 only if it adds at most about 1 MB.
+
+### Done
+
+- Group `max-digons` with the paper as its link; files `maxdigons/all{n}_{2n-2}_digons.json`
+  (`n<N>-intersecting-<2n-2>-digons`, "n = 7, 12 digons (maximum)", "All intersecting arrangements of
+  7 pseudocircles with the maximum of 12 digons."), written by `scripts/import_examples.py`
+  (`PCA_SEQUENCES`, one arrangement per line; all other files unchanged). Sizes 1, 1, 13, 1743.
+- n = 7 added: its file is 574 KB (34 KB gzipped); the bundled examples grow from about 0.73 MB to 1.31 MB.
+- Tests: sizes, digon count 2n - 2 and intersecting for every member, and for n = 4, 5 the sets are
+  exactly the members of `n<N>-intersecting-all` with the most digons (which is 2n - 2).
+- Interpretation: the n = 4, 5 sets (one arrangement each) also say "All ...", as the max-triangles
+  n = 5 one with 13 triangles.
+
 ## 2026-11-24: Examples in supergroups
 
 ### Request (Manfred, via the coordinator; the same in PoCoView and RotSysView)

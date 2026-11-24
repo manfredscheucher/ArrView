@@ -116,6 +116,29 @@ class ExampleCatalogTest {
     }
 
     @Test
+    fun digonMaximizersAreMaximalAndComplete() {
+        val sets = Examples.inGroup(Examples.group("max-digons"))
+        assertEquals(listOf(4, 5, 6, 7), sets.map { it.n })
+        assertEquals(listOf(1, 1, 13, 1743), sets.map { it.size })
+        for (s in sets) {
+            assertEquals("n${s.n}-intersecting-${2 * s.n - 2}-digons", s.name)
+            for (arr in members(s.name)) {
+                assertTrue(arr.isIntersecting, s.name)
+                assertEquals(2 * s.n - 2, arr.digonCount, s.name)
+            }
+        }
+        // complete where all intersecting arrangements are bundled: the members with the most digons
+        for (n in 4..5) {
+            val all = members("n$n-intersecting-all")
+            assertEquals(2 * n - 2, all.maxOf { it.digonCount })
+            assertEquals(
+                all.filter { it.digonCount == 2 * n - 2 }.map { it.canonical }.toSet(),
+                members("n$n-intersecting-${2 * n - 2}-digons").map { it.canonical }.toSet(),
+            )
+        }
+    }
+
+    @Test
     fun furediPalastiTrianglesTendToTwoThirdsNSquared() {
         val sets = Examples.inGroup(Examples.group("furedi-palasti"))
         assertEquals((6..42 step 6).toList(), sets.map { it.n })
@@ -155,6 +178,7 @@ class ExampleCatalogTest {
             assertTrue(s.description.endsWith("."), s.name)
             assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
             Regex("""-(\d+)-triangles$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} triangles" in s.description, s.description) }
+            Regex("""-(\d+)-digons$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} digons" in s.description, s.description) }
         }
     }
 
