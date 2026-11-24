@@ -119,8 +119,8 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
                     TreeHeader(group.title, 1, gKey in open) { ex.toggle(gKey) }
                     HorizontalDivider(Modifier.padding(start = INDENT))
                     if (gKey !in open) continue
-                    // only the links that differ from the supergroup's (shown above)
-                    NodeIntro(group.description, group.links - sg.links.toSet(), 1, "group-info")
+                    // its own links, unless they are exactly the supergroup's (shown above)
+                    NodeIntro(group.description, if (group.links.toSet() == sg.links.toSet()) emptyList() else group.links, 1, "group-info")
                     for (set in Examples.inGroup(group)) {
                         TreeLeaf(leafLabel(set), 2, ex.selected == set) {
                             // the same leaf again keeps its (maybe invalid) number field
