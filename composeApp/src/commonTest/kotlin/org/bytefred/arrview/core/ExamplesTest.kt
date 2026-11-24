@@ -28,8 +28,8 @@ class ExamplesTest {
         "n9-digonfree-12-triangles" to 4, "n10-digonfree-14-triangles" to 317, "n11-digonfree-15-triangles" to 1,
         "n12-digonfree-16-triangles" to 2, "n13-digonfree-18-triangles" to 23, "n14-digonfree-19-triangles" to 1,
         "n5-digonfree-12-triangles" to 6, "n5-intersecting-13-triangles" to 1, "n6-digonfree-20-triangles" to 4,
-        "n7-digonfree-28-triangles" to 19, "n7-digonfree-29-triangles" to 3, "n8-digonfree-37-triangles" to 7,
-        "n9-digonfree-48-triangles" to 1, "n8-intersecting-38-triangles" to 1, "n9-digonfree-50-triangles" to 1,
+        "n7-digonfree-29-triangles" to 3, "n8-digonfree-37-triangles" to 7,
+        "n8-intersecting-38-triangles" to 1, "n9-digonfree-50-triangles" to 1, "n10-digonfree-61-triangles" to 1,
         "n4-intersecting-digongraphs" to 7, "n5-intersecting-digongraphs" to 27, "n6-intersecting-digongraphs" to 107,
         "n7-intersecting-digongraphs" to 485, "n7-intersecting-trianglefree-digongraphs" to 99,
         "n8-intersecting-nonplanar-digongraph" to 2,
@@ -78,7 +78,7 @@ class ExamplesTest {
     @Test
     fun listSizes() {
         for ((name, size) in expectedSizes) assertEquals(size, set(name).size, name)
-        val singles = listOf("furedi-palasti", "non-circularizable", "colorings", "three").map(Examples::group)
+        val singles = listOf("furedi-palasti", "non-circularizable", "colorings").map(Examples::group)
         for (s in singles.flatMap(Examples::inGroup)) assertEquals(1, s.size, s.name)
         assertEquals(Examples.sets.size, (singles.flatMap(Examples::inGroup) + Examples.sets.filter { it.name in expectedSizes }).size)
     }
@@ -126,13 +126,14 @@ class ExamplesTest {
 
     @Test
     fun namedExamples() {
-        val krupp = set("n3-great-krupp").arrangement(0)
-        val nonKrupp = set("n3-intersecting-nonkrupp").arrangement(0)
-        assertEquals(canonicalSet("n3-intersecting-all"), setOf(krupp.canonical, nonKrupp.canonical))
-        assertEquals(nonKrupp.canonical, krupp.triangleFlip(0).canonical)
-        val chain = set("n3-connected-chain").arrangement(0)
-        assertEquals(1, chain.nonIntersectingPairCount)
-        assertTrue(chain.canonical in canonicalSet("n3-connected-all"))
+        // n = 3: the Krupp and the NonKrupp (its triangle flip) are the intersecting ones, the 3-Chain
+        // (one pair does not cross) is the third connected one
+        val krupp = Arrangement.krupp()
+        assertEquals(canonicalSet("n3-intersecting-all"), setOf(krupp.canonical, krupp.triangleFlip(0).canonical))
+        val connected3 = set("n3-connected-all")
+        val chains = (0 until connected3.size).map(connected3::arrangement).filter { it.nonIntersectingPairCount == 1 }
+        assertEquals(1, chains.size)
+        assertEquals(canonicalSet("n3-connected-all"), canonicalSet("n3-intersecting-all") + chains.single().canonical)
         assertTrue(set("n5-intersecting-nonr-1").arrangement(0).isIntersecting)
         for (k in 2..4) assertTrue(!set("n5-connected-nonr-$k").arrangement(0).isIntersecting)
     }
@@ -151,7 +152,7 @@ class ExamplesTest {
         val s = set("n5-intersecting-all")
         assertEquals("n5-intersecting-all #17", s.memberName(16))
         assertEquals("#17 of 278", s.position(16))
-        assertEquals("n3-great-krupp", set("n3-great-krupp").memberName(0))
+        assertEquals("n10-digonfree-61-triangles", set("n10-digonfree-61-triangles").memberName(0))
     }
 
     @Test

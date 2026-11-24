@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -47,8 +48,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class WidgetButtonsUiTest {
     private val start = Examples.start.arrangement()
-    private val chain = Examples.byName("n3-connected-chain")!!.arrangement(0)
-    private val nonKrupp = Examples.byName("n3-intersecting-nonkrupp")!!.arrangement(0)
+    private val chain = ThreeCircles.chain
+    private val nonKrupp = ThreeCircles.nonKrupp
 
     private fun state(vararg widgets: Widget) = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default)).apply {
         openWidgets.clear()

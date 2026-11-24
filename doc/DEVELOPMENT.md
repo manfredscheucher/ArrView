@@ -81,7 +81,7 @@ The encoding is one attribute: `"mod1s6"` or `"mod2s6"` (a sparse6 string, as on
 `"sequences"`; `"crossingColors"` (only with sequences) gives a colour word per entry. A file with
 several arrangements has `"arrangements": [{"mod1s6": "..."}, ...]` (one object per line) instead.
 The app reads the same objects in Open file and Import (`readArrangementFile` in `core/Formats.kt`).
-Names: `n<N>-<class>-<description>`; `source` is null for the typed-in ones (`three/`); the dialog
+Names: `n<N>-<class>-<description>`; the dialog
 shows a set's links only where they differ from its group's.
 
 To refresh the data, run `python3 scripts/import_examples.py` (reads
@@ -113,8 +113,6 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `digongraphs/*` | `website/arrangements/digongraphs/data/` (model 1, although the page says primal-dual graphs) |
 | `colorings/n*_triangle_sat_*` | `website/arrangements/colorings/triangle_sat/*.enc_1_1tutte7.ipe` (sequences and crossing colours R, G, B read from the drawings; `ExampleColoursDataTest` checks them against the `.enc` files, copied to `jvmTest/resources/data/colorings/`) |
 | `colorings/n8_koester` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the file name) |
-
-Krupp, NonKrupp and 3-Chain (`three/`) are typed in (no source).
 
 ## Tests
 

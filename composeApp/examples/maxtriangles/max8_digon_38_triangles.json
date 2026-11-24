@@ -2,7 +2,7 @@
   "name": "n8-intersecting-38-triangles",
   "n": 8,
   "group": "Maximum number of triangles",
-  "label": "n = 8, 38 triangles, with digons",
+  "label": "n = 8, 38 triangles, with digons (maximum)",
   "description": "The intersecting arrangement of 8 pseudocircles with the maximum of 38 triangles; unique up to isomorphism, by computer search.",
   "links": [],
   "source": "data/maxtri/n8_p3eq38.txt",

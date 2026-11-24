@@ -103,9 +103,8 @@ class ExampleCatalogTest {
         val max10 = members("n10-digonfree-61-triangles").single()
         assertEquals(61, max10.triangleCount)
         assertTrue(max10.isDigonFree)
-        // the website's n = 8, 9 sets stay below the maxima
-        assertTrue(website.filter { it.n == 8 }.all { s -> members(s.name).all { it.triangleCount < 38 } })
-        assertTrue(website.filter { it.n == 9 }.all { s -> members(s.name).all { it.triangleCount < 50 } })
+        // the website's n = 8 set: digon-free, below the maximum 38
+        assertTrue(website.filter { it.n == 8 }.all { s -> members(s.name).all { it.isDigonFree && it.triangleCount == 37 } })
         assertEquals(website.size + 3, Examples.inGroup(Examples.group("max-triangles")).size)
     }
 
@@ -128,13 +127,11 @@ class ExampleCatalogTest {
     @Test
     fun namedArrangementsAreWhatTheirDescriptionsSay() {
         fun one(name: String) = set(name).arrangement(0)
-        val krupp = one("n3-great-krupp")
-        assertEquals(1 to 0, krupp.kruppTriples)
-        assertEquals(8, krupp.triangleCount)
-        assertEquals(0 to 1, one("n3-intersecting-nonkrupp").kruppTriples)
-        // the 3-Chain: circle 2 crosses circles 1 and 3, which do not cross
-        val chain = one("n3-connected-chain")
-        assertEquals(listOf(0 to 1, 1 to 2), chain.intersectionGraph())
+        // n = 3: one Krupp (8 triangles) and one NonKrupp among the intersecting ones
+        val three = set("n3-intersecting-all")
+        val triples = (0 until three.size).map { three.arrangement(it).kruppTriples }.toSet()
+        assertEquals(setOf(1 to 0, 0 to 1), triples)
+        assertEquals(8, Arrangement.krupp().triangleCount)
         // "all triangles Krupp": the three circles of every triangle form a Krupp
         val allKrupp = one("n6-intersecting-nonr-all-triangles-krupp")
         for (f in allKrupp.faces.indices.filter { allKrupp.faces[it].size == 3 }) {
@@ -147,7 +144,7 @@ class ExampleCatalogTest {
     fun descriptionsNameTheirSize() {
         for (s in Examples.sets) {
             assertTrue(s.description.endsWith("."), s.name)
-            if (s.group != Examples.group("three")) assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
+            assertTrue(" ${s.n} " in s.description, "${s.name}: ${s.description}")
             Regex("""-(\d+)-triangles$""").find(s.name)?.let { assertTrue("${it.groupValues[1]} triangles" in s.description, s.description) }
         }
     }

@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
@@ -52,7 +53,7 @@ class CanvasInteractionUiTest {
     private val start = Examples.start.arrangement()
 
     /** The NonKrupp: three digons, model 1 and model 2. */
-    private val nonKrupp = Examples.byName("n3-intersecting-nonkrupp")!!.arrangement(0)
+    private val nonKrupp = ThreeCircles.nonKrupp
 
     private fun state() = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
 

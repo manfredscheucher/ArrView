@@ -2,7 +2,7 @@
   "name": "n9-digonfree-50-triangles",
   "n": 9,
   "group": "Maximum number of triangles",
-  "label": "n = 9, 50 triangles",
+  "label": "n = 9, 50 triangles, digon-free (maximum)",
   "description": "The arrangement of 9 pseudocircles with the maximum of 50 triangles, digon-free; unique up to isomorphism, by computer search.",
   "links": [],
   "source": "data/maxtri/n9_p3eq50.txt",

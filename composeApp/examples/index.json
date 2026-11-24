@@ -54,7 +54,7 @@
     {
       "id": "max-triangles",
       "title": "Maximum number of triangles",
-      "description": "Arrangements with the most triangles; the website's examples for n = 8, 9 are digon-free and not the maximum.",
+      "description": "Arrangements with the most triangles, digon-free and with digons.",
       "links": [
         {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
         {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
@@ -63,11 +63,9 @@
         "maxtriangles/all5_df_12_triangles.json",
         "maxtriangles/all5_digon_13_triangles.json",
         "maxtriangles/all6_df_20_triangles.json",
-        "maxtriangles/all7_df_28_triangles.json",
         "maxtriangles/all7_df_29_triangles.json",
         "maxtriangles/some8_df_37_triangles.json",
         "maxtriangles/max8_digon_38_triangles.json",
-        "maxtriangles/some9_df_48_triangles.json",
         "maxtriangles/max9_df_50_triangles.json",
         "maxtriangles/some10_df_61_triangles.json"
       ]
@@ -150,19 +148,6 @@
         "digongraphs/n7_all_types_of_digongraphs.json",
         "digongraphs/n7_all_types_of_trianglefree_digongraphs.json",
         "digongraphs/n8_digongraph_trianglefree_nonplanar.json"
-      ]
-    },
-    {
-      "id": "three",
-      "title": "Krupp, NonKrupp, 3-Chain",
-      "description": "The named arrangements of 3 pseudocircles.",
-      "links": [
-        {"title": "Website: Some more information", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=information"}
-      ],
-      "files": [
-        "three/n3_krupp.json",
-        "three/n3_nonkrupp.json",
-        "three/n3_chain.json"
       ]
     }
   ]

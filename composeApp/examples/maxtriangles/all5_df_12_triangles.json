@@ -2,7 +2,7 @@
   "name": "n5-digonfree-12-triangles",
   "n": 5,
   "group": "Maximum number of triangles",
-  "label": "n = 5, 12 triangles",
+  "label": "n = 5, 12 triangles, digon-free (maximum)",
   "description": "All digon-free intersecting arrangements of 5 pseudocircles with 12 triangles.",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},

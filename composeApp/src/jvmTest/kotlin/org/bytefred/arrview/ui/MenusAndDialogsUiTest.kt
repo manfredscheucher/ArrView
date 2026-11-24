@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -53,7 +54,7 @@ import org.bytefred.arrview.core.arrangementFile
 @OptIn(ExperimentalTestApi::class)
 class MenusAndDialogsUiTest {
     private val start = Examples.start.arrangement()
-    private val chain = Examples.byName("n3-connected-chain")!!.arrangement(0)
+    private val chain = ThreeCircles.chain
 
     private fun state() = AppState(CoroutineScope(SupervisorJob() + Dispatchers.Default))
 

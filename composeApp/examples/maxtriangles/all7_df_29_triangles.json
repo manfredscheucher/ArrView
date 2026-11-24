@@ -2,7 +2,7 @@
   "name": "n7-digonfree-29-triangles",
   "n": 7,
   "group": "Maximum number of triangles",
-  "label": "n = 7, 29 triangles",
+  "label": "n = 7, 29 triangles, digon-free (maximum)",
   "description": "All digon-free intersecting arrangements of 7 pseudocircles with 29 triangles.",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},

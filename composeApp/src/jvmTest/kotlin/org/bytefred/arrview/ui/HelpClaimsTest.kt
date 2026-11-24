@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import org.bytefred.arrview.core.Arrangement
 import org.bytefred.arrview.core.DrawModel
 import org.bytefred.arrview.core.Examples
@@ -199,7 +200,7 @@ class HelpClaimsTest {
         // the sequences example of the Formats page is a real arrangement (the NonKrupp)
         val example = "{1: [2, -2, 3, -3], 2: [...], ...}"
         assertSays(HelpPage.FORMATS, example)
-        val nonKrupp = Examples.byName("n3-intersecting-nonkrupp")!!.arrangement(0)
+        val nonKrupp = ThreeCircles.nonKrupp
         assertTrue(nonKrupp.toString().startsWith(example.substringBefore(" 2:")))
     }
 

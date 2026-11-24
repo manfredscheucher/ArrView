@@ -106,7 +106,7 @@ attribute, maybe there are more".
    `"mod2s6"` (sparse6 strings as on the website) or `"sequences"`; a set with several arrangements
    has `"arrangements": [{"mod1s6": ...}, ...]`, one object per line. The catalogue moved from
    `Examples.kt` into these files. Folders and file stems stay (`connected/all5.json`,
-   `colorings/n6_triangle_sat_no2.json`, ...; Krupp, NonKrupp, 3-Chain in `three/`).
+   `colorings/n6_triangle_sat_no2.json`, ...).
    `scripts/import_examples.py` rewrites the data and keeps the metadata of each file; it
    reproduces the converted files byte for byte.
 4. App files: Save writes `{"name", "n", "sequences"}` (plus `"crossingColors"`), a set as the

@@ -53,7 +53,7 @@ class EditingSessionTest {
         val random = Random(17)
         val walks = listOf(
             example("n6-digonfree-nonr-8-triangles"),
-            example("n3-intersecting-nonkrupp"),
+            example("n3-intersecting-all", 1),
             example("n4-intersecting-all", 5),
             example("n5-connected-all", 400),
             example("n5-connected-nonr-2"),

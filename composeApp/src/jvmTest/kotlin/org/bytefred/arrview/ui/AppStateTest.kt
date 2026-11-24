@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -143,7 +144,7 @@ class AppStateTest {
     fun model1IsRefusedForANonIntersectingArrangementEvenWhenTheDialogIsOff() {
         val s = state()
         s.model1ConfirmOff = true
-        s.load("chain", Examples.byName("n3-connected-chain")!!.arrangement(0))
+        s.load("chain", ThreeCircles.chain)
         s.chooseModel(DrawModel.MODEL1)
         assertEquals(ModelDialog.NotIntersecting, s.modelDialog)
         s.confirmModelDialog(dontShowAgain = true)
@@ -156,7 +157,7 @@ class AppStateTest {
     @Test
     fun loadUndoAndSetStepsFallBackToModel2() {
         val s = state()
-        val chain = Examples.byName("n3-connected-chain")!!.arrangement(0)
+        val chain = ThreeCircles.chain
         s.changeModel(DrawModel.MODEL1)
         // a load: the notice, then the load
         s.load("chain", chain)

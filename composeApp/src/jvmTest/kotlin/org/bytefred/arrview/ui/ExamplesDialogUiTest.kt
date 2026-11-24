@@ -160,11 +160,6 @@ class ExamplesDialogUiTest {
         // from the computations: the Pappus one has no website page
         click("n = 9 great, non-Pappus")
         onNodeWithText("Data: computations/results/n9_nonr_pappus.enc").assertExists()
-        // typed in: where it comes from
-        click(header(Examples.group("three")))
-        click("Krupp")
-        onNodeWithText("n = 3, 1 arrangement").assertExists()
-        onNodeWithText("Typed in as intersection sequences").assertExists()
         // a list of the database: the count in the label, the chooser
         click(header(Examples.group("database")))
         click("Intersecting, n = 4 (8)")
@@ -207,7 +202,7 @@ class ExamplesDialogUiTest {
     fun collapsingTheSelectionsGroupDisablesLoad() = runComposeUiTest {
         val s = state()
         setContent { App(s, initialDialog = DialogKind.EXAMPLES) }
-        val group = Examples.group("three")
+        val group = Examples.group("furedi-palasti")
         val other = Examples.group("min-triangles")
         val load = onNodeWithText("Load")
         load.assertIsNotEnabled()
@@ -229,8 +224,8 @@ class ExamplesDialogUiTest {
         val start = s.arrangement
         setContent { App(s, initialDialog = DialogKind.NONE) }
         openExamples()
-        click(header(Examples.group("three")))
-        click("Krupp")
+        click(header(Examples.group("database")))
+        click("Connected, n = 3 (3)")
         onNodeWithText("Cancel").performClick()
         waitForIdle()
         onNodeWithTag("big-dialog").assertDoesNotExist()
@@ -238,6 +233,6 @@ class ExamplesDialogUiTest {
         assertFalse(s.canUndo)
         // the selection is kept for the next opening
         openExamples()
-        onNodeWithText("Krupp").assertIsSelected()
+        onNodeWithText("Connected, n = 3 (3)").assertIsSelected()
     }
 }

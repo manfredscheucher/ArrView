@@ -1,5 +1,6 @@
 package org.bytefred.arrview.ui
 
+import org.bytefred.arrview.core.ThreeCircles
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -79,8 +80,7 @@ class WidgetsUiTest {
         onNodeWithText("Cannot apply the model 1 sparse6", substring = true).assertIsDisplayed()
         onNodeWithText("OK").performClick()
         // not intersecting: no model 1, a note why
-        val set = Examples.byName("n3-connected-chain")!!
-        runOnIdle { s.load(set.name, set.arrangement(0)) }
+        runOnIdle { s.load("chain", ThreeCircles.chain) }
         onNodeWithText("Only for intersecting arrangements", substring = true).assertIsDisplayed()
     }
 

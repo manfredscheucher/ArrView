@@ -2,8 +2,8 @@
   "name": "n8-digonfree-37-triangles",
   "n": 8,
   "group": "Maximum number of triangles",
-  "label": "n = 8, 37 triangles",
-  "description": "Some digon-free intersecting arrangements of 8 pseudocircles with 37 triangles.",
+  "label": "n = 8, 37 triangles, digon-free (maximum)",
+  "description": "Some digon-free arrangements of 8 pseudocircles with 37 triangles, the digon-free maximum (7 of 20, by computer search).",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
     {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}

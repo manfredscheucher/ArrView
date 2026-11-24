@@ -192,7 +192,7 @@ class LayoutTest {
      */
     @Test
     fun curvesHaveTheControlPointsOfTheSagePrograms() {
-        for (arr in listOf(start, Examples.byName("n3-intersecting-nonkrupp")!!.arrangement(0))) for (model in DrawModel.entries) {
+        for (arr in listOf(start, ThreeCircles.nonKrupp)) for (model in DrawModel.entries) {
             val layout = ArrangementLayout(arr, model, arr.defaultOuterFace(model))
             val pos = layout.positions(LayoutSettings(maxIterations = 7))
             fun at(v: Int) = Point(pos[2 * v], pos[2 * v + 1])

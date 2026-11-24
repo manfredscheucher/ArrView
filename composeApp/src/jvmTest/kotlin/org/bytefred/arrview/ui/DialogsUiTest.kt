@@ -94,8 +94,8 @@ class DialogsUiTest {
         runOnIdle { s.flipSomeTriangle() }
         onNodeWithTag("menu-Arrangement").performClick()
         onNodeWithText("Examples...").performClick()
-        onNodeWithText("Krupp, NonKrupp, 3-Chain").performScrollTo().performClick()
-        onNodeWithText("Krupp").performScrollTo().performClick()
+        onNodeWithText("Database").performScrollTo().performClick()
+        onNodeWithText("Great, n = 3").performScrollTo().performClick()
         onNodeWithText("Load").performClick()
         onNodeWithText("Save changes?").assertIsDisplayed()
         onNodeWithText("Save JSON").assertIsDisplayed()
@@ -107,8 +107,8 @@ class DialogsUiTest {
         onNodeWithText("Load").performClick()
         onNodeWithText("Discard").performClick()
         waitForIdle()
-        assertEquals(Arrangement.krupp(), s.arrangement)
-        assertEquals("n3-great-krupp", s.name)
+        assertTrue(s.arrangement.isIsomorphicTo(Arrangement.krupp()))
+        assertEquals("n3-great-all", s.name)
     }
 
     @Test

@@ -40,8 +40,8 @@ SOURCES = [
         "some11_df_15_triangles", "some12_df_16_triangles", "some13_df_18_triangles", "some14_df_19_triangles",
     ]],
     *[("maxtriangles", f"website/arrangements/triangles/digonfree_maximal_triangles/{name}.enc") for name in [
-        "all5_df_12_triangles", "all5_digon_13_triangles", "all6_df_20_triangles", "all7_df_28_triangles",
-        "all7_df_29_triangles", "some8_df_37_triangles", "some9_df_48_triangles",
+        "all5_df_12_triangles", "all5_digon_13_triangles", "all6_df_20_triangles", "all7_df_29_triangles",
+        "some8_df_37_triangles",
     ]],
     *[("fueredipalasti", f"website/arrangements/triangles/fueredi_palasti_construction/fueredi_palasti_{k}.enc")
       for k in (6, 12, 18, 24, 30, 36, 42)],
