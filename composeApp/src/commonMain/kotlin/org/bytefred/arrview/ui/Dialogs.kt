@@ -323,6 +323,7 @@ private fun AboutDialog(close: () -> Unit) = AlertDialog(
             Text("Literature", style = MaterialTheme.typography.titleSmall)
             for (paper in PAPERS) Text(paper, Modifier.padding(vertical = 2.dp), style = MaterialTheme.typography.bodySmall)
             LinkText("Linhart and Ortner at EJC", LINHART_ORTNER, MaterialTheme.typography.bodySmall)
+            if (isWeb) TermsAndPrivacy(feedbackMailto())
             Spacer(Modifier.height(8.dp))
             Text(buildLine(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             var showLicenses by remember { mutableStateOf(false) }
