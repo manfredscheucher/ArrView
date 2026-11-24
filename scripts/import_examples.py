@@ -35,7 +35,7 @@ SOURCES = [
     *[("digonfree", f"computations/results/abstract/all{n}_digonfree.enc") for n in range(3, 7)],
     *[("connected", f"website/arrangements/pseudocircles/connected/all{n}.mod2s6") for n in range(3, 6)],
     *[("mintriangles", f"website/arrangements/triangles/digonfree_minimal_triangles/{name}.txt") for name in [
-        "all3_df_8_triangles", "all4_df_8_triangles", "all5_df_8_triangles", "all6_df_8_triangles",
+        "all5_df_8_triangles", "all6_df_8_triangles",
         "all7_df_10_triangles", "all8_df_11_triangles", "all9_df_12_triangles", "some10_df_14_triangles",
         "some11_df_15_triangles", "some12_df_16_triangles", "some13_df_18_triangles", "some14_df_19_triangles",
     ]],

@@ -76,8 +76,8 @@ class ExampleCatalogTest {
 
     @Test
     fun triangleMinimizersAreMinimalAndComplete() {
-        // checkable where all digon-free arrangements are bundled (n = 3..6)
-        for (n in 3..6) {
+        // checkable where all digon-free arrangements are bundled (n = 5, 6; for n = 3, 4 min = max)
+        for (n in 5..6) {
             val all = members("n$n-digonfree-all")
             val min = all.minOf { it.triangleCount }
             val set = Examples.inGroup(Examples.group("min-triangles")).single { it.n == n }

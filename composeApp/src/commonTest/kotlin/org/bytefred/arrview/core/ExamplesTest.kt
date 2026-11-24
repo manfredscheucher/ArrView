@@ -23,7 +23,7 @@ class ExamplesTest {
         "n3-digonfree-all" to 1, "n4-digonfree-all" to 2, "n5-digonfree-all" to 14, "n6-digonfree-all" to 2131,
         "n2-intersecting-all" to 1, "n3-intersecting-all" to 2, "n4-intersecting-all" to 8, "n5-intersecting-all" to 278,
         "n3-connected-all" to 3, "n4-connected-all" to 21, "n5-connected-all" to 984,
-        "n3-digonfree-8-triangles" to 1, "n4-digonfree-8-triangles" to 2, "n5-digonfree-8-triangles" to 1,
+        "n5-digonfree-8-triangles" to 1,
         "n6-digonfree-8-triangles" to 1, "n7-digonfree-10-triangles" to 4, "n8-digonfree-11-triangles" to 3,
         "n9-digonfree-12-triangles" to 4, "n10-digonfree-14-triangles" to 317, "n11-digonfree-15-triangles" to 1,
         "n12-digonfree-16-triangles" to 2, "n13-digonfree-18-triangles" to 23, "n14-digonfree-19-triangles" to 1,

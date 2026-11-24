@@ -37,8 +37,6 @@
         {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
       ],
       "files": [
-        "mintriangles/all3_df_8_triangles.json",
-        "mintriangles/all4_df_8_triangles.json",
         "mintriangles/all5_df_8_triangles.json",
         "mintriangles/all6_df_8_triangles.json",
         "mintriangles/all7_df_10_triangles.json",

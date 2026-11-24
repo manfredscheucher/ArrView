@@ -5,6 +5,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onAllNodesWithText
@@ -124,11 +125,11 @@ class ExamplesDialogUiTest {
         assertEquals("1", onNodeWithTag("example-index").text())
         click(leafLabel(set))
         assertEquals("19", onNodeWithTag("example-index").text())
-        // a click on an open group collapses it
+        // a click on an open group collapses it and clears the selection
         click(group)
         onNodeWithText(leafLabel(set)).assertDoesNotExist()
         click(group)
-        onNodeWithText(leafLabel(set)).assertIsSelected()
+        onNodeWithText(leafLabel(set)).assertIsNotSelected()
     }
 
     @Test

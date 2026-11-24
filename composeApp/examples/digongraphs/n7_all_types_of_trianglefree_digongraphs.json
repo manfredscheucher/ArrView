@@ -3,7 +3,7 @@
   "n": 7,
   "group": "Digongraphs",
   "label": "n = 7, all triangle-free types",
-  "description": "Intersecting arrangements of 7 pseudocircles, one for every type of triangle-free digongraph.",
+  "description": "Intersecting arrangements of 7 pseudocircles, one for every type of triangle-free digongraph (99 of the 485 types).",
   "links": [
     {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
   ],
