@@ -2,8 +2,8 @@
   "name": "n9-great-nonr-pappus",
   "n": 9,
   "group": "Non-circularizable arrangements",
-  "label": "n = 9 great, non-Pappus",
-  "description": "A non-circularizable arrangement of 9 great pseudocircles, from the non-Pappus arrangement of 9 pseudolines.",
+  "label": "n = 9, great, non-Pappus",
+  "description": "The only non-circularizable arrangement of up to 9 great pseudocircles, from the non-Pappus arrangement of pseudolines.",
   "links": [
     {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
   ],

@@ -4,7 +4,9 @@
   "group": "Maximum number of triangles",
   "label": "n = 10, 61 triangles, digon-free (maximum)",
   "description": "An arrangement of 10 pseudocircles with the maximum of 61 triangles, digon-free; by computer search, uniqueness open.",
-  "links": [],
+  "links": [
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
   "source": "data/maxtri/n10_p3ge61_partial.txt",
   "sequences": [
     [2, 3, -2, 4, 5, 6, 7, 8, 9, 10, -8, -9, -10, -6, -7, -4, -5, -3],

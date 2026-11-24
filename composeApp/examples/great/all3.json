@@ -5,6 +5,7 @@
   "label": "Great, n = 3",
   "description": "All arrangements of 3 great pseudocircles.",
   "links": [
+    {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
     {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
   ],
   "source": "computations/results/great/all3.enc.greatcircles.enc",

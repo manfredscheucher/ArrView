@@ -1,8 +1,8 @@
 {
   "name": "n10-great-triangle-saturated-1",
   "n": 10,
-  "group": "Triangle-saturated arrangements and colorings",
-  "label": "n = 10 great, no. 1",
+  "group": "Triangle-saturated arrangements and colourings",
+  "label": "n = 10, great, no. 1",
   "description": "A triangle-saturated arrangement of 10 great pseudocircles.",
   "links": [
     {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},

@@ -2,6 +2,39 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-24: Examples cleanup
+
+### Request (Manfred, via the coordinator)
+
+Fixes to the example catalogue from a critical review (texts, labels, links, Koester's file name).
+
+### Done
+
+- Triangle-saturated means every edge lies on exactly one triangle (Chiu et al.), not every crossing
+  on a triangle: group description fixed; `triangleSaturatedColouringsAreProper` checks the edge
+  property, `koesterHasSevenCirclesAndOneNonCrossingPair` that Koester's has 5 edges on no triangle.
+- Labels "n = N, <class>, <what>" in Non-circularizable and the colourings ("n = 5, connected,
+  no. 2", "n = 9, great, non-Pappus", "n = 16, great, Simmons"). The website's "additional" files
+  are named by symmetry as in the circularizability paper (N_6^{i6:k}, N_6^{c4:k}, N_6^{c8:k},
+  N_6^{c24}): "n = 6, intersecting, symmetry 6, no. 2", "n = 6, connected digon-free, sym. 8,
+  no. 1" (45-character limit). The paper's figure files carry the website's names, and the paper
+  shows N_6^{c8:1} in `misc_con6_sym8_2` and N_6^{c8:2} in `misc_con6_sym8_1` (checked by the
+  non-crossing pairs in the figures and the data: 1 and 2), so `n6_connected_digonfree_sym8_2` is
+  "sym. 8, no. 1" and `..._sym8_1` is "no. 2". Order unchanged.
+- Descriptions: maxima for n = 5, 6, 7 ("with the maximum of ..."; n = 7: all three digon-free);
+  n = 8 minimum (the first below Grünbaum's 2n - 4, Triangles and Drawings Sec. 2); N_5^2 (Linhart
+  and Ortner 2005); non-Pappus (the only non-circularizable one up to 9 great pseudocircles);
+  every-triangle-Krupp (the other one besides N_6^2, which now says so too); the 6-circle minimum
+  and N_6^Delta point to each other; n = 6 great no. 1 has the maximum 20 triangles.
+- Füredi–Palásti group: 2n(n-3)/3 triangles, great pseudocircles doubled from the line
+  arrangements; link to the Füredi–Palásti paper. Digongraphs: link to On Digons and Triangles.
+  Koester: link to Koester's paper.
+- Links: great/* carry the database page like the other database sets; the n = 8, 9, 10 maxima
+  from the computer search carry the Triangles and Drawings paper (no website page).
+- Spelling: the app says "colour", so the group title is now "Triangle-saturated arrangements
+  and colourings" (link titles keep the website's and paper's spelling).
+- `colorings/n8_koester.json` is now `n7_koester.json` (explicit stem in `import_examples.py`).
+
 ## 2026-11-21: Fixes from the manual walkthrough
 
 ### Request (Manfred)
@@ -137,7 +170,7 @@ attribute, maybe there are more".
 ### Open questions
 
 - File names keep the old stems (`colorings/n8_koester.json` holds `n7-connected-koester`); PoCoView
-  names files after the example. Rename?
+  names files after the example. Rename? Done 2026-11-24: `colorings/n7_koester.json`.
 - PoCoView's `"reference"` and `"colors"` (count) keys are not used. Add `"colors": 3` to the
   coloured files?
 - Export SVG does not draw the crossing colours (it did not before either). Done, see "SVG export".

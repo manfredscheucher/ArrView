@@ -2,7 +2,7 @@
   "name": "n5-connected-nonr-4",
   "n": 5,
   "group": "Non-circularizable arrangements",
-  "label": "n = 5, no. 4",
+  "label": "n = 5, connected, no. 4",
   "description": "A non-circularizable connected arrangement of 5 pseudocircles.",
   "links": [
     {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},

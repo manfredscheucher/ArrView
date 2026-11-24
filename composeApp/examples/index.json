@@ -31,7 +31,7 @@
     {
       "id": "min-triangles",
       "title": "Minimum number of triangles",
-      "description": "Digon-free arrangements with the fewest triangles.",
+      "description": "Digon-free arrangements with the fewest triangles; from n = 8 on fewer than Grünbaum's conjectured 2n - 4.",
       "links": [
         {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
         {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
@@ -73,10 +73,11 @@
     {
       "id": "furedi-palasti",
       "title": "Füredi–Palásti construction",
-      "description": "Circle arrangements with about 2n²/3 triangles.",
+      "description": "Arrangements of great pseudocircles with 2n(n-3)/3 triangles, doubled from Füredi–Palásti line arrangements.",
       "links": [
         {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
-        {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+        {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"},
+        {"title": "Paper: Arrangements of lines with a large number of triangles (Füredi, Palásti)", "url": "https://doi.org/10.1090/S0002-9939-1984-0760946-2"}
       ],
       "files": [
         "fueredipalasti/fueredi_palasti_6.json",
@@ -118,8 +119,8 @@
     },
     {
       "id": "colorings",
-      "title": "Triangle-saturated arrangements and colorings",
-      "description": "Every crossing is on a triangle; the crossings are shown in their 3 colours. Koester's arrangement needs 4.",
+      "title": "Triangle-saturated arrangements and colourings",
+      "description": "Every edge lies on exactly one triangle; crossings shown in their 3 colours. Koester's arrangement needs 4.",
       "links": [
         {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},
         {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
@@ -128,7 +129,7 @@
         "colorings/n6_triangle_sat_no1_great.json",
         "colorings/n6_triangle_sat_no2.json",
         "colorings/n7_triangle_sat_no1.json",
-        "colorings/n8_koester.json",
+        "colorings/n7_koester.json",
         "colorings/n9_triangle_sat_no1.json",
         "colorings/n10_triangle_sat_no1_great.json",
         "colorings/n16_triangle_sat_Simmons.json"
@@ -139,7 +140,8 @@
       "title": "Digongraphs",
       "description": "Intersecting arrangements with every type of digongraph (circles as vertices, digons as edges).",
       "links": [
-        {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+        {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"},
+        {"title": "Paper: On Digons and Triangles (Felsner, Roch, Scheucher)", "url": "https://arxiv.org/abs/2208.12110"}
       ],
       "files": [
         "digongraphs/n4_all_types_of_digongraphs.json",

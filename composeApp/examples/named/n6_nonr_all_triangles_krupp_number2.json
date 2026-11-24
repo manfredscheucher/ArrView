@@ -2,8 +2,8 @@
   "name": "n6-intersecting-nonr-all-triangles-krupp",
   "n": 6,
   "group": "Non-circularizable arrangements",
-  "label": "n = 6, every triangle a Krupp",
-  "description": "A non-circularizable intersecting arrangement of 6 pseudocircles; the circles of every triangle form a Krupp.",
+  "label": "n = 6, intersecting, every triangle a Krupp",
+  "description": "The other arrangement of 6 pseudocircles where every triangle is a Krupp (with digons), hence non-circularizable.",
   "links": [
     {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
   ],

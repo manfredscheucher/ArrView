@@ -158,7 +158,7 @@ class ExamplesDialogUiTest {
         onNodeWithTag("example-index").assertDoesNotExist()
         onNodeWithText("Data: website/arrangements/nomorecircles/connected/n5_nonr_number1_intersecting.mod2s6").assertExists()
         // from the computations: the Pappus one has no website page
-        click("n = 9 great, non-Pappus")
+        click("n = 9, great, non-Pappus")
         onNodeWithText("Data: computations/results/n9_nonr_pappus.enc").assertExists()
         // a list of the database: the count in the label, the chooser
         click(header(Examples.group("database")))

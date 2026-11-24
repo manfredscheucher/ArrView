@@ -3,7 +3,7 @@
   "n": 6,
   "group": "Maximum number of triangles",
   "label": "n = 6, 20 triangles, digon-free (maximum)",
-  "description": "All digon-free intersecting arrangements of 6 pseudocircles with 20 triangles.",
+  "description": "All digon-free intersecting arrangements of 6 pseudocircles with the maximum of 20 triangles.",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
     {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}

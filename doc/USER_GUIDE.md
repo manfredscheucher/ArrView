@@ -72,10 +72,10 @@ the website page (and the paper, where there is one).
 - Database: all arrangements of n pseudocircles for small n (connected n = 3 to 5, intersecting 2 to
   5, digon-free 3 to 6, great 3 to 8).
 - Minimum number of triangles, Maximum number of triangles.
-- Füredi–Palásti construction: circle arrangements with about 2n²/3 triangles.
+- Füredi–Palásti construction: great pseudocircle arrangements with 2n(n-3)/3 triangles.
 - Non-circularizable arrangements: cannot be drawn with circles.
-- Triangle-saturated arrangements and colorings: every crossing is on a triangle; in six of them the
-  crossings are drawn in their colours.
+- Triangle-saturated arrangements and colourings: every edge lies on exactly one
+  triangle; in six of them the crossings are drawn in their colours.
 - Digongraphs, and Krupp, NonKrupp, 3-Chain (the named arrangements of 3 pseudocircles).
 
 The selected entry shows its description, n, the number of arrangements, links and where the data is

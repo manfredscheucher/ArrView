@@ -2,7 +2,7 @@
   "name": "n5-intersecting-nonr-1",
   "n": 5,
   "group": "Non-circularizable arrangements",
-  "label": "n = 5, no. 1 (intersecting)",
+  "label": "n = 5, intersecting, no. 1",
   "description": "The only non-circularizable intersecting arrangement of at most 5 pseudocircles.",
   "links": [
     {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},

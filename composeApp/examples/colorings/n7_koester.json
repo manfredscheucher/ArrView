@@ -1,11 +1,12 @@
 {
   "name": "n7-connected-koester",
   "n": 7,
-  "group": "Triangle-saturated arrangements and colorings",
+  "group": "Triangle-saturated arrangements and colourings",
   "label": "n = 7, Koester",
   "description": "Koester's arrangement of 7 circles: all pairs but one cross, and its crossings need 4 colours.",
   "links": [
-    {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
+    {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"},
+    {"title": "Paper: Note to a problem of T. Gallai and G. A. Dirac (Koester)", "url": "https://doi.org/10.1007/BF02579365"}
   ],
   "source": "computations/biconnected_results/n8_koester.enc",
   "sequences": [

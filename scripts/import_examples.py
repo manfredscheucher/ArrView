@@ -27,8 +27,8 @@ import re
 import subprocess
 import sys
 
-# (destination folder, source path relative to the research folder); the file is
-# <folder>/<source name up to its first dot>.json
+# (destination folder, source path relative to the research folder[, destination stem]); the file is
+# <folder>/<stem>.json, by default the source name up to its first dot
 SOURCES = [
     *[("great", f"computations/results/great/all{n}.enc.greatcircles.enc") for n in range(3, 9)],
     *[("intersecting", f"computations/results/abstract/all{n}.enc") for n in range(2, 6)],
@@ -67,7 +67,7 @@ SOURCES = [
         "n6_triangle_sat_no1_great", "n6_triangle_sat_no2", "n7_triangle_sat_no1", "n9_triangle_sat_no1",
         "n10_triangle_sat_no1_great", "n16_triangle_sat_Simmons",
     ]],
-    ("colorings", "computations/biconnected_results/n8_koester.enc"),
+    ("colorings", "computations/biconnected_results/n8_koester.enc", "n7_koester"),
     ("named", "computations/results/n6_nonr_all_triangles_krupp_number2.enc"),
     ("named", "computations/results/n6_nonr_edelsbrunnerramos.enc"),
     ("named", "computations/results/n9_nonr_pappus.enc"),
@@ -252,10 +252,10 @@ def main():
     args = parser.parse_args()
     target = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "composeApp", "examples")
     total = 0
-    for folder, source in SOURCES:
+    for folder, source, *dest in SOURCES:
         path = os.path.join(args.research, source)
         name = os.path.basename(source)
-        stem = name.split(".")[0]
+        stem = dest[0] if dest else name.split(".")[0]
         if name.endswith("_1_1tutte7.ipe"):
             with open(path) as f:
                 lists, colours = ipe_colouring(f.read())

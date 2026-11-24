@@ -2,7 +2,7 @@
   "name": "n6-connected-nonr-sym8-1",
   "n": 6,
   "group": "Non-circularizable arrangements",
-  "label": "n = 6 digon-free connected, additional no. 3",
+  "label": "n = 6, connected digon-free, sym. 8, no. 2",
   "description": "A non-circularizable digon-free connected arrangement of 6 pseudocircles.",
   "links": [
     {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},

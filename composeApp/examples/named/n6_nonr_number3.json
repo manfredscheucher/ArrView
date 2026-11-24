@@ -2,7 +2,7 @@
   "name": "n6-digonfree-nonr-3",
   "n": 6,
   "group": "Non-circularizable arrangements",
-  "label": "n = 6 digon-free intersecting, no. 3",
+  "label": "n = 6, digon-free intersecting, no. 3",
   "description": "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles.",
   "links": [
     {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},

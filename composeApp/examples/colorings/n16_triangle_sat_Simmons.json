@@ -1,8 +1,8 @@
 {
   "name": "n16-great-triangle-saturated-simmons",
   "n": 16,
-  "group": "Triangle-saturated arrangements and colorings",
-  "label": "n = 16 great, Simmons",
+  "group": "Triangle-saturated arrangements and colourings",
+  "label": "n = 16, great, Simmons",
   "description": "Simmons' triangle-saturated arrangement of 16 great pseudocircles.",
   "links": [
     {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},

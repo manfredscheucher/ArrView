@@ -14,6 +14,13 @@ class ExampleCatalogTest {
 
     private fun members(name: String): List<Arrangement> = set(name).let { s -> (0 until s.size).map(s::arrangement) }
 
+    /** For every edge (the arc from crossing `k` to the next one on its circle), the number of triangles on it. */
+    private fun trianglesPerEdge(arr: Arrangement): IntArray {
+        val count = IntArray(arr.size)
+        for (f in arr.faces.filter { it.size == 3 }) for (a in f) count[if (a % 2 == 0) a / 2 else arr.previousOnCircle(a / 2)]++
+        return count
+    }
+
     @Test
     fun everyMemberRoundTripsThroughAllTextForms() {
         var count = 0
@@ -132,11 +139,13 @@ class ExampleCatalogTest {
         val triples = (0 until three.size).map { three.arrangement(it).kruppTriples }.toSet()
         assertEquals(setOf(1 to 0, 0 to 1), triples)
         assertEquals(8, Arrangement.krupp().triangleCount)
-        // "all triangles Krupp": the three circles of every triangle form a Krupp
-        val allKrupp = one("n6-intersecting-nonr-all-triangles-krupp")
-        for (f in allKrupp.faces.indices.filter { allKrupp.faces[it].size == 3 }) {
-            val (a, b, c) = allKrupp.faceCircles(f).sorted()
-            assertTrue(allKrupp.isKrupp(a, b, c), "triangle $f")
+        // "every triangle is a Krupp": the three circles of every triangle form a Krupp
+        for (name in listOf("n6-intersecting-nonr-all-triangles-krupp", "n6-digonfree-nonr-2")) {
+            val allKrupp = one(name)
+            for (f in allKrupp.faces.indices.filter { allKrupp.faces[it].size == 3 }) {
+                val (a, b, c) = allKrupp.faceCircles(f).sorted()
+                assertTrue(allKrupp.isKrupp(a, b, c), "$name triangle $f")
+            }
         }
     }
 
@@ -164,13 +173,8 @@ class ExampleCatalogTest {
                 assertEquals(colours[k], colours[arr.partners[k]], "${s.name} crossing $k")
                 assertTrue(colours[k] != colours[arr.nextOnCircle(k)], "${s.name} crossing $k")
             }
-            // triangle-saturated: every crossing is on a triangle
-            val onTriangle = BooleanArray(arr.size)
-            for (f in arr.faces.filter { it.size == 3 }) for (a in f) {
-                onTriangle[a / 2] = true
-                onTriangle[arr.partners[a / 2]] = true
-            }
-            assertTrue(onTriangle.all { it }, s.name)
+            // triangle-saturated: every edge lies on exactly one triangle
+            assertTrue(trianglesPerEdge(arr).all { it == 1 }, s.name)
             assertEquals(s.name.split("-")[1] == "great", arr.isGreat, s.name)
         }
         // the coloured examples are exactly these 6: no other set has colours
@@ -185,6 +189,8 @@ class ExampleCatalogTest {
         assertEquals(7, arr.n)
         assertEquals(1, arr.nonIntersectingPairCount)
         assertEquals(40, arr.crossingCount)
+        // not triangle-saturated: 5 edges lie on no triangle
+        assertEquals(5, trianglesPerEdge(arr).count { it == 0 })
     }
 
     @Test

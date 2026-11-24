@@ -3,7 +3,7 @@
   "n": 6,
   "group": "Minimum number of triangles",
   "label": "n = 6, 8 triangles",
-  "description": "All digon-free intersecting arrangements of 6 pseudocircles with the minimum of 8 triangles.",
+  "description": "All digon-free intersecting arrangements of 6 pseudocircles with the minimum of 8 triangles: one, also under Non-circularizable.",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
     {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}

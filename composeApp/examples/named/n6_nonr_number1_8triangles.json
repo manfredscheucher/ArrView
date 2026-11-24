@@ -2,8 +2,8 @@
   "name": "n6-digonfree-nonr-8-triangles",
   "n": 6,
   "group": "Non-circularizable arrangements",
-  "label": "n = 6 digon-free intersecting, no. 1",
-  "description": "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, the only one with 8 triangles.",
+  "label": "n = 6, digon-free intersecting, no. 1",
+  "description": "A non-circularizable digon-free intersecting arrangement of 6 pseudocircles, the only one with 8 triangles (also under Minimum).",
   "links": [
     {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
     {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}

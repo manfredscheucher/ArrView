@@ -4,7 +4,9 @@
   "group": "Maximum number of triangles",
   "label": "n = 9, 50 triangles, digon-free (maximum)",
   "description": "The arrangement of 9 pseudocircles with the maximum of 50 triangles, digon-free; unique up to isomorphism, by computer search.",
-  "links": [],
+  "links": [
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+  ],
   "source": "data/maxtri/n9_p3eq50.txt",
   "sequences": [
     [2, 3, -2, -3, 4, 5, -4, 6, -5, -6, 7, 8, -7, 9, -8, -9],

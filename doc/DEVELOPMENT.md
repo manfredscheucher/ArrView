@@ -67,7 +67,7 @@ A file is the metadata, then the data:
 {
   "name": "n6-digonfree-triangle-saturated-2",
   "n": 6,
-  "group": "Triangle-saturated arrangements and colorings",
+  "group": "Triangle-saturated arrangements and colourings",
   "label": "n = 6, no. 2",
   "description": "A triangle-saturated arrangement of 6 pseudocircles.",
   "links": [{"title": "Website: ...", "url": "..."}, {"title": "Paper: ...", "url": "..."}],
@@ -112,7 +112,7 @@ identical to `~/Documents/2024/TUB/pseudocircles/website/` for these files):
 | `named/n6_sym6_{2,3}`, `named/n6_connected_digonfree_sym*` | `website/arrangements/nomorecircles/{intersecting,connected}/additional/` |
 | `digongraphs/*` | `website/arrangements/digongraphs/data/` (model 1, although the page says primal-dual graphs) |
 | `colorings/n*_triangle_sat_*` | `website/arrangements/colorings/triangle_sat/*.enc_1_1tutte7.ipe` (sequences and crossing colours R, G, B read from the drawings; `ExampleColoursDataTest` checks them against the `.enc` files, copied to `jvmTest/resources/data/colorings/`) |
-| `colorings/n8_koester` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the file name) |
+| `colorings/n7_koester` | `computations/biconnected_results/n8_koester.enc` (sparse6 of the crossing graph, converted by `scripts/crossing_graph_sequences.sage`; 7 circles despite the source name) |
 
 ## Tests
 
