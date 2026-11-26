@@ -3,27 +3,27 @@ package org.bytefred.arrview.core
 /** The pseudocircles website (most of the bundled data comes from it). */
 const val PSEUDOCIRCLES_WEBSITE = "https://www3.math.tu-berlin.de/diskremath/pseudocircles/"
 
-/** A link of a supergroup, a group or a set: a website page ("Website: ...") or a paper ("Paper: ..."). */
+/** A link of a set: a website page ("Website: ...") or a paper ("Paper: ..."). */
 data class ExampleLink(val title: String, val url: String)
 
 /**
  * A top-level node of the examples tree (`composeApp/examples/index.json`, `"supergroups"`), e.g.
- * Database or Non-circularizable. [id] is unique among the supergroups.
+ * Database or Non-circularizable. [id] is unique among the supergroups. It has no links: those belong
+ * to the sets.
  */
 class ExampleSupergroup(
     val id: String,
     val title: String,
     /** One or two short sentences, or null. */
     val description: String?,
-    /** Shown below its header; its groups and sets do not repeat them. */
-    val links: List<ExampleLink>,
 ) {
     override fun toString() = id
 }
 
 /**
  * A group of bundled examples inside its [supergroup] (in display order, as in the index). [id] is
- * unique among all groups (the loader checks it, see [Examples.group]).
+ * unique among all groups (the loader checks it, see [Examples.group]). It has no links: those belong
+ * to the sets.
  */
 class ExampleGroup(
     val supergroup: ExampleSupergroup,
@@ -31,12 +31,7 @@ class ExampleGroup(
     val title: String,
     /** One or two short sentences, or null. */
     val description: String?,
-    /** Its own links (none repeats a link of the supergroup). */
-    val links: List<ExampleLink>,
 ) {
-    /** The links shown above its sets, together with the supergroup's. */
-    val allLinks: List<ExampleLink> get() = (supergroup.links + links).distinct()
-
     override fun toString() = "${supergroup.id}/$id"
 }
 
@@ -62,7 +57,7 @@ class ExampleSet internal constructor(
     val label: String,
     /** One or two short sentences. */
     val description: String,
-    /** Its website page and paper (where they are the group's or supergroup's too, the dialog shows them only there). */
+    /** Where it is from: website pages and papers, at least one. */
     val links: List<ExampleLink>,
     /**
      * Where the data comes from (a path below `~/github/research/pca/pseudocircles/`, `data/` below
@@ -138,12 +133,14 @@ object Examples {
         val files = ArrayList<Pair<ExampleGroup, String>>()
         for (s in index.list("supergroups", INDEX)) {
             val so = jsonObject(s, INDEX)
-            val sg = ExampleSupergroup(so.string("id", INDEX), so.string("title", INDEX), so.optString("description", INDEX), links(so, INDEX))
+            checkNoLinks(so)
+            val sg = ExampleSupergroup(so.string("id", INDEX), so.string("title", INDEX), so.optString("description", INDEX))
             require(supergroups.none { it.id == sg.id }) { "$INDEX: supergroup id '${sg.id}' twice" }
             supergroups += sg
             for (g in so.list("groups", INDEX)) {
                 val go = jsonObject(g, INDEX)
-                val group = ExampleGroup(sg, go.string("id", INDEX), go.string("title", INDEX), go.optString("description", INDEX), links(go, INDEX))
+                checkNoLinks(go)
+                val group = ExampleGroup(sg, go.string("id", INDEX), go.string("title", INDEX), go.optString("description", INDEX))
                 groups += group
                 val paths = go.list("files", INDEX).map { it as? String ?: error("$INDEX: file names must be strings") }
                 require(paths.size == paths.toSet().size) { "$INDEX: a file twice in '$group'" }
@@ -197,6 +194,11 @@ object Examples {
     private fun links(o: Map<*, *>, file: String): List<ExampleLink> = (o["links"]?.let { o.list("links", file) } ?: emptyList<Any?>()).map {
         val l = jsonObject(it, file)
         ExampleLink(l.string("title", file), l.string("url", file))
+    }
+
+    /** Links belong to the sets: a supergroup or group ([node], from the index) with "links" is refused. */
+    internal fun checkNoLinks(node: Map<*, *>) {
+        require("links" !in node) { "$INDEX: '${node["id"]}' has links; links belong to the sets" }
     }
 
     /** The supergroup with the given [id]. */

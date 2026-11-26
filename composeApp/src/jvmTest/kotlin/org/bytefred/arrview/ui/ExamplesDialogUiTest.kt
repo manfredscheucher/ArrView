@@ -3,6 +3,8 @@ package org.bytefred.arrview.ui
 import kotlin.time.Duration.Companion.minutes
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotSelected
@@ -19,9 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.bytefred.arrview.core.ExampleGroup
-import org.bytefred.arrview.core.ExampleLink
-import org.bytefred.arrview.core.ExampleSet
-import org.bytefred.arrview.core.ExampleSupergroup
 import org.bytefred.arrview.core.Examples
 import kotlin.test.assertNotNull
 import kotlin.test.BeforeTest
@@ -152,18 +151,17 @@ class ExamplesDialogUiTest {
         for (g in Examples.groups) onNodeWithText(g.title).assertDoesNotExist()
         onNodeWithTag("supergroup-info").assertDoesNotExist()
         onNodeWithTag("group-info").assertDoesNotExist()
-        // an open supergroup shows what it is and its links, then its groups (collapsed)
+        // an open supergroup shows what it is, then its groups (collapsed); no links above a set
+        val linkTitles = Examples.sets.flatMap { it.links }.map { it.title }.toSet()
         for (sg in Examples.supergroups) {
             click(sg.title)
             sg.description?.let { onNodeWithText(it).assertExists() }
-            for (link in sg.links) onAllNodesWithText(link.title).assertCountEquals(1)
             for (g in Examples.groupsIn(sg)) {
                 onNodeWithText(g.title).assertExists()
-                // an open group: its description, only the links that differ from the supergroup's, its sets
+                // an open group: its description, its sets
                 click(g.title)
                 g.description?.let { onNodeWithText(it).assertExists() }
-                for (link in g.links) onAllNodesWithText(link.title).assertCountEquals(1)
-                for (link in sg.links) onAllNodesWithText(link.title).assertCountEquals(1)
+                for (title in linkTitles) onAllNodesWithText(title).assertCountEquals(0)
                 for (set in Examples.inGroup(g)) onNodeWithText(leafLabel(set)).assertExists()
                 click(g.title)
                 for (set in Examples.inGroup(g)) onNodeWithText(leafLabel(set)).assertDoesNotExist()
@@ -179,8 +177,8 @@ class ExamplesDialogUiTest {
         onNodeWithText("n = 5, 1 arrangement").assertExists()
         onNodeWithTag("example-index").assertDoesNotExist()
         onNodeWithText("Data: website/arrangements/nomorecircles/connected/n5_nonr_number1_intersecting.mod2s6").assertExists()
-        // the links of the supergroup are not repeated by the set
-        for (link in Examples.supergroup("non-circularizable").links) onAllNodesWithText(link.title).assertCountEquals(1)
+        // all its links, once each
+        for (link in nonr.links) onAllNodesWithText(link.title).assertCountEquals(1)
         // from the computations: the Pappus one has no website page
         click(Examples.group("nonr-9-great").title)
         click("n = 9, great, non-Pappus")
@@ -197,8 +195,7 @@ class ExamplesDialogUiTest {
         // a coloured one; Koester's arrangement is with them
         openGroup(Examples.group("colorings"))
         click("n = 6, no. 2")
-        // the links of the group are not repeated
-        for (link in Examples.group("colorings").links) onAllNodesWithText(link.title).assertCountEquals(1)
+        for (link in Examples.byName("n6-digonfree-triangle-saturated-2")!!.links) onAllNodesWithText(link.title).assertCountEquals(1)
         click("n = 7, Koester")
         onNodeWithText("n = 7, 1 arrangement").assertExists()
         onNodeWithText("Data: computations/biconnected_results/n8_koester.enc").assertExists()
@@ -314,22 +311,24 @@ class ExamplesDialogUiTest {
     }
 
     @Test
-    fun linksAreLeftOutByUrlNotByTitle() {
-        val web = ExampleLink("Website: pseudocircles", "https://example.org/web")
-        val paper = ExampleLink("Paper: A", "https://example.org/a")
-        val sg = ExampleSupergroup("sg", "SG", null, listOf(web, paper))
-        // the same URLs under other titles, in another order: the group shows none of them
-        val same = ExampleGroup(sg, "same", "Same", null, listOf(paper.copy(title = "Paper: a"), web.copy(title = "Website")))
-        assertEquals(emptyList(), shownLinks(same))
-        // one URL more: the group shows all its own links
-        val more = ExampleGroup(sg, "more", "More", null, listOf(paper, ExampleLink("Paper: B", "https://example.org/b")))
-        assertEquals(more.links, shownLinks(more))
-        // a set leaves out what its group or supergroup shows, by URL
-        val own = ExampleLink("Website: page", "https://example.org/page")
-        val set = ExampleSet(
-            "f.json", "n3-great-x", more, 3, "x", "d",
-            listOf(web.copy(title = "Website: other title"), ExampleLink("Paper: b", "https://example.org/b"), own), null, emptyList(),
-        )
-        assertEquals(listOf(own), shownLinks(set))
+    fun setDetailsShowWhatItIsBeforeItsLinks() = runComposeUiTest {
+        val s = state()
+        setContent { App(s, initialDialog = DialogKind.NONE) }
+        openExamples()
+        openGroup(Examples.group("intersecting"))
+        val set = Examples.byName("n4-intersecting-all")!!
+        click(leafLabel(set))
+        // description, n and count, the member chooser, then the links, then where the data is from
+        fun top(node: SemanticsNodeInteraction) = node.getBoundsInRoot().top
+        val order = listOf(
+            onNodeWithText(set.description),
+            onNodeWithText("n = 4, 8 arrangements"),
+            onNodeWithTag("example-index"),
+            onNodeWithTag("example-links"),
+            onNodeWithText("Data: ${set.source}"),
+        ).map(::top)
+        assertEquals(order.sorted(), order)
+        assertEquals(order.size, order.toSet().size)
+        for (link in set.links) onNodeWithText(link.title).assertExists()
     }
 }

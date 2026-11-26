@@ -2,6 +2,41 @@
 
 Requests and decisions. Newest first.
 
+## 2026-11-26: Links belong to the example sets
+
+### Request (Manfred, via the coordinator)
+
+Keep the grouping of the Examples dialog. Sources (links) belong to the individual sets, not to groups
+or supergroups: e.g. the maxima of triangles for n = 8, 9, 10 are new data and not on the
+pseudocircles website, so they must not carry the website link. Several links per set are fine. In an
+opened set: description and parameters first (n, count, member chooser), the links last ("wenn ich
+zuerst lese wer es gemacht hat und dann sehe dass mich die eigenschaft nicht interessiert ist
+gatsch"). As in RotSysView: supergroups and groups keep only their descriptions, every set file has
+its own links; details order description, n and count, chooser, links, then the "Data:" line.
+
+### Done
+
+- `index.json`: no `links` on supergroups and groups any more; the loader refuses them
+  (`Examples.checkNoLinks`), `ExampleSupergroup` and `ExampleGroup` have no links.
+- The set files already had their own links, chosen by provenance (DEVELOPMENT.md). Of the group
+  links only two were missing in their sets and were moved down: the Füredi–Palásti paper into the
+  seven Füredi–Palásti sets, On Digons and Triangles (cited by the website's digongraphs page, which
+  holds the data) into the six digongraph sets. All other group and supergroup links were already on
+  exactly the sets they apply to; the n = 8 (with digons), 9, 10 maxima, Koester's arrangement, the
+  every-triangle-Krupp one and the non-Pappus one have no website link (not on the website).
+- The dialog shows every link of the selected set (no more leaving out what a group shows), after the
+  member chooser and before "Data:". `ExamplesDialogUiTest.setDetailsShowWhatItIsBeforeItsLinks`
+  checks the order on screen; `ExamplesTest` checks that every set has a link and none twice.
+- Kept: the top line "Most of the data is from the pseudocircles website" of the dialog.
+- `import_examples.py` keeps a file's metadata (links included), so a rerun gives the same files; the
+  one-off move is `scripts/probe/move_group_links.py` (writes with the importer's `example_json`).
+
+### Open question
+
+- The n = 8, 9, 10 maxima of triangles keep the paper Triangles and Drawings (decided 2026-11-24). They
+  are new data from a computer search; is that paper the right source for them, or is there a newer
+  one?
+
 ## 2026-11-24: Terms & privacy note (web)
 
 Request (Manfred, relayed by turingmachine-ef): every GitHub Pages site gets the approved "Terms &

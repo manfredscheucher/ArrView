@@ -5,7 +5,8 @@
   "label": "n = 4, all types",
   "description": "Intersecting arrangements of 4 pseudocircles, one for every type of digongraph.",
   "links": [
-    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"},
+    {"title": "Paper: On Digons and Triangles (Felsner, Roch, Scheucher)", "url": "https://arxiv.org/abs/2208.12110"}
   ],
   "source": "website/arrangements/digongraphs/data/n4_all_types_of_digongraphs.enc",
   "arrangements": [

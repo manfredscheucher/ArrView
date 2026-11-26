@@ -66,8 +66,7 @@ browser.
 All of these are in the Arrangement menu.
 
 **Examples...** lists the bundled arrangements as a tree: supergroups, their groups, then the sets.
-Everything starts collapsed. An open supergroup or group starts with what it is and its links (the
-website page and the paper); a group shows only the links that differ from its supergroup's.
+Everything starts collapsed. An open supergroup or group starts with what it is.
 
 - Database (all arrangements of n pseudocircles for small n, as in Table 1 of On Circularizability):
   Great pseudocircles (n = 3 to 8), Intersecting, digon-free (3 to 6), Intersecting (2 to 5),
@@ -80,8 +79,8 @@ website page and the paper); a group shows only the links that differ from its s
   Triangle-saturated arrangements and colourings (every edge lies on exactly one triangle; in six of
   them the crossings are drawn in their colours).
 
-The selected entry shows its description, n, the number of arrangements, links and where the data is
-from. An entry with several arrangements has "(k)" after its name and a number field with `−` and
+The selected entry shows its description, n and the number of arrangements, then its links (website
+pages and papers it comes from) and where the data is from. An entry with several arrangements has "(k)" after its name and a number field with `−` and
 `+` to choose one ("1 of 4"; a number out of range disables Load). Load opens the whole set at the
 chosen arrangement, so you can step through the others with `<` `>`. The dialog remembers its state
 (open nodes, selection, scroll position) while the app runs; collapsing the supergroup or group of the

@@ -3,20 +3,13 @@ package org.bytefred.arrview.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** The bundled examples against the counts and properties known from the research data. */
-/** The supergroup's, group's or set's website page. */
-internal val ExampleSupergroup.page get() = links.firstOrNull { it.title.startsWith("Website: ") }
-
-internal val ExampleSupergroup.paper get() = links.firstOrNull { it.title.startsWith("Paper: ") }
-
-internal val ExampleGroup.page get() = links.firstOrNull { it.title.startsWith("Website: ") }
-
-internal val ExampleGroup.paper get() = links.firstOrNull { it.title.startsWith("Paper: ") }
-
+/** The set's website page. */
 internal val ExampleSet.page get() = links.firstOrNull { it.title.startsWith("Website: ") }
 
 internal val ExampleSet.paper get() = links.firstOrNull { it.title.startsWith("Paper: ") }
@@ -172,10 +165,23 @@ class ExamplesTest {
 
     @Test
     fun websitePagesAndPapers() {
-        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=nomorecircles", Examples.supergroup("non-circularizable").page?.url)
-        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=pseudocircles", Examples.supergroup("database").page?.url)
-        assertEquals("https://doi.org/10.1007/s00454-019-00077-y", Examples.supergroup("database").paper?.url)
-        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=colorings", Examples.group("colorings").page?.url)
+        for (s in Examples.inGroup(Examples.group("nonr-5"))) assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=nomorecircles", s.page?.url)
+        for (s in Examples.groupsIn(Examples.supergroup("database")).flatMap { Examples.inGroup(it) }) {
+            assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=pseudocircles", s.page?.url, s.name)
+            assertEquals("https://doi.org/10.1007/s00454-019-00077-y", s.paper?.url, s.name)
+        }
+        assertEquals(PSEUDOCIRCLES_WEBSITE + "?show=colorings", set("n6-digonfree-triangle-saturated-2").page?.url)
+        // the maxima of triangles for n = 8, 9, 10 are new (computer search), not on the website
+        for (name in listOf("n8-intersecting-38-triangles", "n9-digonfree-50-triangles", "n10-digonfree-61-triangles")) {
+            assertNull(set(name).page, name)
+        }
+        // the constructions carry the paper they are from
+        for (s in Examples.inGroup(Examples.group("furedi-palasti"))) {
+            assertTrue(s.links.any { it.url == "https://doi.org/10.1090/S0002-9939-1984-0760946-2" }, s.name)
+        }
+        for (s in Examples.inGroup(Examples.group("digon-graphs"))) {
+            assertTrue(s.links.any { it.url == "https://arxiv.org/abs/2208.12110" }, s.name)
+        }
         val fromComputations = listOf(
             "n6-intersecting-nonr-edelsbrunner-ramos", "n6-intersecting-nonr-all-triangles-krupp", "n9-great-nonr-pappus",
             "n7-connected-koester",
@@ -192,7 +198,7 @@ class ExamplesTest {
     }
 
     @Test
-    fun descriptionsAreShortAndEveryGroupHasLinks() {
+    fun descriptionsAreShortAndEverySetHasLinks() {
         val url = Regex("""https://[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9./?=_-]*""")
         // descriptions are optional; one or two short sentences
         for ((id, title, description) in Examples.supergroups.map { Triple(it.id, it.title, it.description) } +
@@ -202,16 +208,31 @@ class ExamplesTest {
             assertTrue(description.endsWith("."), id)
             assertTrue(description.split(". ").size <= 2 && description.length <= 110, "$id: ${description.length}")
         }
-        for (g in Examples.groups) {
-            // links on the supergroup, a group has its own only where they differ
-            assertTrue(g.allLinks.isNotEmpty(), g.toString())
-            assertTrue(g.links.none { it in g.supergroup.links }, g.toString())
+        // links belong to the sets: each has at least one, none twice
+        for (s in Examples.sets) {
+            assertTrue(s.links.isNotEmpty(), s.name)
+            assertEquals(s.links.size, s.links.map { it.url }.toSet().size, s.name)
         }
-        for (link in (Examples.supergroups.flatMap { it.links } + Examples.groups.flatMap { it.links } + Examples.sets.flatMap { it.links })) {
+        for (link in Examples.sets.flatMap { it.links }) {
             assertNotNull(url.matchEntire(link.url), link.url)
             assertTrue(link.title.startsWith("Website: ") || link.title.startsWith("Paper: "), link.title)
         }
-        assertEquals("https://arxiv.org/abs/2205.08181", Examples.group("colorings").paper?.url)
+        assertEquals("https://arxiv.org/abs/2205.08181", set("n6-digonfree-triangle-saturated-2").paper?.url)
+    }
+
+    @Test
+    fun supergroupsAndGroupsHaveNoLinks() {
+        // the index has none, and the loader refuses them
+        val index = parseJson(GeneratedExamples.FILES.getValue(Examples.INDEX).joinToString("")) as Map<*, *>
+        for (sg in index["supergroups"] as List<*>) {
+            assertFalse("links" in (sg as Map<*, *>), sg["id"].toString())
+            for (g in sg["groups"] as List<*>) assertFalse("links" in (g as Map<*, *>), g["id"].toString())
+        }
+        val e = assertFailsWith<IllegalArgumentException> {
+            Examples.checkNoLinks(mapOf("id" to "x", "links" to emptyList<Any>()))
+        }
+        assertEquals("index.json: 'x' has links; links belong to the sets", e.message)
+        Examples.checkNoLinks(mapOf("id" to "x"))
     }
 
     @Test
@@ -267,10 +288,10 @@ class ExamplesTest {
         assertEquals(Examples.groups.size, Examples.groups.map { it.id }.toSet().size)
         Examples.checkGroupIds(Examples.groups)
         // the same id in two supergroups is refused, not only within one
-        val a = ExampleSupergroup("a", "A", null, emptyList())
-        val b = ExampleSupergroup("b", "B", null, emptyList())
+        val a = ExampleSupergroup("a", "A", null)
+        val b = ExampleSupergroup("b", "B", null)
         val e = assertFailsWith<IllegalStateException> {
-            Examples.checkGroupIds(listOf(ExampleGroup(a, "x", "X", null, emptyList()), ExampleGroup(b, "x", "X", null, emptyList())))
+            Examples.checkGroupIds(listOf(ExampleGroup(a, "x", "X", null), ExampleGroup(b, "x", "X", null)))
         }
         assertEquals("index.json: group id 'x' twice (in 'a', 'b')", e.message)
     }

@@ -6,7 +6,8 @@
   "description": "The Füredi–Palásti arrangement of 6 circles.",
   "links": [
     {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
-    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
+    {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"},
+    {"title": "Paper: Arrangements of lines with a large number of triangles (Füredi, Palásti)", "url": "https://doi.org/10.1090/S0002-9939-1984-0760946-2"}
   ],
   "source": "website/arrangements/triangles/fueredi_palasti_construction/fueredi_palasti_6.enc",
   "mod1s6": ":_a?@c@bddf_B_BEgmKLcLcmjNOdKaIPeMRSh_@UgKLQdHcVjOUYaCPcLPfJUXdGK"

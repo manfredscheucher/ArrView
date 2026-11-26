@@ -70,7 +70,6 @@ if a file is not in the index or vice versa.
       "id": "database",
       "title": "Database",
       "description": "All arrangements of n pseudocircles for small n, ...",
-      "links": [{"title": "Website: ...", "url": "..."}, {"title": "Paper: ...", "url": "..."}],
       "groups": [
         {"id": "great", "title": "Great pseudocircles", "description": "...", "files": ["great/all3.json", "..."]}
       ]
@@ -81,13 +80,14 @@ if a file is not in the index or vice versa.
 ```
 
 `id`, `title` and `groups` / `files` are required; `description` (one or two sentences, at most 110
-characters) and `links` are optional, the top-level `links` too (ArrView has none). Supergroup ids are
+characters) is optional. Supergroups and groups have no `links`: links belong to the sets (as in
+RotSysView), and the loader refuses a supergroup or group with `links` (`Examples.checkNoLinks`).
+The top-level `links` of PoCoView's schema is not used (ArrView has none). Supergroup ids are
 unique, group ids unique among all groups (`Examples.checkGroupIds`, so `Examples.group(id)`
 works); the loader rejects duplicates and files that are not bundled. The dialog's tree keys are
-`SG/<supergroup id>` and `G/<supergroup id>/<group id>`. Links go on the supergroup when all its groups
-share them; a group has its own links only where they differ (`ExamplesTest` checks that every group
-has links, its own or its supergroup's, and repeats none). A set shows only links that its group and
-supergroup do not show. A file may be listed in several groups (e.g. a subset of the database); it
+`SG/<supergroup id>` and `G/<supergroup id>/<group id>`. Every set has its own `links`, at least one
+(`ExamplesTest` checks it), only those that apply to that set: a set that is not on the website (e.g.
+the maxima of triangles for n = 8, 9, 10 from the computer search) has no website link. A file may be listed in several groups (e.g. a subset of the database); it
 is parsed once, each listing is its own leaf. A new group (e.g. Maximum number of digons) is one more
 entry in `groups` plus its files. A file's `"group"` is the title of a group or supergroup that lists
 it (Database files say `Database`).
@@ -112,8 +112,8 @@ The encoding is one attribute: `"mod1s6"` or `"mod2s6"` (a sparse6 string, as on
 `"sequences"`; `"crossingColors"` (only with sequences) gives a colour word per entry. A file with
 several arrangements has `"arrangements": [{"mod1s6": "..."}, ...]` (one object per line) instead.
 The app reads the same objects in Open file and Import (`readArrangementFile` in `core/Formats.kt`).
-Names: `n<N>-<class>-<description>`; the dialog
-shows a set's links only where they differ from its group's and supergroup's.
+Names: `n<N>-<class>-<description>`. The dialog shows a selected set's description, n and count, the
+member chooser, then all its links, then the "Data:" line (what it is before who made it).
 
 To refresh the data, run `python3 scripts/import_examples.py` (reads
 `~/github/research/pca/pseudocircles/`, `--research` for another place; Koester's file needs

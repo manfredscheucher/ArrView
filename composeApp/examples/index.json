@@ -4,10 +4,6 @@
       "id": "database",
       "title": "Database",
       "description": "All arrangements of n pseudocircles for small n, as in Table 1 of On Circularizability.",
-      "links": [
-        {"title": "Website: The database of pseudocircles", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=pseudocircles"},
-        {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
-      ],
       "groups": [
         {
           "id": "great",
@@ -74,10 +70,6 @@
           "id": "min-triangles",
           "title": "Minimum number of triangles",
           "description": "Digon-free arrangements with the fewest triangles; from n = 8 on fewer than Grünbaum's conjectured 2n - 4.",
-          "links": [
-            {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
-            {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
-          ],
           "files": [
             "mintriangles/all5_df_8_triangles.json",
             "mintriangles/all6_df_8_triangles.json",
@@ -95,10 +87,6 @@
           "id": "max-triangles",
           "title": "Maximum number of triangles",
           "description": "Arrangements with the most triangles, digon-free and with digons.",
-          "links": [
-            {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
-            {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"}
-          ],
           "files": [
             "maxtriangles/all5_df_12_triangles.json",
             "maxtriangles/all5_digon_13_triangles.json",
@@ -114,9 +102,6 @@
           "id": "max-digons",
           "title": "Maximum number of digons",
           "description": "Intersecting arrangements with 2n - 2 digons, the maximum (Grünbaum's conjecture, proved by Ackerman et al.).",
-          "links": [
-            {"title": "Paper: The maximum number of digons formed by pairwise intersecting pseudocircles (Ackerman et al.)", "url": "https://doi.org/10.4230/LIPIcs.SoCG.2025.2"}
-          ],
           "files": [
             "maxdigons/all4_6_digons.json",
             "maxdigons/all5_8_digons.json",
@@ -128,10 +113,6 @@
           "id": "digon-graphs",
           "title": "Digongraphs",
           "description": "Intersecting arrangements with every type of digongraph (circles as vertices, digons as edges).",
-          "links": [
-            {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"},
-            {"title": "Paper: On Digons and Triangles (Felsner, Roch, Scheucher)", "url": "https://arxiv.org/abs/2208.12110"}
-          ],
           "files": [
             "digongraphs/n4_all_types_of_digongraphs.json",
             "digongraphs/n5_all_types_of_digongraphs.json",
@@ -147,10 +128,6 @@
       "id": "non-circularizable",
       "title": "Non-circularizable",
       "description": "Arrangements of pseudocircles that cannot be drawn with circles.",
-      "links": [
-        {"title": "Website: No more circle representations", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=nomorecircles"},
-        {"title": "Paper: On Circularizability (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-019-00077-y"}
-      ],
       "groups": [
         {
           "id": "nonr-5",
@@ -209,11 +186,6 @@
           "id": "furedi-palasti",
           "title": "Füredi–Palásti",
           "description": "Arrangements of great pseudocircles with 2n(n-3)/3 triangles, doubled from Füredi–Palásti line arrangements.",
-          "links": [
-            {"title": "Website: Triangular cells", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=triangles"},
-            {"title": "Paper: Triangles and Drawings (Felsner, Scheucher)", "url": "https://doi.org/10.1007/s00454-020-00173-4"},
-            {"title": "Paper: Arrangements of lines with a large number of triangles (Füredi, Palásti)", "url": "https://doi.org/10.1090/S0002-9939-1984-0760946-2"}
-          ],
           "files": [
             "fueredipalasti/fueredi_palasti_6.json",
             "fueredipalasti/fueredi_palasti_12.json",
@@ -228,10 +200,6 @@
           "id": "colorings",
           "title": "Triangle-saturated arrangements and colourings",
           "description": "Every edge lies on exactly one triangle; crossings shown in their 3 colours. Koester's arrangement needs 4.",
-          "links": [
-            {"title": "Website: Triangle-saturated arrangements and colorings", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=colorings"},
-            {"title": "Paper: Coloring circle arrangements (Chiu et al.)", "url": "https://arxiv.org/abs/2205.08181"}
-          ],
           "files": [
             "colorings/n6_triangle_sat_no1_great.json",
             "colorings/n6_triangle_sat_no2.json",

@@ -34,7 +34,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.bytefred.arrview.core.ExampleGroup
-import org.bytefred.arrview.core.ExampleLink
 import org.bytefred.arrview.core.ExampleSet
 import org.bytefred.arrview.core.ExampleSupergroup
 import org.bytefred.arrview.core.Examples
@@ -75,9 +74,10 @@ private fun treeKeys(set: ExampleSet): List<String> = listOf(treeKey(set.group.s
 
 /**
  * The bundled examples ([Examples]) as a tree: supergroups, their groups, each set a leaf; an open
- * supergroup or group starts with its description and links. The selected set shows its description,
- * size and, for a list, a chooser for the member. Load replaces the arrangement with it (after "Save changes?", [AppState.leave]). The data
- * is compiled in, so nothing has to load.
+ * supergroup or group starts with its description. The selected set shows its description, size, for
+ * a list a chooser for the member, then its links and where its data is from. Load replaces the
+ * arrangement with it (after "Save changes?", [AppState.leave]). The data is compiled in, so nothing
+ * has to load.
  */
 @Composable
 fun ExamplesDialog(state: AppState, close: () -> Unit) {
@@ -113,13 +113,13 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
                 TreeHeader(sg.title, 0, sgKey in open, top = true) { ex.toggle(sgKey) }
                 HorizontalDivider()
                 if (sgKey !in open) continue
-                NodeIntro(sg.description, sg.links, 0, "supergroup-info")
+                NodeIntro(sg.description, 0, "supergroup-info")
                 for (group in Examples.groupsIn(sg)) {
                     val gKey = treeKey(group)
                     TreeHeader(group.title, 1, gKey in open) { ex.toggle(gKey) }
                     HorizontalDivider(Modifier.padding(start = INDENT))
                     if (gKey !in open) continue
-                    NodeIntro(group.description, shownLinks(group), 1, "group-info")
+                    NodeIntro(group.description, 1, "group-info")
                     for (set in Examples.inGroup(group)) {
                         TreeLeaf(leafLabel(set), 2, ex.selected == set) {
                             // the same leaf again keeps its (maybe invalid) number field
@@ -139,30 +139,18 @@ fun ExamplesDialog(state: AppState, close: () -> Unit) {
     }
 }
 
-/** The links an open group shows: its own, unless their URLs are exactly the supergroup's (shown above it). */
-internal fun shownLinks(group: ExampleGroup): List<ExampleLink> =
-    if (group.links.map { it.url }.toSet() == group.supergroup.links.map { it.url }.toSet()) emptyList() else group.links
-
-/** The links a selected set shows: those whose URL its group and supergroup do not show already. */
-internal fun shownLinks(set: ExampleSet): List<ExampleLink> {
-    val above = set.group.allLinks.map { it.url }.toSet()
-    return set.links.filter { it.url !in above }
-}
-
 /** The text of a leaf: the label and, for a list, how many arrangements it has. */
 internal fun leafLabel(set: ExampleSet): String = if (set.size == 1) set.label else "${set.label} (${set.size})"
 
-/** The description and links of an open supergroup or group at [depth], above its children (nothing if it has none). */
+/** The description of an open supergroup or group at [depth], above its children (nothing if it has none). */
 @Composable
-private fun NodeIntro(description: String?, links: List<ExampleLink>, depth: Int, tag: String) {
-    if (description == null && links.isEmpty()) return
-    Column(
+private fun NodeIntro(description: String?, depth: Int, tag: String) {
+    if (description == null) return
+    Text(
+        description,
         Modifier.padding(start = INDENT * (depth + 1) + 8.dp, bottom = 4.dp).testTag(tag),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        description?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-        for (link in links) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
-    }
+        style = MaterialTheme.typography.bodySmall,
+    )
 }
 
 /** Indentation per tree level. */
@@ -227,10 +215,9 @@ private fun TreeLeaf(name: String, depth: Int, selected: Boolean, onSelect: () -
 }
 
 /**
- * The info of the selected set, as PoCoView's: description, n and the number of arrangements (for a
- * list the member number, typed or with − and +), its website page and paper where they differ from the group's and
- * supergroup's, or
- * where else its data is from. [onIndex] gets the 0-based member, or null while the typed number is
+ * The info of the selected set: description, n and the number of arrangements (for a list the member
+ * number, typed or with − and +), then its links (website pages, papers) and where its data is from:
+ * what it is comes before who made it. [onIndex] gets the 0-based member, or null while the typed number is
  * invalid.
  */
 @Composable
@@ -252,7 +239,9 @@ private fun ExampleDetails(state: AppState, set: ExampleSet, index: Int, depth: 
             ) { i -> onIndex(i?.minus(1)) }
             Text("of ${set.size}", Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium)
         }
-        for (link in shownLinks(set)) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
+        Column(Modifier.testTag("example-links"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            for (link in set.links) LinkText(link.title, link.url, MaterialTheme.typography.labelSmall)
+        }
         Text(
             set.source?.let { "Data: $it" } ?: "Typed in as intersection sequences",
             style = MaterialTheme.typography.labelSmall,

@@ -5,7 +5,8 @@
   "label": "n = 8, triangle-free non-planar",
   "description": "Intersecting arrangements of 8 pseudocircles with a triangle-free non-planar digongraph.",
   "links": [
-    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"}
+    {"title": "Website: (Trianglefree) digongraphs", "url": "https://www3.math.tu-berlin.de/diskremath/pseudocircles/?show=digongraphs"},
+    {"title": "Paper: On Digons and Triangles (Felsner, Roch, Scheucher)", "url": "https://arxiv.org/abs/2208.12110"}
   ],
   "source": "website/arrangements/digongraphs/data/n8_digongraph_trianglefree_nonplanar.enc",
   "arrangements": [
